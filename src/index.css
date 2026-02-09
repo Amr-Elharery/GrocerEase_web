@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -119,6 +120,7 @@
     @apply border-border outline-ring/50;
   }
   body {
+    font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
     @apply bg-background text-foreground;
   }
 }
