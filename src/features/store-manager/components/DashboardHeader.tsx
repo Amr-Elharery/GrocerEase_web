@@ -9,7 +9,7 @@ export function DashboardHeader() {
             Store Manager
           </p>
           <h1 className="text-3xl font-semibold text-foreground">
-            GrocerEase Operations Dashboard
+            ZAD Operations Dashboard
           </h1>
         </div>
         <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
