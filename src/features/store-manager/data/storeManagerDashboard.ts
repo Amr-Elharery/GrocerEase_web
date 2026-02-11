@@ -55,7 +55,6 @@ export const storeNav: NavItem[] = [
   { label: 'Orders', description: 'Fulfillment queue' },
   { label: 'Inventory', description: 'Stock health' },
   { label: 'Promotions', description: 'Active campaigns' },
-  { label: 'Staff', description: 'Shifts & coverage' },
 ];
 
 export const kpiStats: KpiStat[] = [
