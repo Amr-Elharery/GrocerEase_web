@@ -1,8 +1,44 @@
-# Architecture Overview — GrocerEase
+# Architecture Overview — GrocerEase Web
 
 ## Summary
 
-The project follows a clean, scalable architecture based on feature boundaries and clear separation of concerns:
+The project follows a clean, scalable architecture based on feature boundaries and clear separation of concerns
+
+# Development
+
+**Important Instructions For Source Control**:
+
+- Create **branch** for every development/fixes tasks
+  - For feature development create a branch with prefix `feat/`
+  - For bug fixes create a branch with prefix `fix/`
+- DO NOT push on **master or staging** branches directly, instead create a PRs.
+- DO NOT merge any PRs into **master** before review.
+- Before any branch creation from **staging** branch, make sure to pull the latest changes
+
+## How to create branch and start working
+
+1. Create branch from staging branch
+   ```bash
+   git switch staging
+   git pull origin staging
+   git switch -c feat/your-feature-name
+   ```
+2. After completing your work, push your branch to remote
+   ```bash
+   git add .
+   git commit -m "Your commit message"
+   git push origin feat/your-feature-name
+   ```
+3. Create a Pull Request (PR) from your branch to staging branch on GitHub for review and merging.
+
+4. After PR is approved and merged, switch back to staging branch and pull the latest changes
+   ```bash
+   git switch staging
+   git pull origin staging
+   ```
+
+---
+
 
 ## Layers
 
@@ -28,7 +64,6 @@ Responsibilities:
 
 - business logic
 - **data validation** (Zod/Yup schemas)
-- DTO mapping
 - calling the HTTPService
 
 This guarantees consistent behavior for all consumers (hooks, components, tests).
@@ -78,7 +113,6 @@ src/
 │ │ ├─ api/userService.ts
 │ │ ├─ hooks/useUsers.ts
 │ │ |─ components/UsersList.tsx
-| | └─ userMapper.ts
 ├─ shared/
 │ ├─ http/httpService.ts
 │ └─ types/
@@ -118,25 +152,11 @@ http.interceptors.request.use((config) => {
 export default http;
 ```
 
-### 2. DTO Mapper
-
-```javascript
-export function mapUserDtoToUser(dto: any) {
-  return {
-    id: dto._id,
-    name: dto.full_name,
-    email: dto.contact?.email,
-    createdAt: new Date(dto.created_at),
-  };
-}
-```
-
-### 3. Feature Service (Validation + Mapping)
+### 2. Feature Service (Validation)
 
 ```javascript
 import http from '@/shared/http/httpService';
 import { z } from 'zod';
-import { mapUserDtoToUser } from '../mappers/userMapper';
 
 // Validation schema for creating users
 const CreateUserSchema = z.object({
@@ -144,12 +164,12 @@ const CreateUserSchema = z.object({
   email: z.string().email(),
 });
 
-export type CreateUserDto = z.infer<typeof CreateUserSchema>;
+export type CreateUserInput = z.infer<typeof CreateUserSchema>;
 
 export const userService = {
   async getAll() {
     const res = await http.get('/users');
-    return res.data.map(mapUserDtoToUser);
+    return res.data;
   },
 
   async create(payload: unknown) {
@@ -162,18 +182,17 @@ export const userService = {
     // Send to API
     const res = await http.post('/users', parsed.data);
 
-    // Map response
-    return mapUserDtoToUser(res.data);
+    return res.data;
   },
 };
 ```
 
-### 4. React Query Hooks
+### 3. React Query Hooks
 
 ```javascript
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userService } from '../api/userService';
-import type { CreateUserDto } from '../api/userService';
+import type { CreateUserInput } from '../api/userService';
 
 export function useUsers() {
   return useQuery(['users'], () => userService.getAll());
@@ -182,7 +201,7 @@ export function useUsers() {
 export function useCreateUser() {
   const qc = useQueryClient();
 
-  return useMutation((data: CreateUserDto) => userService.create(data), {
+  return useMutation((data: CreateUserInput) => userService.create(data), {
     onSuccess: () => {
       // Refresh list
       qc.invalidateQueries(['users']);
@@ -191,7 +210,7 @@ export function useCreateUser() {
 }
 ```
 
-### 5. View Component
+### 4. View Component
 
 ```javascript
 import React, { useState } from "react";
@@ -245,3 +264,69 @@ export default function UsersList() {
   );
 }
 ```
+
+## Quick Start - ShadCN and React Query
+
+### ShadCN Quick Start
+
+1. Add a component using the CLI.
+
+```bash
+npx shadcn@latest add button
+```
+
+2. Import and use it in your page or feature component.
+
+```tsx
+import { Button } from '@/components/ui/button';
+
+export function ExampleAction() {
+  return <Button>Save</Button>;
+}
+```
+
+3. Keep shared styling and tokens in src/index.css and use existing UI primitives under src/components/ui.
+
+### React Query Quick Start
+
+1. Wrap the app with QueryClientProvider in src/main.tsx.
+
+```tsx
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </QueryClientProvider>
+  </StrictMode>,
+);
+```
+
+2. Create a query hook per feature.
+
+```tsx
+import { useQuery } from '@tanstack/react-query';
+import http from '@/shared/http';
+
+export function useProducts() {
+  return useQuery({
+    queryKey: ['products'],
+    queryFn: async () => {
+      const res = await http.get('/products');
+      return res.data;
+    },
+  });
+}
+```
+
+3. Consume hook state directly in UI components for loading, error, and data rendering.
+
+For more visit official docs
+
+- ShadCN: https://ui.shadcn.com/docs
+- React Query: https://tanstack.com/query/latest/docs/framework/react/overview
