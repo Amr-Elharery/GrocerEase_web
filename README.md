@@ -12,7 +12,7 @@ This is the web portal for GrocerEase, built using React + Vite.
   - For feature development create a branch with prefix `feat/`
   - For bug fixes create a branch with prefix `fix/`
 - DO NOT push on **master or staging** branches directly, instead create a PRs.
-- DO NOT merge any PRs into **master** before review.
+- DO NOT merge any PRs before review.
 - Before any branch creation from **staging** branch, make sure to pull the latest changes
 
 ## Start Development
