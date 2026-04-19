@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import Navbar from "@/components/Navbar";
 import { useForgotPassword } from "../hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,7 @@ export default function ForgotPassword() {
 
   return (
     <div className="min-h-screen bg-background">
+       <Navbar variant="auth" />
       <main className="relative h-screen flex items-center justify-center overflow-hidden">
 
         {/* Card */}
@@ -34,7 +36,7 @@ export default function ForgotPassword() {
                 <p className="font-semibold text-foreground">Check your email!</p>
                 <p className="text-sm text-muted-foreground">We sent a reset link to <span className="font-medium text-foreground">{email}</span></p>
                 <Button asChild variant="outline" className="mt-2 w-full">
-                  <Link to="/">Back to Sign In</Link>
+                  <Link to="/auth"> Back to Sign In</Link>
                 </Button>
               </div>
             ) : (
@@ -55,7 +57,7 @@ export default function ForgotPassword() {
                 </Button>
 
                 <Button asChild variant="ghost" className="w-full gap-2">
-                  <Link to="/"><ArrowLeft className="w-4 h-4" /> Back to Sign In</Link>
+                  <Link to="/auth"><ArrowLeft className="w-4 h-4" /> Back to Sign In</Link>
                 </Button>
               </form>
             )}

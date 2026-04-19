@@ -17,7 +17,7 @@ export default function Profile() {
   const [formData, setFormData] = useState({ name: "", phone: "" });
 
   useEffect(() => {
-    if (!authService.isAuthenticated()) navigate("/");
+    if (!authService.isAuthenticated()) navigate("/auth");;
   }, [navigate]);
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export default function Profile() {
 
   const handleLogout = () => {
     authService.logout();
-    navigate("/");
+    navigate("/auth");
   };
 
   if (isLoading) return (

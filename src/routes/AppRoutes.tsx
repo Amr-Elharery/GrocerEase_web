@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import Login from "@/features/auth/components/Login";
 import ForgotPassword from "@/features/auth/components/ForgotPassword";
 import ResetPassword from "@/features/auth/components/ResetPassword";
@@ -6,40 +6,32 @@ import Home from "@/features/auth/components/Home";
 import Profile from "@/features/profile/components/Profile";
 import SignUp from "@/features/auth/components/SignUp";
 
+
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Login />,
+    element: <Navigate to="/auth" replace />,
   },
   {
-    path: "/signup",
-    element: <SignUp />,
+    path: "/auth",
+    children: [
+      { index: true, Component: Login },
+      { path: "signup", Component: SignUp },
+      { path: "forgot-password", Component: ForgotPassword },
+      { path: "reset-password/:token", Component: ResetPassword },
+    ],
   },
   {
-    path: "/forgot-password",
-    element: <ForgotPassword />,
+    path: "/app",
+    children: [
+      { index: true, Component: Home },
+      { path: "home", Component: Home },
+      { path: "profile", Component: Profile },
+    ],
   },
-  {
-    path: "/reset-password/:token",
-    element: <ResetPassword />,
-  },
-  {
-    path: "/home",
-    element: <Home />,
-  },
-  {
-    path: "/profile",
-    element: <Profile />,
-  },
-
- 
   {
     path: "*",
-    element: (
-      <div className="flex min-h-svh items-center justify-center text-sm text-muted-foreground">
-        Page not found
-      </div>
-    ),
+    element: <Navigate to="/auth" replace />,
   },
 ]);
 

@@ -12,7 +12,7 @@ export default function Home() {
 
   const handleLogout = () => {
     authService.logout();
-    navigate("/");
+    navigate("/auth");
   };
 
   return (

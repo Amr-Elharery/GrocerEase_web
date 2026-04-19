@@ -8,7 +8,7 @@ export function useLogin() {
   return useMutation({
     mutationFn: (data) => authService.login(data),
     onSuccess: () => {
-      navigate('/home');
+      navigate("/app/home");
     },
     onError: (error) => {
       alert(error.message);
@@ -22,8 +22,8 @@ export function useRegister() {
   return useMutation({
     mutationFn: (data) => authService.register(data),
     onSuccess: () => {
-      navigate('/home');
-    },
+    navigate("/app/home"); 
+   },
     onError: (error) => {
       alert(error.message);
     },
@@ -46,7 +46,7 @@ export function useResetPassword() {
     mutationFn: (data) => authService.resetPassword(data),
     onSuccess: () => {
       alert('Password reset successful');
-      navigate('/');
+      navigate("/auth");
     },
     onError: (error) => {
       alert(error.message);
