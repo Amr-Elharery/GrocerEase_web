@@ -6,7 +6,10 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "types": ["vite/client"],
+    "allowJs": true,        // allow importing .js/.jsx files
+    "checkJs": false ,       // don't type-check them
     "skipLibCheck": true,
+    
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -25,7 +28,6 @@
     "noUncheckedSideEffectImports": true,
 
     // Path aliases
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
