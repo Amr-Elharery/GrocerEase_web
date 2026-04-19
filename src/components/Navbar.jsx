@@ -23,10 +23,10 @@ export default function Navbar({ variant = "auth", onLogout }) {
       )}
       {variant === "app" && (
         <nav className="flex items-center gap-6">
-          <Link to="/home"      className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Home</Link>
-          <Link to="/inventory" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Inventory</Link>
-          <Link to="/orders"    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Orders</Link>
-          <Link to="/reports"   className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Reports</Link>
+          <Link to="/home"     className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Home</Link>
+          <div to="/inventory" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Inventory</div>
+          <div to="/orders"    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Orders</div>
+          <div to="/reports"   className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Reports</div>
         </nav>
       )}
 
