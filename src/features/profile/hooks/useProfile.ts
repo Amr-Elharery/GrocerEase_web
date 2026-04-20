@@ -12,12 +12,9 @@ export function useUpdateProfile() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: (data) => profileService.updateProfile(data),
+    mutationFn: (data: { name: string; phone: string }) => profileService.updateProfile(data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['profile'] }); 
-    },
-    onError: (error) => {
-      alert(error.message);
+      qc.invalidateQueries({ queryKey: ['profile'] });
     },
   });
 }
