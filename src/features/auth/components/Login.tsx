@@ -61,8 +61,7 @@ export default function Login() {
                 type="email"
                 placeholder="admin@zad.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
+onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}              />
               {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
             </div>
             <div className="flex flex-col gap-1.5">
@@ -78,8 +77,7 @@ export default function Login() {
                   type={show ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pr-10"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}                  className="pr-10"
                 />
                 <button
                   type="button"
