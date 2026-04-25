@@ -1,5 +1,10 @@
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router";
 import AuthLayout from "@/features/auth/components/AuthLayout";
+import ProductList from "@/features/products/components/ProductList";
+import CreateProductForm from "@/features/products/components/CreateProductForm";
+import EditProductForm from "@/features/products/components/EditProductForm";
+import CategoryManagement from "@/features/categories/components/CategoryManagement";
+import SubmissionList from "@/features/submissions/components/SubmissionList";
 import AppLayout from "@/components/layouts/AppLayout";
 import AuthGuard from "@/components/AuthGuard";
 import Login from "@/features/auth/components/Login";
@@ -19,13 +24,13 @@ const router = createBrowserRouter([
   { path: "/", element: <Home /> },
   {
     path: "/auth",
-    Component: AuthLayout,
+    element: <AuthLayout />,
     children: [
       { index: true, element: <Navigate to="/auth/login" replace /> },
-      { path: "login", Component: Login },
-      { path: "signup", Component: SignUp },
-      { path: "forgot-password", Component: ForgotPassword },
-      { path: "reset-password/:token", Component: ResetPassword },
+      { path: "login", element: <Login /> },
+      { path: "signup", element: <SignUp /> },
+      { path: "forgot-password", element: <ForgotPassword /> },
+      { path: "reset-password/:token", element: <ResetPassword /> },
     ],
   },
   {
@@ -37,9 +42,13 @@ const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Navigate to="/app/home" replace /> },
-      { path: "home", Component: Home },
-      { path: "profile", Component: Profile },
-      { path: "inventory", element: <ComingSoon page="Inventory" /> },
+      { path: "home", element: <Home /> },
+      { path: "profile", element: <Profile /> },
+      { path: "inventory", element: <ProductList /> },
+      { path: "inventory/create", element: <CreateProductForm /> },
+      { path: "inventory/:id/edit", element: <EditProductForm /> },
+      { path: "categories", element: <CategoryManagement /> },
+      { path: "submissions", element: <SubmissionList /> },
       { path: "orders", element: <ComingSoon page="Orders" /> },
       { path: "reports", element: <ComingSoon page="Reports" /> },
     ],

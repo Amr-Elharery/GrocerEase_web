@@ -1,8 +1,10 @@
 import { Navigate } from "react-router";
-import { authService } from "@/features/auth/api/authService";
+import { useAuth } from "@/Context/AuthContext";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
-  if (!authService.isAuthenticated()) {
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
     return <Navigate to="/auth/login" replace />;
   }
 
