@@ -1,9 +1,9 @@
-import { CategoryMixCard } from './CategoryMixCard';
-import { DashboardHeader } from './DashboardHeader';
-import { KpiStats } from './KpiStats';
-import { OrdersTableCard } from './OrdersTableCard';
-import { RevenueChartCard } from './RevenueChartCard';
-import { StoreManagerSidebar } from './StoreManagerSidebar';
+import { CategoryMixCard } from './components/CategoryMixCard';
+import { DashboardHeader } from './components/DashboardHeader';
+import { KpiStats } from './components/KpiStats';
+import { OrdersTableCard } from './components/OrdersTableCard';
+import { RevenueChartCard } from './components/RevenueChartCard';
+import { StoreManagerSidebar } from './components/StoreManagerSidebar';
 
 export function StoreManagerDashboard() {
   return (

@@ -1,6 +1,6 @@
 import { Route, Routes } from 'react-router';
 
-import { StoreManagerDashboard } from '@/features/store-manager/components/StoreManagerDashboard';
+import { StoreManagerDashboard } from '@/features/store-manager/StoreManagerDashboard';
 
 export function AppRoutes() {
   return (
