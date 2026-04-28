@@ -5,7 +5,9 @@ import CreateProductForm from "@/features/products/components/CreateProductForm"
 import EditProductForm from "@/features/products/components/EditProductForm";
 import CategoryManagement from "@/features/categories/components/CategoryManagement";
 import SubmissionList from "@/features/submissions/components/SubmissionList";
-import AppLayout from "@/components/layouts/AppLayout";
+import AppLayout from "@/components/layouts/AdminLayout";
+import StoreLayout from "@/components/layouts/StoreLayout";
+import ShopInventory from "@/features/shop/components/ShopInventory";
 import AuthGuard from "@/components/AuthGuard";
 import Login from "@/features/auth/components/Login";
 import SignUp from "@/features/auth/components/SignUp";
@@ -49,6 +51,21 @@ const router = createBrowserRouter([
       { path: "inventory/:id/edit", element: <EditProductForm /> },
       { path: "categories", element: <CategoryManagement /> },
       { path: "submissions", element: <SubmissionList /> },
+      { path: "orders", element: <ComingSoon page="Orders" /> },
+      { path: "reports", element: <ComingSoon page="Reports" /> },
+    ],
+  },
+  {
+    path: "/store",
+    element: (
+      <AuthGuard>
+        <StoreLayout />
+      </AuthGuard>
+    ),
+    children: [
+      { index: true, element: <Navigate to="/store/inventory" replace /> },
+      { path: "home", element: <ComingSoon page="Store Dashboard" /> },
+      { path: "inventory", element: <ShopInventory /> },
       { path: "orders", element: <ComingSoon page="Orders" /> },
       { path: "reports", element: <ComingSoon page="Reports" /> },
     ],
