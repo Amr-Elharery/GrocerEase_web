@@ -7,15 +7,21 @@ export function useLogin() {
   const { login } = useAuth();
 
   return useMutation({
-    mutationFn: async (_: { email: string; password: string }) => {
+    mutationFn: async (data: { email: string; password: string }) => {
       // TODO: replace with real API call
-      // const res = await authService.login(email, password);
-      // return res;
-      return { token: "fake-token", expiry: Date.now() + 5 * 60 * 1000 };
+      // const res = await authService.login(data.email, data.password);
+      // return res; // { token, expiry, role }
+
+      const role = data.email.includes("store") ? "store_manager" : "admin";
+      return { token: "fake-token", expiry: Date.now() + 5 * 60 * 1000, role };
     },
     onSuccess: (data) => {
       login(data.token, data.expiry);
-      navigate("/app/home");
+      if (data.role === "store_manager") {
+        navigate("/store/inventory");
+      } else {
+        navigate("/app/home");
+      }
     },
   });
 }
