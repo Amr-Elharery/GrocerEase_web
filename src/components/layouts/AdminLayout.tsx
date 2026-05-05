@@ -1,21 +1,21 @@
 import { useState } from "react";
 import { Outlet, Link, useLocation } from "react-router";
 import { useLogout } from "@/features/auth/hooks/useAuth";
-import { Leaf, Search, LayoutDashboard, Package, Warehouse, Settings, HelpCircle, LogOut, ChevronLeft, ChevronRight, Tag, ClipboardList } from "lucide-react";
+import { Leaf, Search, LayoutDashboard, Package, Warehouse, Settings, HelpCircle, LogOut, ChevronLeft, ChevronRight, Tag, ClipboardList, Users } from "lucide-react";
 import { useSearch } from "@/Context/SearchContext";
 
 export default function AppLayout() {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const { search, setSearch } = useSearch();
-
-const handleLogout = useLogout();
+  const handleLogout = useLogout();
 
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/app/home" },
     { icon: Package, label: "Products", path: "/app/inventory" },
     { icon: Tag, label: "Categories", path: "/app/categories" },
     { icon: ClipboardList, label: "Submissions", path: "/app/submissions" },
+    { icon: Users, label: "Users", path: "/app/users" },
     { icon: Warehouse, label: "Orders", path: "/app/orders" },
     { icon: Settings, label: "Reports", path: "/app/reports" },
   ];
@@ -108,7 +108,7 @@ const handleLogout = useLogout();
             <div className="h-6 w-px bg-border" />
             <Link to="/app/profile"
               className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-foreground">
-              Raghd
+              A
             </Link>
           </div>
         </header>

@@ -5,6 +5,7 @@ import CreateProductForm from "@/features/products/components/CreateProductForm"
 import EditProductForm from "@/features/products/components/EditProductForm";
 import CategoryManagement from "@/features/categories/components/CategoryManagement";
 import SubmissionList from "@/features/submissions/components/SubmissionList";
+import UserManagement from "@/features/users/components/UserManagement";
 import AppLayout from "@/components/layouts/AdminLayout";
 import StoreLayout from "@/components/layouts/StoreLayout";
 import ShopInventory from "@/features/shop/components/ShopInventory";
@@ -51,6 +52,7 @@ const router = createBrowserRouter([
       { path: "inventory/:id/edit", element: <EditProductForm /> },
       { path: "categories", element: <CategoryManagement /> },
       { path: "submissions", element: <SubmissionList /> },
+      { path: "users", element: <UserManagement /> },
       { path: "orders", element: <ComingSoon page="Orders" /> },
       { path: "reports", element: <ComingSoon page="Reports" /> },
     ],
