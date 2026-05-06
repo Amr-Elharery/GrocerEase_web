@@ -4,35 +4,101 @@ import { useProduct, useUpdateProduct } from "../hooks/useEditProduct";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ChevronDown, ChevronUp, Upload, X, AlertTriangle, Store } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Upload,
+  X,
+  AlertTriangle,
+  Store,
+} from "lucide-react";
 
 const categories = [
-  { id: "1", name: "Dairy", sub_categories: [
-    { id: "1-1", name: "Milk" }, { id: "1-2", name: "Cheese" },
-    { id: "1-3", name: "Yogurt" }, { id: "1-4", name: "Eggs" },
-  ]},
-  { id: "2", name: "Grains", sub_categories: [
-    { id: "2-1", name: "Rice" }, { id: "2-2", name: "Pasta" }, { id: "2-3", name: "Bread" },
-  ]},
-  { id: "3", name: "Beverages", sub_categories: [
-    { id: "3-1", name: "Juice" }, { id: "3-2", name: "Water" },
-    { id: "3-3", name: "Tea" }, { id: "3-4", name: "Coffee" },
-  ]},
-  { id: "4", name: "Snacks", sub_categories: [
-    { id: "4-1", name: "Chips" }, { id: "4-2", name: "Chocolate" }, { id: "4-3", name: "Biscuits" },
-  ]},
-  { id: "5", name: "Meat", sub_categories: [
-    { id: "5-1", name: "Poultry" }, { id: "5-2", name: "Beef" }, { id: "5-3", name: "Fish" },
-  ]},
-  { id: "6", name: "Oils", sub_categories: [
-    { id: "6-1", name: "Cooking Oil" }, { id: "6-2", name: "Olive Oil" },
-  ]},
-  { id: "7", name: "Bakery", sub_categories: [
-    { id: "7-1", name: "Bread" }, { id: "7-2", name: "Pastry" },
-  ]},
-  { id: "8", name: "Canned Goods", sub_categories: [
-    { id: "8-1", name: "Paste" }, { id: "8-2", name: "Fish" }, { id: "8-3", name: "Vegetables" },
-  ]},
+  {
+    id: "1",
+    name: "Dairy",
+    sub_categories: [
+      { id: "1-1", name: "Milk" },
+      { id: "1-2", name: "Cheese" },
+      { id: "1-3", name: "Yogurt" },
+      { id: "1-4", name: "Eggs" },
+    ],
+  },
+  {
+    id: "2",
+    name: "Grains",
+    sub_categories: [
+      { id: "2-1", name: "Rice" },
+      { id: "2-2", name: "Pasta" },
+      { id: "2-3", name: "Bread" },
+    ],
+  },
+  {
+    id: "3",
+    name: "Beverages",
+    sub_categories: [
+      { id: "3-1", name: "Juice" },
+      { id: "3-2", name: "Water" },
+      { id: "3-3", name: "Tea" },
+      { id: "3-4", name: "Coffee" },
+    ],
+  },
+  {
+    id: "4",
+    name: "Snacks",
+    sub_categories: [
+      { id: "4-1", name: "Chips" },
+      { id: "4-2", name: "Chocolate" },
+      { id: "4-3", name: "Biscuits" },
+    ],
+  },
+  {
+    id: "5",
+    name: "Meat",
+    sub_categories: [
+      { id: "5-1", name: "Poultry" },
+      { id: "5-2", name: "Beef" },
+      { id: "5-3", name: "Fish" },
+    ],
+  },
+  {
+    id: "6",
+    name: "Oils",
+    sub_categories: [
+      { id: "6-1", name: "Cooking Oil" },
+      { id: "6-2", name: "Olive Oil" },
+    ],
+  },
+  {
+    id: "7",
+    name: "Bakery",
+    sub_categories: [
+      { id: "7-1", name: "Bread" },
+      { id: "7-2", name: "Pastry" },
+    ],
+  },
+  {
+    id: "8",
+    name: "Canned Goods",
+    sub_categories: [
+      { id: "8-1", name: "Paste" },
+      { id: "8-2", name: "Fish" },
+      { id: "8-3", name: "Vegetables" },
+    ],
+  },
+];
+
+const units = [
+  "Piece",
+  "Kg",
+  "Litre",
+  "Pack",
+  "Box",
+  "Bottle",
+  "Can",
+  "Bag",
+  "Tray",
+  "Jar",
 ];
 
 type FormErrors = {
@@ -60,10 +126,20 @@ type ImageFile = {
 const mockStores: StoreRow[] = [
   { id: "1", name: "Cairo Store", price: 25.99, stock: 150, is_active: true },
   { id: "2", name: "Alexandria Store", price: 24.99, stock: 80, is_active: true },
-  { id: "3", name: "Giza Store", price: 26.50, stock: 0, is_active: false },
-  { id: "4", name: "Mansoura Store", price: 25.00, stock: 45, is_active: true },
-  { id: "5", name: "Aswan Store", price: 27.00, stock: 20, is_active: false },
+  { id: "3", name: "Giza Store", price: 26.5, stock: 0, is_active: false },
+  { id: "4", name: "Mansoura Store", price: 25.0, stock: 45, is_active: true },
+  { id: "5", name: "Aswan Store", price: 27.0, stock: 20, is_active: false },
 ];
+
+function formatDate(date?: string) {
+  if (!date) return "-";
+
+  return new Date(date).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
 
 export default function EditProductForm() {
   const { id } = useParams<{ id: string }>();
@@ -73,9 +149,15 @@ export default function EditProductForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
-    product_name: "", brand: "", description: "",
-    barcode: "", unit: "", category_id: "", sub_category_id: "",
+    product_name: "",
+    brand: "",
+    description: "",
+    barcode: "",
+    unit: "",
+    category_id: "",
+    sub_category_id: "",
   });
+
   const [originalData, setOriginalData] = useState({ ...formData });
   const [errors, setErrors] = useState<FormErrors>({});
   const [barcodeConflict, setBarcodeConflict] = useState(false);
@@ -85,8 +167,11 @@ export default function EditProductForm() {
   const [storesOpen, setStoresOpen] = useState(true);
   const [stores, setStores] = useState<StoreRow[]>(mockStores);
   const [hasChanges, setHasChanges] = useState(false);
+  const [unitOpen, setUnitOpen] = useState(false);
 
-  const selectedCategory = categories.find(c => c.id === formData.category_id);
+  const selectedCategory = categories.find(
+    (category) => category.id === formData.category_id
+  );
 
   useEffect(() => {
     if (product) {
@@ -99,6 +184,7 @@ export default function EditProductForm() {
         category_id: product.category_id ?? "",
         sub_category_id: product.sub_category_id ?? "",
       };
+
       setFormData(data);
       setOriginalData(data);
     }
@@ -108,31 +194,54 @@ export default function EditProductForm() {
     setHasChanges(JSON.stringify(formData) !== JSON.stringify(originalData));
   }, [formData, originalData]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+  const handleChange = (
+    event: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = event.target;
+
     if (name === "category_id") {
-      setFormData(prev => ({ ...prev, category_id: value, sub_category_id: "" }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({
+        ...prev,
+        category_id: value,
+        sub_category_id: "",
+      }));
+      return;
     }
+
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+  const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
     const newErrors = { ...errors };
-    if (name === "product_name") { if (!value) newErrors.product_name = "Required"; else delete newErrors.product_name; }
-    if (name === "brand") { if (!value) newErrors.brand = "Required"; else delete newErrors.brand; }
-    if (name === "barcode") { if (!value) newErrors.barcode = "Required"; else delete newErrors.barcode; }
+
+    if (name === "product_name") {
+      if (!value) newErrors.product_name = "Required";
+      else delete newErrors.product_name;
+    }
+
+    if (name === "brand") {
+      if (!value) newErrors.brand = "Required";
+      else delete newErrors.brand;
+    }
+
+    if (name === "barcode") {
+      if (!value) newErrors.barcode = "Required";
+      else delete newErrors.barcode;
+    }
+
     setErrors(newErrors);
   };
 
-  const handleBarcodeBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    handleBlur(e);
+  const handleBarcodeBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+    handleBlur(event);
+
     if (formData.barcode !== originalData.barcode) {
-      // TODO: replace with real API call
-      // const res = await http.get(`/products/barcode/${formData.barcode}`);
-      // setBarcodeConflict(res.data.exists);
-      setBarcodeConflict(["745920381442", "745920381443"].includes(formData.barcode));
+      setBarcodeConflict(
+        ["745920381442", "745920381443"].includes(formData.barcode)
+      );
     } else {
       setBarcodeConflict(false);
     }
@@ -140,277 +249,587 @@ export default function EditProductForm() {
 
   const handleFiles = (files: FileList | null) => {
     if (!files) return;
-    const newFiles = Array.from(files).slice(0, 5 - images.length).map(file => ({
-      preview: URL.createObjectURL(file),
-      file,
-    }));
-    setImages(prev => [...prev, ...newFiles].slice(0, 5));
+
+    const newFiles = Array.from(files)
+      .slice(0, 5 - images.length)
+      .map((file) => ({
+        preview: URL.createObjectURL(file),
+        file,
+      }));
+
+    setImages((prev) => [...prev, ...newFiles].slice(0, 5));
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
+  const handleDrop = (event: React.DragEvent) => {
+    event.preventDefault();
     setIsDragging(false);
-    handleFiles(e.dataTransfer.files);
+    handleFiles(event.dataTransfer.files);
   };
 
   const removeImage = (index: number) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
-    if (primaryIndex >= index && primaryIndex > 0) setPrimaryIndex(p => p - 1);
+    setImages((prev) => prev.filter((_, imageIndex) => imageIndex !== index));
+
+    if (primaryIndex >= index && primaryIndex > 0) {
+      setPrimaryIndex((prev) => prev - 1);
+    }
   };
 
-  const handleStoreChange = (storeId: string, field: keyof StoreRow, value: string | boolean | number) => {
-    setStores(prev => prev.map(s => s.id === storeId ? { ...s, [field]: value } : s));
+  const handleStoreChange = (
+    storeId: string,
+    field: keyof StoreRow,
+    value: string | boolean | number
+  ) => {
+    setStores((prev) =>
+      prev.map((store) =>
+        store.id === storeId ? { ...store, [field]: value } : store
+      )
+    );
   };
 
   const handleNavigateAway = () => {
-    if (hasChanges && !window.confirm("You have unsaved changes. Are you sure you want to leave?")) return;
+    if (
+      hasChanges &&
+      !window.confirm("You have unsaved changes. Are you sure you want to leave?")
+    ) {
+      return;
+    }
+
     navigate("/app/inventory");
   };
 
   const handleSubmit = () => {
     const newErrors: FormErrors = {};
+
     if (!formData.product_name) newErrors.product_name = "Required";
     if (!formData.brand) newErrors.brand = "Required";
     if (!formData.barcode) newErrors.barcode = "Required";
     if (!formData.unit) newErrors.unit = "Required";
     if (!formData.category_id) newErrors.category_id = "Required";
     if (!formData.sub_category_id) newErrors.sub_category_id = "Required";
-    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     if (barcodeConflict) return;
-    updateProduct.mutate({ id: id!, data: formData }, {
-      onSuccess: () => {
-        // TODO: upload images after product updated
-        // await Promise.all(images.map((img, i) =>
-        //   http.post(`/products/${id}/images`, { file: img.file, is_primary: i === primaryIndex })
-        // ));
-        setOriginalData(formData);
-        setHasChanges(false);
-      },
-    });
+
+    updateProduct.mutate(
+      { id: id!, data: formData },
+      {
+        onSuccess: () => {
+          setOriginalData(formData);
+          setHasChanges(false);
+        },
+      }
+    );
   };
 
-  if (isLoading) return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-64px)]">
-      <p className="text-muted-foreground">Loading...</p>
-    </div>
-  );
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[calc(100vh-64px)] items-center justify-center">
+        <p className="text-sm text-[#667085]">Loading product...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-4">
-
+    <section className="mx-auto max-w-[1420px] space-y-3">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col justify-between gap-3 lg:flex-row lg:items-center">
         <div>
-          <h1 className="text-2xl font-bold">Edit Product</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">{product?.product_name}</p>
+          <h1 className="text-[22px] font-bold tracking-tight text-[#101828]">
+            Edit Product
+          </h1>
+
+          <p className="mt-0.5 text-sm text-[#667085]">
+            {product?.product_name}
+          </p>
         </div>
-        <div className="flex gap-2">
-          {hasChanges && <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full border border-yellow-200 font-medium self-center">Unsaved changes</span>}
-          <Button variant="outline" size="sm" onClick={handleNavigateAway}>Discard</Button>
-          <Button size="sm" onClick={handleSubmit} disabled={updateProduct.isPending || barcodeConflict}>
+
+        <div className="flex items-center gap-2">
+          {hasChanges && (
+            <span className="rounded-full border border-yellow-200 bg-yellow-100 px-2.5 py-1 text-xs font-semibold text-yellow-800">
+              Unsaved changes
+            </span>
+          )}
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleNavigateAway}
+            className="h-9 rounded-lg border-[#DDE7DF] px-4 text-sm font-semibold"
+          >
+            Discard
+          </Button>
+
+          <Button
+            size="sm"
+            onClick={handleSubmit}
+            disabled={updateProduct.isPending || barcodeConflict}
+            className="h-9 min-w-[118px] rounded-lg bg-[#006B22] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#00571C]"
+          >
             {updateProduct.isPending ? "Saving..." : "Save Changes"}
           </Button>
         </div>
       </div>
 
       {/* Meta Info Bar */}
-      <div className="bg-muted/30 border border-border rounded-lg px-4 py-2.5 flex items-center justify-between">
-        <div className="flex items-center gap-6 text-xs text-muted-foreground">
-          <span><span className="font-semibold uppercase tracking-wider">Created:</span> {product?.created_at ? new Date(product.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "-"}</span>
-          <span><span className="font-semibold uppercase tracking-wider">Updated:</span> {product?.updated_at ? new Date(product.updated_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "-"}</span>
+      <div className="flex items-center justify-between rounded-xl border border-[#DDE7DF] bg-[#F8FAF8] px-4 py-2.5">
+        <div className="flex items-center gap-6 text-xs text-[#667085]">
+          <span>
+            <span className="font-semibold uppercase tracking-wider text-[#5F7168]">
+              Created:
+            </span>{" "}
+            {formatDate(product?.created_at)}
+          </span>
+
+          <span>
+            <span className="font-semibold uppercase tracking-wider text-[#5F7168]">
+              Updated:
+            </span>{" "}
+            {formatDate(product?.updated_at)}
+          </span>
         </div>
-        <button onClick={() => setStoresOpen(true)}
-          className="flex items-center gap-1.5 text-xs text-primary font-medium hover:underline">
-          <Store className="w-3.5 h-3.5" />
+
+        <button
+          type="button"
+          onClick={() => setStoresOpen(true)}
+          className="flex items-center gap-1.5 text-xs font-semibold text-[#006B22] hover:underline"
+        >
+          <Store className="h-3.5 w-3.5" />
           Listed in {product?.stores_count} stores
         </button>
       </div>
 
-      {/* Top Section — same layout as CreateProductForm */}
-      <div className="grid grid-cols-3 gap-4">
+      {/* Main Layout */}
+      <div className="grid gap-3 xl:grid-cols-[0.82fr_1.8fr]">
+        {/* Left Column */}
+        <div className="space-y-3">
+          {/* Category Taxonomy */}
+          <div className="rounded-xl border border-[#DDE7DF] bg-white p-3.5 shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
+            <h2 className="text-[15px] font-bold text-[#101828]">
+              Category Taxonomy
+            </h2>
 
-        {/* Category Taxonomy */}
-        <div className="bg-white border border-border rounded-lg p-5 space-y-4">
-          <h2 className="text-sm font-semibold">Category Taxonomy</h2>
+            <div className="mt-3 space-y-1.5">
+              <Label className="text-xs font-semibold text-[#101828]">
+                Top-Level Category *
+              </Label>
 
-          <div className="space-y-1.5">
-            <Label className="text-xs">Top-Level Category *</Label>
-            <select name="category_id" value={formData.category_id} onChange={handleChange}
-              className={`h-9 w-full rounded-lg border bg-transparent px-3 text-sm outline-none focus:border-ring ${errors.category_id ? "border-destructive" : "border-input"}`}>
-              <option value="">Select category</option>
-              {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-            {errors.category_id && <p className="text-xs text-destructive">{errors.category_id}</p>}
-          </div>
-
-          {selectedCategory && (
-            <div className="space-y-1.5">
-              <Label className="text-xs">Sub-Category *</Label>
-              <div className="flex flex-wrap gap-2">
-                {selectedCategory.sub_categories.map(sub => (
-                  <button key={sub.id} type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, sub_category_id: sub.id }))}
-                    className={`px-3 py-1 rounded-full text-xs border transition-colors ${
-                      formData.sub_category_id === sub.id
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-background border-border hover:bg-muted"
-                    }`}>
-                    {sub.name}
-                  </button>
-                ))}
-              </div>
-              {errors.sub_category_id && <p className="text-xs text-destructive">{errors.sub_category_id}</p>}
-            </div>
-          )}
-        </div>
-
-        {/* Product Information */}
-        <div className="col-span-2 bg-white border border-border rounded-lg p-5 space-y-4">
-          <h2 className="text-sm font-semibold">Product Information</h2>
-
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs">Product Name *</Label>
-              {errors.product_name && <span className="text-xs text-destructive">{errors.product_name}</span>}
-            </div>
-            <Input name="product_name" value={formData.product_name}
-              onChange={handleChange} onBlur={handleBlur}
-              className={errors.product_name ? "border-destructive" : ""} />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label className="text-xs">Brand</Label>
-              <Input name="brand" value={formData.brand}
-                onChange={handleChange} onBlur={handleBlur}
-                className={errors.brand ? "border-destructive" : ""} />
-              {errors.brand && <p className="text-xs text-destructive">{errors.brand}</p>}
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs">Unit</Label>
-              <select name="unit" value={formData.unit} onChange={handleChange}
-                className={`h-9 w-full rounded-lg border bg-transparent px-3 text-sm outline-none focus:border-ring ${errors.unit ? "border-destructive" : "border-input"}`}>
-                <option value="">Select unit</option>
-                {["Piece","Kg","Litre","Pack","Box","Bottle","Can","Bag","Tray","Jar"].map(u => (
-                  <option key={u} value={u}>{u}</option>
+              <select
+                name="category_id"
+                value={formData.category_id}
+                onChange={handleChange}
+                className={`h-9 w-full rounded-lg border bg-[#F8FAF8] px-3 text-sm text-[#101828] outline-none transition focus:border-[#2D6A4F] focus:ring-2 focus:ring-[#2D6A4F]/10 ${
+                  errors.category_id ? "border-red-500" : "border-[#DDE7DF]"
+                }`}
+              >
+                <option value="">Select category</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
                 ))}
               </select>
-              {errors.unit && <p className="text-xs text-destructive">{errors.unit}</p>}
-            </div>
-          </div>
 
-          <div className="space-y-1.5">
-            <Label className="text-xs">Barcode / SKU</Label>
-            <div className="relative">
-              <Input name="barcode" value={formData.barcode}
-                onChange={handleChange} onBlur={handleBarcodeBlur}
-                className={barcodeConflict || errors.barcode ? "border-destructive pr-10" : ""} />
-              {barcodeConflict && <AlertTriangle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-destructive" />}
+              {errors.category_id && (
+                <p className="text-xs text-red-600">{errors.category_id}</p>
+              )}
             </div>
-            {barcodeConflict && (
-              <div className="flex items-start gap-2 p-3 rounded-lg border border-destructive/30 bg-destructive/5 mt-1">
-                <AlertTriangle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs font-semibold text-destructive">Barcode Conflict Warning</p>
-                  <p className="text-xs text-destructive/80 mt-0.5">The barcode <span className="font-mono font-bold">{formData.barcode}</span> is already assigned to another product.</p>
+
+            {selectedCategory && (
+              <div className="mt-3 space-y-2">
+                <Label className="text-xs font-semibold text-[#101828]">
+                  Sub-Category *
+                </Label>
+
+                <div className="flex flex-wrap gap-2">
+                  {selectedCategory.sub_categories.map((subCategory) => (
+                    <button
+                      key={subCategory.id}
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          sub_category_id: subCategory.id,
+                        }))
+                      }
+                      className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                        formData.sub_category_id === subCategory.id
+                          ? "border-[#006B22] bg-[#006B22] text-white"
+                          : "border-[#DDE7DF] bg-[#F8FAF8] text-[#5F7168] hover:bg-[#E8F0EA]"
+                      }`}
+                    >
+                      {subCategory.name}
+                    </button>
+                  ))}
                 </div>
+
+                {errors.sub_category_id && (
+                  <p className="text-xs text-red-600">
+                    {errors.sub_category_id}
+                  </p>
+                )}
               </div>
             )}
-            {errors.barcode && !barcodeConflict && <p className="text-xs text-destructive">{errors.barcode}</p>}
           </div>
 
-          <div className="space-y-1.5">
-            <Label className="text-xs">Product Description</Label>
-            <textarea name="description" value={formData.description} onChange={handleChange} rows={4}
-              className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring resize-none" />
-          </div>
-        </div>
-      </div>
+          {/* Product Assets */}
+          <div className="rounded-xl border border-[#DDE7DF] bg-white p-3.5 shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-[15px] font-bold text-[#101828]">
+                  Product Assets
+                </h2>
 
-      {/* Product Assets */}
-      <div className="bg-white border border-border rounded-lg p-5 space-y-4">
-        <h2 className="text-sm font-semibold">Product Assets</h2>
-        <div className="flex gap-3 flex-wrap">
-          {images.length < 5 && (
-            <div
-              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-              onDragLeave={() => setIsDragging(false)}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-              className={`w-40 h-36 border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors ${
-                isDragging ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
-              }`}>
-              <Upload className="w-6 h-6 text-muted-foreground mb-2" />
-              <p className="text-xs text-muted-foreground text-center">Drag and drop images</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">JPG, PNG, WEBP</p>
-              <span className="text-[10px] text-primary font-semibold mt-1 uppercase tracking-wide">OR BROWSE FILES</span>
-              <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden"
-                onChange={(e) => handleFiles(e.target.files)} />
+                <p className="mt-0.5 text-xs text-[#667085]">
+                  Upload up to 5 product images.
+                </p>
+              </div>
+
+              <span className="rounded-full bg-[#EAF7EE] px-2.5 py-1 text-xs font-semibold text-[#006B22]">
+                {images.length}/5
+              </span>
             </div>
-          )}
-          {images.map((img, index) => (
-            <div key={index} className="relative w-40 h-36 rounded-lg overflow-hidden border border-border group">
-              <img src={img.preview} alt="" className="w-full h-full object-cover cursor-pointer"
-                onClick={() => setPrimaryIndex(index)} />
-              {index === primaryIndex && (
-                <span className="absolute top-2 left-2 text-[10px] bg-primary text-primary-foreground px-2 py-0.5 rounded-full font-semibold">Primary</span>
+
+            <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+              {images.length < 5 && (
+                <div
+                  onDragOver={(event) => {
+                    event.preventDefault();
+                    setIsDragging(true);
+                  }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`flex h-24 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition ${
+                    isDragging
+                      ? "border-[#006B22] bg-[#EAF7EE]"
+                      : "border-[#C9D8CE] bg-[#F8FAF8] hover:border-[#006B22]"
+                  }`}
+                >
+                  <Upload className="mb-1.5 h-5 w-5 text-[#5F7168]" />
+
+                  <p className="text-center text-xs font-medium text-[#5F7168]">
+                    Drag and drop images
+                  </p>
+
+                  <p className="mt-0.5 text-[10px] text-[#667085]">
+                    JPG, PNG, WEBP
+                  </p>
+
+                  <span className="mt-1 text-[10px] font-bold uppercase tracking-wide text-[#006B22]">
+                    Or browse files
+                  </span>
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(event) => handleFiles(event.target.files)}
+                  />
+                </div>
               )}
-              <button type="button" onClick={() => removeImage(index)}
-                className="absolute top-2 right-2 w-5 h-5 bg-black/50 text-white rounded-full hidden group-hover:flex items-center justify-center">
-                <X className="w-3 h-3" />
-              </button>
+
+              {images.map((image, index) => (
+                <div
+                  key={index}
+                  className="group relative h-24 overflow-hidden rounded-xl border border-[#DDE7DF] bg-[#F8FAF8]"
+                >
+                  <img
+                    src={image.preview}
+                    alt=""
+                    className="h-full w-full cursor-pointer object-cover"
+                    onClick={() => setPrimaryIndex(index)}
+                  />
+
+                  {index === primaryIndex && (
+                    <span className="absolute left-2 top-2 rounded-full bg-[#006B22] px-2 py-0.5 text-[10px] font-semibold text-white">
+                      Primary
+                    </span>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className="absolute right-2 top-2 hidden h-6 w-6 items-center justify-center rounded-full bg-black/50 text-white group-hover:flex"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+        </div>
+
+        {/* Right Column */}
+        <div className="rounded-xl border border-[#DDE7DF] bg-white p-3.5 shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
+          <h2 className="text-[15px] font-bold text-[#101828]">
+            Product Information
+          </h2>
+
+          <div className="mt-3 space-y-3.5">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-semibold text-[#101828]">
+                  Product Name *
+                </Label>
+
+                {errors.product_name && (
+                  <span className="text-xs text-red-600">
+                    {errors.product_name}
+                  </span>
+                )}
+              </div>
+
+              <Input
+                name="product_name"
+                value={formData.product_name}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={`h-9 rounded-lg border-[#DDE7DF] bg-[#F8FAF8] text-sm ${
+                  errors.product_name ? "border-red-500" : ""
+                }`}
+              />
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-[#101828]">
+                  Brand *
+                </Label>
+
+                <Input
+                  name="brand"
+                  value={formData.brand}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`h-9 rounded-lg border-[#DDE7DF] bg-[#F8FAF8] text-sm ${
+                    errors.brand ? "border-red-500" : ""
+                  }`}
+                />
+
+                {errors.brand && (
+                  <p className="text-xs text-red-600">{errors.brand}</p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-[#101828]">
+                  Unit *
+                </Label>
+
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setUnitOpen((prev) => !prev)}
+                    className={`flex h-9 w-full items-center justify-between rounded-lg border bg-[#F8FAF8] px-3 text-left text-sm text-[#101828] outline-none transition focus:border-[#2D6A4F] focus:ring-2 focus:ring-[#2D6A4F]/10 ${
+                      errors.unit ? "border-red-500" : "border-[#DDE7DF]"
+                    }`}
+                  >
+                    <span
+                      className={
+                        formData.unit ? "text-[#101828]" : "text-[#667085]"
+                      }
+                    >
+                      {formData.unit || "Select unit"}
+                    </span>
+
+                    <ChevronDown className="h-4 w-4 text-[#5F7168]" />
+                  </button>
+
+                  {unitOpen && (
+                    <div className="absolute left-0 right-0 top-[42px] z-50 overflow-hidden rounded-lg border border-[#DDE7DF] bg-white shadow-[0_10px_24px_rgba(15,23,42,0.12)]">
+                      {units.map((unit) => (
+                        <button
+                          key={unit}
+                          type="button"
+                          onClick={() => {
+                            setFormData((prev) => ({ ...prev, unit }));
+                            setErrors((prev) => {
+                              const next = { ...prev };
+                              delete next.unit;
+                              return next;
+                            });
+                            setUnitOpen(false);
+                          }}
+                          className={`block w-full px-3 py-2 text-left text-sm transition hover:bg-[#EAF7EE] ${
+                            formData.unit === unit
+                              ? "bg-[#EAF7EE] font-semibold text-[#006B22]"
+                              : "text-[#101828]"
+                          }`}
+                        >
+                          {unit}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {errors.unit && (
+                  <p className="text-xs text-red-600">{errors.unit}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-[#101828]">
+                Barcode / SKU *
+              </Label>
+
+              <div className="relative">
+                <Input
+                  name="barcode"
+                  value={formData.barcode}
+                  onChange={handleChange}
+                  onBlur={handleBarcodeBlur}
+                  className={`h-9 rounded-lg border-[#DDE7DF] bg-[#F8FAF8] pr-10 text-sm ${
+                    barcodeConflict || errors.barcode ? "border-red-500" : ""
+                  }`}
+                />
+
+                {barcodeConflict && (
+                  <AlertTriangle className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-red-600" />
+                )}
+              </div>
+
+              {barcodeConflict && (
+                <div className="mt-1 rounded-lg border border-red-200 bg-red-50 p-2.5">
+                  <p className="text-xs font-semibold text-red-600">
+                    Barcode Conflict Warning
+                  </p>
+                  <p className="mt-0.5 text-xs text-red-600">
+                    The barcode{" "}
+                    <span className="font-mono font-bold">
+                      {formData.barcode}
+                    </span>{" "}
+                    is already assigned to another product.
+                  </p>
+                </div>
+              )}
+
+              {errors.barcode && !barcodeConflict && (
+                <p className="text-xs text-red-600">{errors.barcode}</p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-[#101828]">
+                Product Description
+              </Label>
+
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                rows={2}
+                className="w-full resize-none rounded-lg border border-[#DDE7DF] bg-[#F8FAF8] px-3 py-2 text-sm text-[#101828] outline-none transition placeholder:text-[#98A2B3] focus:border-[#2D6A4F] focus:ring-2 focus:ring-[#2D6A4F]/10"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Store Listings */}
-      <div className="bg-white border border-border rounded-lg overflow-hidden">
-        <button type="button"
-          className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-muted/20 transition-colors"
-          onClick={() => setStoresOpen(p => !p)}>
+      {/* Store Inventory & Pricing */}
+      <div className="overflow-hidden rounded-xl border border-[#DDE7DF] bg-white shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
+        <button
+          type="button"
+          className="flex w-full items-center justify-between px-4 py-2.5 transition hover:bg-[#F8FAF8]"
+          onClick={() => setStoresOpen((prev) => !prev)}
+        >
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold">Store Inventory & Pricing</span>
-            <span className="text-xs text-muted-foreground">({stores.length} stores)</span>
+            <span className="text-[15px] font-bold text-[#101828]">
+              Store Inventory & Pricing
+            </span>
+            <span className="text-xs text-[#667085]">
+              ({stores.length} stores)
+            </span>
           </div>
-          {storesOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+
+          {storesOpen ? (
+            <ChevronUp className="h-4 w-4 text-[#5F7168]" />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-[#5F7168]" />
+          )}
         </button>
 
         {storesOpen && (
-          <table className="w-full text-sm">
+          <table className="w-full table-fixed text-sm">
             <thead>
-              <tr className="border-t border-b border-border bg-muted/20">
-                <th className="text-left px-5 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Store Name</th>
-                <th className="text-left px-5 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Price</th>
-                <th className="text-left px-5 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Stock</th>
-                <th className="text-left px-5 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+              <tr className="border-y border-[#DDE7DF] bg-[#F8FAF8] text-[11px] font-semibold uppercase tracking-wide text-[#5F7168]">
+                <th className="w-[35%] px-4 py-2 text-left">Store Name</th>
+                <th className="w-[22%] px-4 py-2 text-left">Price</th>
+                <th className="w-[25%] px-4 py-2 text-left">Stock</th>
+                <th className="w-[18%] px-4 py-2 text-left">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
-              {stores.map(store => (
-                <tr key={store.id} className="hover:bg-muted/10 transition-colors">
-                  <td className="px-5 py-3 font-medium">{store.name}</td>
-                  <td className="px-5 py-3">
+
+            <tbody className="divide-y divide-[#DDE7DF]">
+              {stores.map((store) => (
+                <tr key={store.id} className="transition hover:bg-[#F8FAF8]">
+                  <td className="px-4 py-1.5 font-semibold text-[#101828]">
+                    {store.name}
+                  </td>
+
+                  <td className="px-4 py-1.5">
                     <div className="flex items-center gap-1">
-                      <span className="text-muted-foreground text-xs">$</span>
-                      <input type="number" value={store.price} step="0.01"
-                        onChange={(e) => handleStoreChange(store.id, "price", parseFloat(e.target.value))}
-                        className="w-20 h-7 rounded border border-input bg-transparent px-2 text-sm outline-none focus:border-ring" />
+                      <span className="text-xs text-[#667085]">$</span>
+                      <input
+                        type="number"
+                        value={store.price}
+                        step="0.01"
+                        onChange={(event) =>
+                          handleStoreChange(
+                            store.id,
+                            "price",
+                            parseFloat(event.target.value)
+                          )
+                        }
+                        className="h-7 w-24 rounded-lg border border-[#DDE7DF] bg-[#F8FAF8] px-2 text-sm outline-none focus:border-[#2D6A4F]"
+                      />
                     </div>
                   </td>
-                  <td className="px-5 py-3">
-                    <div className="flex items-center gap-1">
-                      <input type="number" value={store.stock}
-                        onChange={(e) => handleStoreChange(store.id, "stock", parseInt(e.target.value))}
-                        className="w-20 h-7 rounded border border-input bg-transparent px-2 text-sm outline-none focus:border-ring" />
-                      <span className="text-muted-foreground text-xs">units</span>
+
+                  <td className="px-4 py-1.5">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        value={store.stock}
+                        onChange={(event) =>
+                          handleStoreChange(
+                            store.id,
+                            "stock",
+                            parseInt(event.target.value)
+                          )
+                        }
+                        className="h-7 w-24 rounded-lg border border-[#DDE7DF] bg-[#F8FAF8] px-2 text-sm outline-none focus:border-[#2D6A4F]"
+                      />
+                      <span className="text-xs text-[#667085]">units</span>
                     </div>
                   </td>
-                  <td className="px-5 py-3">
-                    <button type="button"
-                      onClick={() => handleStoreChange(store.id, "is_active", !store.is_active)}
-                      className={`relative w-10 h-5 rounded-full transition-colors ${store.is_active ? "bg-primary" : "bg-muted-foreground/30"}`}>
-                      <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${store.is_active ? "left-5" : "left-0.5"}`} />
+
+                  <td className="px-4 py-1.5">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleStoreChange(
+                          store.id,
+                          "is_active",
+                          !store.is_active
+                        )
+                      }
+                      className={`relative h-5 w-10 rounded-full transition-colors ${
+                        store.is_active ? "bg-[#006B22]" : "bg-[#C7CEC9]"
+                      }`}
+                    >
+                      <span
+                        className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${
+                          store.is_active ? "left-5" : "left-0.5"
+                        }`}
+                      />
                     </button>
                   </td>
                 </tr>
@@ -419,6 +838,6 @@ export default function EditProductForm() {
           </table>
         )}
       </div>
-    </div>
+    </section>
   );
 }

@@ -16,6 +16,10 @@ import ForgotPassword from "@/features/auth/components/ForgotPassword";
 import ResetPassword from "@/features/auth/components/ResetPassword";
 import Home from "@/features/auth/components/Home";
 import Profile from "@/features/profile/components/Profile";
+import OrderList from "@/features/orders/components/OrderList";
+import Reports from "@/features/reports/components/Reports";
+import Settings from "@/features/settings/components/Settings";
+import Support from "@/features/support/components/Support";
 
 const ComingSoon = ({ page }: { page: string }) => (
   <div className="flex items-center justify-center min-h-[calc(100vh-64px)]">
@@ -53,9 +57,11 @@ const router = createBrowserRouter([
       { path: "categories", element: <CategoryManagement /> },
       { path: "submissions", element: <SubmissionList /> },
       { path: "users", element: <UserManagement /> },
-      { path: "orders", element: <ComingSoon page="Orders" /> },
-      { path: "reports", element: <ComingSoon page="Reports" /> },
-    ],
+
+{ path: "settings", element: <Settings /> },
+{ path: "orders", element: <OrderList /> },
+{ path: "reports", element: <Reports /> }, 
+{ path: "support", element: <Support /> },   ],
   },
   {
     path: "/store",
