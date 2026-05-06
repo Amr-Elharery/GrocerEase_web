@@ -5,6 +5,7 @@ import CreateProductForm from "@/features/products/components/CreateProductForm"
 import EditProductForm from "@/features/products/components/EditProductForm";
 import CategoryManagement from "@/features/categories/components/CategoryManagement";
 import SubmissionList from "@/features/submissions/components/SubmissionList";
+import UserManagement from "@/features/users/components/UserManagement";
 import AppLayout from "@/components/layouts/AdminLayout";
 import StoreLayout from "@/components/layouts/StoreLayout";
 import ShopInventory from "@/features/shop/components/ShopInventory";
@@ -15,6 +16,10 @@ import ForgotPassword from "@/features/auth/components/ForgotPassword";
 import ResetPassword from "@/features/auth/components/ResetPassword";
 import Home from "@/features/auth/components/Home";
 import Profile from "@/features/profile/components/Profile";
+import OrderList from "@/features/orders/components/OrderList";
+import Reports from "@/features/reports/components/Reports";
+import Settings from "@/features/settings/components/Settings";
+import Support from "@/features/support/components/Support";
 
 const ComingSoon = ({ page }: { page: string }) => (
   <div className="flex items-center justify-center min-h-[calc(100vh-64px)]">
@@ -51,9 +56,12 @@ const router = createBrowserRouter([
       { path: "inventory/:id/edit", element: <EditProductForm /> },
       { path: "categories", element: <CategoryManagement /> },
       { path: "submissions", element: <SubmissionList /> },
-      { path: "orders", element: <ComingSoon page="Orders" /> },
-      { path: "reports", element: <ComingSoon page="Reports" /> },
-    ],
+      { path: "users", element: <UserManagement /> },
+
+{ path: "settings", element: <Settings /> },
+{ path: "orders", element: <OrderList /> },
+{ path: "reports", element: <Reports /> }, 
+{ path: "support", element: <Support /> },   ],
   },
   {
     path: "/store",

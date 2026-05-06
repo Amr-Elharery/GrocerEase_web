@@ -1,7 +1,21 @@
 import { useState } from "react";
-import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory } from "../hooks/useCategories";
+import {
+  useCategories,
+  useCreateCategory,
+  useUpdateCategory,
+  useDeleteCategory,
+} from "../hooks/useCategories";
 import { type Category } from "../api/categoryService";
-import { Plus, Pencil, Trash2, X, Check } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  X,
+  Check,
+  Tags,
+  FolderTree,
+  AlertTriangle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function CategoryManagement() {
@@ -19,42 +33,71 @@ export default function CategoryManagement() {
   const [deleteConfirm, setDeleteConfirm] = useState<Category | null>(null);
   const [error, setError] = useState("");
 
-  const topLevel = categories.filter(c => c.parent_id === null);
+  const topLevel = categories.filter((category) => category.parent_id === null);
+
   const subCategories = selectedParent
-    ? categories.filter(c => c.parent_id === selectedParent.id)
+    ? categories.filter((category) => category.parent_id === selectedParent.id)
     : [];
 
-  const handleStartEdit = (cat: Category) => {
-    setEditingId(cat.id);
-    setEditingName(cat.name);
+  const handleStartEdit = (category: Category) => {
+    setEditingId(category.id);
+    setEditingName(category.name);
     setError("");
   };
 
-  const handleSaveEdit = (cat: Category) => {
-    if (!editingName.trim()) { setError("Name is required"); return; }
-
-    const siblings = categories.filter(c =>
-      c.parent_id === cat.parent_id && c.id !== cat.id
-    );
-    if (siblings.some(c => c.name.toLowerCase() === editingName.trim().toLowerCase())) {
-      setError("Name already exists"); return;
+  const handleSaveEdit = (category: Category) => {
+    if (!editingName.trim()) {
+      setError("Name is required");
+      return;
     }
 
-    updateCategory.mutate({ id: cat.id, data: { name: editingName.trim() } });
+    const siblings = categories.filter(
+      (item) => item.parent_id === category.parent_id && item.id !== category.id
+    );
+
+    const isDuplicate = siblings.some(
+      (item) => item.name.toLowerCase() === editingName.trim().toLowerCase()
+    );
+
+    if (isDuplicate) {
+      setError("Name already exists");
+      return;
+    }
+
+    updateCategory.mutate({
+      id: category.id,
+      data: { name: editingName.trim() },
+    });
+
     setEditingId(null);
     setError("");
   };
 
   const handleAddCategory = (parentId: string | null) => {
-    if (!newName.trim()) { setError("Name is required"); return; }
+    if (!newName.trim()) {
+      setError("Name is required");
+      return;
+    }
 
-    const siblings = categories.filter(c => c.parent_id === parentId);
-    if (siblings.some(c => c.name.toLowerCase() === newName.trim().toLowerCase())) {
-      setError("Name already exists"); return;
+    const siblings = categories.filter(
+      (category) => category.parent_id === parentId
+    );
+
+    const isDuplicate = siblings.some(
+      (category) =>
+        category.name.toLowerCase() === newName.trim().toLowerCase()
+    );
+
+    if (isDuplicate) {
+      setError("Name already exists");
+      return;
     }
 
     createCategory.mutate(
-      { name: newName.trim(), parent_id: parentId },
+      {
+        name: newName.trim(),
+        parent_id: parentId,
+      },
       {
         onSuccess: () => {
           setNewName("");
@@ -66,131 +109,240 @@ export default function CategoryManagement() {
     );
   };
 
-  const handleDeleteClick = (cat: Category) => {
-    setDeleteConfirm(cat);
+  const handleDeleteClick = (category: Category) => {
+    setDeleteConfirm(category);
   };
 
   const handleConfirmDelete = () => {
     if (!deleteConfirm) return;
+
     deleteCategory.mutate(deleteConfirm.id, {
       onSuccess: () => {
         setDeleteConfirm(null);
-        if (selectedParent?.id === deleteConfirm.id) setSelectedParent(null);
+
+        if (selectedParent?.id === deleteConfirm.id) {
+          setSelectedParent(null);
+        }
       },
     });
   };
 
-  if (isLoading) return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-64px)]">
-      <p className="text-muted-foreground">Loading...</p>
-    </div>
-  );
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[calc(100vh-64px)] items-center justify-center">
+        <p className="text-sm text-[#667085]">Loading categories...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-4">
-
+    <section className="mx-auto max-w-[1420px] space-y-4">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">Category Management</h1>
+        <div className="mb-2 flex items-center gap-2 text-xs text-[#667085]">
+          <span>Catalogue</span>
+          <span>›</span>
+          <span className="font-semibold text-[#101828]">Categories</span>
+        </div>
 
+        <h1 className="text-[23px] font-bold tracking-tight text-[#101828]">
+          Category Management
+        </h1>
+
+        <p className="mt-1 text-sm text-[#667085]">
+          Manage grocery categories, sub-categories, and product grouping.
+        </p>
       </div>
 
-      {/* Two Column Layout */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* Main Layout */}
+      <div className="grid gap-4 xl:grid-cols-2">
+        {/* Top-Level Categories */}
+        <div className="overflow-hidden rounded-xl border border-[#DDE7DF] bg-white shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
+          <div className="flex items-center justify-between border-b border-[#DDE7DF] px-4 py-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#EAF7EE] text-[#006B22]">
+                <FolderTree className="h-4 w-4" />
+              </div>
 
-        {/* Left — Top Level Categories */}
-        <div className="bg-white border border-border rounded-lg overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-            <div>
-              <h2 className="text-sm font-semibold">Top-Level Categories</h2>
-              <p className="text-xs text-muted-foreground">{topLevel.length} categories</p>
+              <div>
+                <h2 className="text-sm font-bold text-[#101828]">
+                  Top-Level Categories
+                </h2>
+                <p className="text-xs text-[#667085]">
+                  {topLevel.length} categories
+                </p>
+              </div>
             </div>
-            <Button size="sm" variant="outline" className="gap-1.5 text-xs"
-              onClick={() => { setAddingParent(true); setAddingChild(false); setNewName(""); setError(""); }}>
-              <Plus className="w-3.5 h-3.5" /> Add Category
+
+            <Button
+              size="sm"
+              onClick={() => {
+                setAddingParent(true);
+                setAddingChild(false);
+                setNewName("");
+                setError("");
+              }}
+              className="h-9 gap-1.5 rounded-lg bg-[#006B22] px-3 text-xs font-semibold text-white hover:bg-[#00571C]"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add Category
             </Button>
           </div>
 
-          {/* Add Parent Form */}
           {addingParent && (
-            <div className="px-4 py-3 border-b border-border bg-muted/20">
+            <div className="border-b border-[#DDE7DF] bg-[#F8FAF8] px-4 py-2.5">
               <div className="flex items-center gap-2">
                 <input
                   autoFocus
                   value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleAddCategory(null);
-                    if (e.key === "Escape") { setAddingParent(false); setError(""); }
+                  onChange={(event) => setNewName(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      handleAddCategory(null);
+                    }
+
+                    if (event.key === "Escape") {
+                      setAddingParent(false);
+                      setError("");
+                    }
                   }}
                   placeholder="Category name..."
-                  className="flex-1 h-7 rounded border border-input bg-transparent px-2 text-sm outline-none focus:border-ring"
+                  className="h-8 flex-1 rounded-lg border border-[#DDE7DF] bg-white px-3 text-sm outline-none transition focus:border-[#2D6A4F] focus:ring-2 focus:ring-[#2D6A4F]/10"
                 />
-                <button onClick={() => handleAddCategory(null)}
-                  className="w-7 h-7 flex items-center justify-center rounded bg-primary text-primary-foreground hover:opacity-90">
-                  <Check className="w-3.5 h-3.5" />
+
+                <button
+                  type="button"
+                  onClick={() => handleAddCategory(null)}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#006B22] text-white transition hover:bg-[#00571C]"
+                >
+                  <Check className="h-3.5 w-3.5" />
                 </button>
-                <button onClick={() => { setAddingParent(false); setError(""); }}
-                  className="w-7 h-7 flex items-center justify-center rounded border border-border hover:bg-muted">
-                  <X className="w-3.5 h-3.5" />
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAddingParent(false);
+                    setError("");
+                  }}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#DDE7DF] bg-white text-[#5F7168] transition hover:bg-[#E8F0EA]"
+                >
+                  <X className="h-3.5 w-3.5" />
                 </button>
               </div>
-              {error && <p className="text-xs text-destructive mt-1">{error}</p>}
+
+              {error && <p className="mt-1.5 text-xs text-red-600">{error}</p>}
             </div>
           )}
 
-          <div className="divide-y divide-border">
-            {topLevel.map(cat => (
-              <div key={cat.id}
-                onClick={() => { setSelectedParent(cat); setAddingChild(false); setError(""); }}
-                className={`flex items-center justify-between px-4 py-3 cursor-pointer transition-colors ${
-                  selectedParent?.id === cat.id ? "bg-muted/50 border-r-2 border-primary" : "hover:bg-muted/20"
-                }`}>
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="w-7 h-7 rounded bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground shrink-0">
-                    {cat.name.charAt(0)}
+          <div className="divide-y divide-[#DDE7DF]">
+            {topLevel.map((category) => (
+              <div
+                key={category.id}
+                onClick={() => {
+                  setSelectedParent(category);
+                  setAddingChild(false);
+                  setError("");
+                }}
+                className={`flex cursor-pointer items-center justify-between px-4 py-3 transition ${
+                  selectedParent?.id === category.id
+                    ? "bg-[#EAF7EE]"
+                    : "hover:bg-[#F8FAF8]"
+                }`}
+              >
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  <div
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${
+                      selectedParent?.id === category.id
+                        ? "bg-[#006B22] text-white"
+                        : "bg-[#E8F0EA] text-[#5F7168]"
+                    }`}
+                  >
+                    {category.name.charAt(0)}
                   </div>
-                  {editingId === cat.id ? (
-                    <div className="flex items-center gap-2 flex-1" onClick={e => e.stopPropagation()}>
+
+                  {editingId === category.id ? (
+                    <div
+                      className="flex flex-1 items-center gap-2"
+                      onClick={(event) => event.stopPropagation()}
+                    >
                       <input
                         autoFocus
                         value={editingName}
-                        onChange={(e) => setEditingName(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") handleSaveEdit(cat);
-                          if (e.key === "Escape") { setEditingId(null); setError(""); }
+                        onChange={(event) => setEditingName(event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            handleSaveEdit(category);
+                          }
+
+                          if (event.key === "Escape") {
+                            setEditingId(null);
+                            setError("");
+                          }
                         }}
-                        className="flex-1 h-7 rounded border border-input bg-transparent px-2 text-sm outline-none focus:border-ring"
+                        className="h-8 flex-1 rounded-lg border border-[#DDE7DF] bg-white px-3 text-sm outline-none focus:border-[#2D6A4F]"
                       />
-                      <button onClick={() => handleSaveEdit(cat)}
-                        className="w-6 h-6 flex items-center justify-center rounded bg-primary text-primary-foreground">
-                        <Check className="w-3 h-3" />
+
+                      <button
+                        type="button"
+                        onClick={() => handleSaveEdit(category)}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#006B22] text-white"
+                      >
+                        <Check className="h-3.5 w-3.5" />
                       </button>
-                      <button onClick={() => { setEditingId(null); setError(""); }}
-                        className="w-6 h-6 flex items-center justify-center rounded border border-border">
-                        <X className="w-3 h-3" />
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingId(null);
+                          setError("");
+                        }}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#DDE7DF] bg-white text-[#5F7168]"
+                      >
+                        <X className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   ) : (
-                    <span className="text-sm font-medium truncate" onDoubleClick={() => handleStartEdit(cat)}>
-                      {cat.name}
+                    <span
+                      className="truncate text-sm font-semibold text-[#101828]"
+                      onDoubleClick={() => handleStartEdit(category)}
+                    >
+                      {category.name}
                     </span>
                   )}
                 </div>
-                {editingId !== cat.id && (
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                      cat.product_count > 0 ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                    }`}>
-                      {cat.product_count.toLocaleString()}
+
+                {editingId !== category.id && (
+                  <div className="flex shrink-0 items-center gap-2">
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-xs font-bold ${
+                        category.product_count > 0
+                          ? "bg-[#EAF7EE] text-[#006B22]"
+                          : "bg-[#F2F4F7] text-[#667085]"
+                      }`}
+                    >
+                      {category.product_count.toLocaleString()}
                     </span>
-                    <button onClick={(e) => { e.stopPropagation(); handleStartEdit(cat); }}
-                      className="w-6 h-6 flex items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-                      <Pencil className="w-3 h-3" />
+
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleStartEdit(category);
+                      }}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg text-[#5F7168] transition hover:bg-[#E8F0EA] hover:text-[#101828]"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
                     </button>
-                    <button onClick={(e) => { e.stopPropagation(); handleDeleteClick(cat); }}
-                      className="w-6 h-6 flex items-center justify-center rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors">
-                      <Trash2 className="w-3 h-3" />
+
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleDeleteClick(category);
+                      }}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg text-[#5F7168] transition hover:bg-red-50 hover:text-red-600"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 )}
@@ -199,113 +351,202 @@ export default function CategoryManagement() {
           </div>
         </div>
 
-        {/* Right — Sub Categories */}
-        <div className="bg-white border border-border rounded-lg overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-            <div>
-              <h2 className="text-sm font-semibold">
-                {selectedParent ? `${selectedParent.name} — Sub-Categories` : "Sub-Categories"}
-              </h2>
-              <p className="text-xs text-muted-foreground">
-                {selectedParent ? `${subCategories.length} sub-categories` : "Select a category"}
-              </p>
+        {/* Sub-Categories */}
+        <div className="overflow-hidden rounded-xl border border-[#DDE7DF] bg-white shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
+          <div className="flex items-center justify-between border-b border-[#DDE7DF] px-4 py-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#EAF7EE] text-[#006B22]">
+                <Tags className="h-4 w-4" />
+              </div>
+
+              <div>
+                <h2 className="text-sm font-bold text-[#101828]">
+                  {selectedParent
+                    ? `${selectedParent.name} Sub-Categories`
+                    : "Sub-Categories"}
+                </h2>
+
+                <p className="text-xs text-[#667085]">
+                  {selectedParent
+                    ? `${subCategories.length} sub-categories`
+                    : "Select a category"}
+                </p>
+              </div>
             </div>
+
             {selectedParent && (
-              <Button size="sm" variant="outline" className="gap-1.5 text-xs"
-                onClick={() => { setAddingChild(true); setAddingParent(false); setNewName(""); setError(""); }}>
-                <Plus className="w-3.5 h-3.5" /> Add Sub-Category
+              <Button
+                size="sm"
+                onClick={() => {
+                  setAddingChild(true);
+                  setAddingParent(false);
+                  setNewName("");
+                  setError("");
+                }}
+                className="h-9 gap-1.5 rounded-lg bg-[#006B22] px-3 text-xs font-semibold text-white hover:bg-[#00571C]"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Add Sub-Category
               </Button>
             )}
           </div>
 
-          {/* Add Child Form */}
           {addingChild && selectedParent && (
-            <div className="px-4 py-3 border-b border-border bg-muted/20">
+            <div className="border-b border-[#DDE7DF] bg-[#F8FAF8] px-4 py-2.5">
               <div className="flex items-center gap-2">
                 <input
                   autoFocus
                   value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleAddCategory(selectedParent.id);
-                    if (e.key === "Escape") { setAddingChild(false); setError(""); }
+                  onChange={(event) => setNewName(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      handleAddCategory(selectedParent.id);
+                    }
+
+                    if (event.key === "Escape") {
+                      setAddingChild(false);
+                      setError("");
+                    }
                   }}
                   placeholder="Sub-category name..."
-                  className="flex-1 h-7 rounded border border-input bg-transparent px-2 text-sm outline-none focus:border-ring"
+                  className="h-8 flex-1 rounded-lg border border-[#DDE7DF] bg-white px-3 text-sm outline-none transition focus:border-[#2D6A4F] focus:ring-2 focus:ring-[#2D6A4F]/10"
                 />
-                <button onClick={() => handleAddCategory(selectedParent.id)}
-                  className="w-7 h-7 flex items-center justify-center rounded bg-primary text-primary-foreground hover:opacity-90">
-                  <Check className="w-3.5 h-3.5" />
+
+                <button
+                  type="button"
+                  onClick={() => handleAddCategory(selectedParent.id)}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#006B22] text-white transition hover:bg-[#00571C]"
+                >
+                  <Check className="h-3.5 w-3.5" />
                 </button>
-                <button onClick={() => { setAddingChild(false); setError(""); }}
-                  className="w-7 h-7 flex items-center justify-center rounded border border-border hover:bg-muted">
-                  <X className="w-3.5 h-3.5" />
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAddingChild(false);
+                    setError("");
+                  }}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#DDE7DF] bg-white text-[#5F7168] transition hover:bg-[#E8F0EA]"
+                >
+                  <X className="h-3.5 w-3.5" />
                 </button>
               </div>
-              {error && <p className="text-xs text-destructive mt-1">{error}</p>}
+
+              {error && <p className="mt-1.5 text-xs text-red-600">{error}</p>}
             </div>
           )}
 
           {!selectedParent ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-3">
-                <Plus className="w-5 h-5 text-muted-foreground" />
+            <div className="flex min-h-[310px] flex-col items-center justify-center px-6 text-center">
+              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#EAF7EE] text-[#006B22]">
+                <Tags className="h-5 w-5" />
               </div>
-              <p className="text-sm font-medium text-muted-foreground">Select a category</p>
-              <p className="text-xs text-muted-foreground mt-1">Click a top-level category to view its sub-categories</p>
+
+              <p className="text-sm font-bold text-[#101828]">
+                Select a category
+              </p>
+
+              <p className="mt-1 max-w-[320px] text-xs leading-5 text-[#667085]">
+                Click a top-level category to view, edit, or add its
+                sub-categories.
+              </p>
             </div>
           ) : subCategories.length === 0 && !addingChild ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <p className="text-sm font-medium text-muted-foreground">No sub-categories yet</p>
-              <p className="text-xs text-muted-foreground mt-1">Click "Add Sub-Category" to create one</p>
+            <div className="flex min-h-[310px] flex-col items-center justify-center px-6 text-center">
+              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#EAF7EE] text-[#006B22]">
+                <Plus className="h-5 w-5" />
+              </div>
+
+              <p className="text-sm font-bold text-[#101828]">
+                No sub-categories yet
+              </p>
+
+              <p className="mt-1 max-w-[320px] text-xs leading-5 text-[#667085]">
+                Add the first sub-category under {selectedParent.name}.
+              </p>
             </div>
           ) : (
-            <div className="divide-y divide-border">
-              {subCategories.map(cat => (
-                <div key={cat.id} className="flex items-center justify-between px-4 py-3 hover:bg-muted/20 transition-colors">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="w-7 h-7 rounded bg-muted/50 flex items-center justify-center text-xs font-bold text-muted-foreground shrink-0">
-                      {cat.name.charAt(0)}
+            <div className="divide-y divide-[#DDE7DF]">
+              {subCategories.map((category) => (
+                <div
+                  key={category.id}
+                  className="flex items-center justify-between px-4 py-3 transition hover:bg-[#F8FAF8]"
+                >
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#E8F0EA] text-xs font-bold text-[#5F7168]">
+                      {category.name.charAt(0)}
                     </div>
-                    {editingId === cat.id ? (
-                      <div className="flex items-center gap-2 flex-1">
+
+                    {editingId === category.id ? (
+                      <div className="flex flex-1 items-center gap-2">
                         <input
                           autoFocus
                           value={editingName}
-                          onChange={(e) => setEditingName(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") handleSaveEdit(cat);
-                            if (e.key === "Escape") { setEditingId(null); setError(""); }
+                          onChange={(event) =>
+                            setEditingName(event.target.value)
+                          }
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter") {
+                              handleSaveEdit(category);
+                            }
+
+                            if (event.key === "Escape") {
+                              setEditingId(null);
+                              setError("");
+                            }
                           }}
-                          className="flex-1 h-7 rounded border border-input bg-transparent px-2 text-sm outline-none focus:border-ring"
+                          className="h-8 flex-1 rounded-lg border border-[#DDE7DF] bg-white px-3 text-sm outline-none focus:border-[#2D6A4F]"
                         />
-                        <button onClick={() => handleSaveEdit(cat)}
-                          className="w-6 h-6 flex items-center justify-center rounded bg-primary text-primary-foreground">
-                          <Check className="w-3 h-3" />
+
+                        <button
+                          type="button"
+                          onClick={() => handleSaveEdit(category)}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#006B22] text-white"
+                        >
+                          <Check className="h-3.5 w-3.5" />
                         </button>
-                        <button onClick={() => { setEditingId(null); setError(""); }}
-                          className="w-6 h-6 flex items-center justify-center rounded border border-border">
-                          <X className="w-3 h-3" />
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingId(null);
+                            setError("");
+                          }}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#DDE7DF] bg-white text-[#5F7168]"
+                        >
+                          <X className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     ) : (
-                      <span className="text-sm font-medium truncate" onDoubleClick={() => handleStartEdit(cat)}>
-                        {cat.name}
+                      <span
+                        className="truncate text-sm font-semibold text-[#101828]"
+                        onDoubleClick={() => handleStartEdit(category)}
+                      >
+                        {category.name}
                       </span>
                     )}
                   </div>
-                  {editingId !== cat.id && (
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-xs text-muted-foreground">
-                        {cat.product_count} products
+
+                  {editingId !== category.id && (
+                    <div className="flex shrink-0 items-center gap-2">
+                      <span className="rounded-full bg-[#F2F4F7] px-2.5 py-1 text-xs font-semibold text-[#667085]">
+                        {category.product_count} products
                       </span>
-                      <button onClick={() => handleStartEdit(cat)}
-                        className="w-6 h-6 flex items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-                        <Pencil className="w-3 h-3" />
+
+                      <button
+                        type="button"
+                        onClick={() => handleStartEdit(category)}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-[#5F7168] transition hover:bg-[#E8F0EA] hover:text-[#101828]"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
                       </button>
-                      <button onClick={() => handleDeleteClick(cat)}
-                        className="w-6 h-6 flex items-center justify-center rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors">
-                        <Trash2 className="w-3 h-3" />
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteClick(category)}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-[#5F7168] transition hover:bg-red-50 hover:text-red-600"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   )}
@@ -318,27 +559,68 @@ export default function CategoryManagement() {
 
       {/* Delete Confirm Modal */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4 space-y-4">
-            <h3 className="text-base font-semibold">Delete Category</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4">
+          <div className="w-full max-w-sm rounded-xl bg-white p-5 shadow-[0_20px_40px_rgba(15,23,42,0.18)]">
+            <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-red-50 text-red-600">
+              <AlertTriangle className="h-5 w-5" />
+            </div>
+
+            <h3 className="text-base font-bold text-[#101828]">
+              Delete Category
+            </h3>
+
             {deleteConfirm.product_count > 0 ? (
               <>
-                <p className="text-sm text-muted-foreground">
-                  Cannot delete <span className="font-semibold text-foreground">"{deleteConfirm.name}"</span> — it has <span className="font-semibold text-destructive">{deleteConfirm.product_count} products</span> assigned. Reassign them first.
+                <p className="mt-2 text-sm leading-6 text-[#667085]">
+                  Cannot delete{" "}
+                  <span className="font-semibold text-[#101828]">
+                    "{deleteConfirm.name}"
+                  </span>{" "}
+                  because it has{" "}
+                  <span className="font-semibold text-red-600">
+                    {deleteConfirm.product_count} products
+                  </span>{" "}
+                  assigned. Reassign them first.
                 </p>
-                <div className="flex justify-end">
-                  <Button variant="outline" size="sm" onClick={() => setDeleteConfirm(null)}>Close</Button>
+
+                <div className="mt-5 flex justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setDeleteConfirm(null)}
+                    className="h-9 rounded-lg border-[#DDE7DF] px-4 text-sm font-semibold"
+                  >
+                    Close
+                  </Button>
                 </div>
               </>
             ) : (
               <>
-                <p className="text-sm text-muted-foreground">
-                  Are you sure you want to delete <span className="font-semibold text-foreground">"{deleteConfirm.name}"</span>? This action cannot be undone.
+                <p className="mt-2 text-sm leading-6 text-[#667085]">
+                  Are you sure you want to delete{" "}
+                  <span className="font-semibold text-[#101828]">
+                    "{deleteConfirm.name}"
+                  </span>
+                  ? This action cannot be undone.
                 </p>
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setDeleteConfirm(null)}>Cancel</Button>
-                  <Button variant="destructive" size="sm" onClick={handleConfirmDelete}
-                    disabled={deleteCategory.isPending}>
+
+                <div className="mt-5 flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setDeleteConfirm(null)}
+                    className="h-9 rounded-lg border-[#DDE7DF] px-4 text-sm font-semibold"
+                  >
+                    Cancel
+                  </Button>
+
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleConfirmDelete}
+                    disabled={deleteCategory.isPending}
+                    className="h-9 rounded-lg px-4 text-sm font-semibold"
+                  >
                     {deleteCategory.isPending ? "Deleting..." : "Delete"}
                   </Button>
                 </div>
@@ -347,6 +629,6 @@ export default function CategoryManagement() {
           </div>
         </div>
       )}
-    </div>
+    </section>
   );
 }
