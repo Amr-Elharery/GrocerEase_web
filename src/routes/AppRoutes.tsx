@@ -19,7 +19,8 @@ import Profile from "@/features/profile/components/Profile";
 import OrderList from "@/features/orders/components/OrderList";
 import Reports from "@/features/reports/components/Reports";
 import Settings from "@/features/settings/components/Settings";
-import Support from "@/features/support/components/Support";
+import Support from "@/features/support/components/Support";//#endregion
+import StoreOrders from  "@/features/orders/components/StoreOrders";
 
 const ComingSoon = ({ page }: { page: string }) => (
   <div className="flex items-center justify-center min-h-[calc(100vh-64px)]">
@@ -74,7 +75,7 @@ const router = createBrowserRouter([
       { index: true, element: <Navigate to="/store/inventory" replace /> },
       { path: "home", element: <ComingSoon page="Store Dashboard" /> },
       { path: "inventory", element: <ShopInventory /> },
-      { path: "orders", element: <ComingSoon page="Orders" /> },
+      { path: "orders", element: <StoreOrders /> },
       { path: "reports", element: <ComingSoon page="Reports" /> },
     ],
   },
