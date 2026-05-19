@@ -1,7 +1,14 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useOrders } from "../hooks/useOrders";
 import { type Order } from "../api/orderService";
-import { Filter, RotateCcw, Search } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  Filter,
+  RotateCcw,
+  Search,
+} from "lucide-react";
+import OrderDetailModal from "./OrderDetailModal";
 
 const statusColors: Record<string, string> = {
   pending: "border border-[#FCD34D] bg-[#FFF4D8] text-[#D97706]",
@@ -24,6 +31,21 @@ const paymentColors: Record<string, string> = {
   card: "border border-[#BFDBFE] bg-[#EAF1FF] text-[#2563EB]",
 };
 
+const statusOptions = [
+  { value: "all", label: "All Statuses" },
+  { value: "pending", label: "Pending" },
+  { value: "processing", label: "Processing" },
+  { value: "out_for_delivery", label: "Out for Delivery" },
+  { value: "delivered", label: "Delivered" },
+  { value: "cancelled", label: "Cancelled" },
+];
+
+const paymentOptions = [
+  { value: "all", label: "All Payments" },
+  { value: "cash", label: "Cash" },
+  { value: "card", label: "Card" },
+];
+
 function getInitials(name: string) {
   return name
     .split(" ")
@@ -40,16 +62,99 @@ function formatOrderDate(date: string) {
   });
 }
 
+function GreenDropdown({
+  value,
+  options,
+  onChange,
+  widthClass = "w-[165px]",
+}: {
+  value: string;
+  options: { value: string; label: string }[];
+  onChange: (value: string) => void;
+  widthClass?: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const selectedOption =
+    options.find((option) => option.value === value) ?? options[0];
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  return (
+    <div ref={dropdownRef} className={`relative ${widthClass}`}>
+      <button
+        type="button"
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="flex h-10 w-full items-center justify-between rounded-lg border border-[#078A2D] bg-white px-3 text-sm font-semibold text-[#101828] shadow-sm outline-none transition hover:bg-[#F0FDF4] focus:border-[#078A2D] focus:ring-2 focus:ring-[#078A2D]/15"
+      >
+        <span className="truncate">{selectedOption.label}</span>
+
+        <ChevronDown
+          className={`h-4 w-4 shrink-0 text-[#078A2D] transition-transform ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+
+      {isOpen && (
+        <div className="absolute left-0 top-[46px] z-50 w-full overflow-hidden rounded-lg border border-[#CDE8D5] bg-white shadow-[0_12px_30px_rgba(15,23,42,0.12)]">
+          {options.map((option) => {
+            const isSelected = option.value === value;
+
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => {
+                  onChange(option.value);
+                  setIsOpen(false);
+                }}
+                className={`flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left text-sm transition ${
+                  isSelected
+                    ? "bg-[#EAF7EE] font-semibold text-[#078A2D]"
+                    : "text-[#101828] hover:bg-[#F0FDF4]"
+                }`}
+              >
+                <span>{option.label}</span>
+
+                {isSelected && (
+                  <Check className="h-4 w-4 shrink-0 text-[#078A2D]" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function OrderList() {
   const { data: orders = [], isLoading } = useOrders();
 
   const [statusFilter, setStatusFilter] = useState("all");
   const [paymentFilter, setPaymentFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  const countByStatus = (status: string) => {
-    return orders.filter((order) => order.status === status).length;
-  };
+  const countByStatus = (status: string) =>
+    orders.filter((o) => o.status === status).length;
 
   const filtered = useMemo(() => {
     const searchValue = search.trim().toLowerCase();
@@ -59,7 +164,8 @@ export default function OrderList() {
         statusFilter === "all" || order.status === statusFilter;
 
       const matchesPayment =
-        paymentFilter === "all" || order.payment_method === paymentFilter;
+        paymentFilter === "all" ||
+        order.payment_method === paymentFilter;
 
       const matchesSearch =
         !searchValue ||
@@ -133,7 +239,9 @@ export default function OrderList() {
             key={stat.label}
             className="rounded-xl border border-[#DDE7DF] bg-white px-3 py-2.5 shadow-[0_2px_10px_rgba(15,23,42,0.04)]"
           >
-            <p className="text-sm font-medium text-[#667085]">{stat.label}</p>
+            <p className="text-sm font-medium text-[#667085]">
+              {stat.label}
+            </p>
 
             <p className={`mt-0.5 text-[22px] font-bold ${stat.color}`}>
               {stat.value}
@@ -156,6 +264,7 @@ export default function OrderList() {
                 <p className="text-sm font-semibold text-[#101828]">
                   Filter Orders
                 </p>
+
                 <p className="text-[11px] text-[#667085]">
                   Refine orders by status, payment, or search.
                 </p>
@@ -163,35 +272,24 @@ export default function OrderList() {
             </div>
 
             <div className="grid gap-3 md:grid-cols-2 xl:flex xl:items-center">
-              <select
+              <GreenDropdown
                 value={statusFilter}
-                onChange={(event) => setStatusFilter(event.target.value)}
-                className="h-10 w-[165px] rounded-lg border border-[#DDE7DF] bg-[#F8FAF8] px-3 text-sm font-medium text-[#344054] outline-none transition focus:border-[#2D6A4F] focus:ring-2 focus:ring-[#2D6A4F]/10"
-              >
-                <option value="all">All Statuses</option>
-                <option value="pending">Pending</option>
-                <option value="processing">Processing</option>
-                <option value="out_for_delivery">Out for Delivery</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
+                options={statusOptions}
+                onChange={setStatusFilter}
+              />
 
-              <select
+              <GreenDropdown
                 value={paymentFilter}
-                onChange={(event) => setPaymentFilter(event.target.value)}
-                className="h-10 w-[165px] rounded-lg border border-[#DDE7DF] bg-[#F8FAF8] px-3 text-sm font-medium text-[#344054] outline-none transition focus:border-[#2D6A4F] focus:ring-2 focus:ring-[#2D6A4F]/10"
-              >
-                <option value="all">All Payments</option>
-                <option value="cash">Cash</option>
-                <option value="card">Card</option>
-              </select>
+                options={paymentOptions}
+                onChange={setPaymentFilter}
+              />
 
               <div className="relative md:col-span-2 xl:w-[220px]">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#667085]" />
 
                 <input
                   value={search}
-                  onChange={(event) => setSearch(event.target.value)}
+                  onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search orders..."
                   className="h-10 w-full rounded-lg border border-[#DDE7DF] bg-[#F8FAF8] pl-9 pr-3 text-sm text-[#101828] outline-none transition placeholder:text-[#98A2B3] focus:border-[#2D6A4F] focus:ring-2 focus:ring-[#2D6A4F]/10"
                 />
@@ -227,7 +325,11 @@ export default function OrderList() {
 
             <tbody className="divide-y divide-[#DDE7DF]">
               {filtered.map((order: Order) => (
-                <tr key={order.id} className="transition hover:bg-[#F8FAF8]">
+                <tr
+                  key={order.id}
+                  onClick={() => setSelectedOrder(order)}
+                  className="cursor-pointer transition hover:bg-[#F8FAF8]"
+                >
                   <td className="truncate px-4 py-2.5 font-mono text-xs text-[#5F7168]">
                     #{order.order_id}
                   </td>
@@ -294,10 +396,20 @@ export default function OrderList() {
             {filtered.length}
           </span>{" "}
           of{" "}
-          <span className="font-semibold text-[#101828]">{orders.length}</span>{" "}
+          <span className="font-semibold text-[#101828]">
+            {orders.length}
+          </span>{" "}
           orders
         </div>
       </div>
+
+      {/* Order Detail Modal */}
+      {selectedOrder && (
+        <OrderDetailModal
+          order={selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+        />
+      )}
     </section>
   );
 }

@@ -14,6 +14,12 @@ export const OrderSchema = z.object({
 
 export type Order = z.infer<typeof OrderSchema>;
 
+export type DeliveryPersonnel = {
+  id: string;
+  name: string;
+  email: string;
+};
+
 const mockOrders: Order[] = [
   { id: "1", order_id: "ORD-8451", customer_name: "Omar Ahmed", store_name: "Cairo Store", items_count: 8, total_price: 450.00, status: "pending", payment_method: "cash", created_at: new Date(Date.now() - 1 * 3600000).toISOString() },
   { id: "2", order_id: "ORD-8450", customer_name: "Sara Mohamed", store_name: "Alexandria Store", items_count: 5, total_price: 320.50, status: "processing", payment_method: "card", created_at: new Date(Date.now() - 2 * 3600000).toISOString() },
@@ -27,6 +33,15 @@ const mockOrders: Order[] = [
   { id: "10", order_id: "ORD-8442", customer_name: "Dina Fathy", store_name: "Mansoura Store", items_count: 1, total_price: 45.00, status: "cancelled", payment_method: "card", created_at: new Date(Date.now() - 24 * 3600000).toISOString() },
 ];
 
+const mockDeliveryPersonnel: DeliveryPersonnel[] = [
+  { id: "3", name: "Mohamed Ali", email: "mohamed@zad.com" },
+  { id: "6", name: "Layla Omar", email: "layla@zad.com" },
+  { id: "11", name: "Youssef Nasser", email: "youssef@zad.com" },
+  { id: "12", name: "Hana Mostafa", email: "hana@zad.com" },
+  { id: "13", name: "Hanan gamal", email: "hanan@zad.com" },
+
+];
+
 export const orderService = {
   async getOrders(): Promise<Order[]> {
     // TODO: replace with real API call
@@ -35,5 +50,21 @@ export const orderService = {
     return [...mockOrders].sort((a, b) =>
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
+  },
+
+  async getDeliveryPersonnel(): Promise<DeliveryPersonnel[]> {
+    // TODO: replace with real API call
+    // const res = await http.get('/users?role=delivery');
+    // return res.data;
+    return mockDeliveryPersonnel;
+  },
+
+  async assignOrder(orderId: string, deliveryPersonnelId: string): Promise<void> {
+    // TODO: replace with real API call
+    // await http.post(`/orders/${orderId}/assign`, { delivery_personnel_id: deliveryPersonnelId });
+
+    console.log("assign order", orderId, "to", deliveryPersonnelId);
+    const index = mockOrders.findIndex(o => o.id === orderId);
+    if (index !== -1) mockOrders[index].status = "processing";
   },
 };
