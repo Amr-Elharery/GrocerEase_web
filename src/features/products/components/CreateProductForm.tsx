@@ -7,78 +7,8 @@ import { Label } from "@/components/ui/label";
 import { X, Upload, Plus, AlertTriangle, ChevronDown } from "lucide-react";
 
 const categories = [
-  {
-    id: "1",
-    name: "Dairy",
-    sub_categories: [
-      { id: "1-1", name: "Milk" },
-      { id: "1-2", name: "Cheese" },
-      { id: "1-3", name: "Yogurt" },
-      { id: "1-4", name: "Eggs" },
-    ],
-  },
-  {
-    id: "2",
-    name: "Grains",
-    sub_categories: [
-      { id: "2-1", name: "Rice" },
-      { id: "2-2", name: "Pasta" },
-      { id: "2-3", name: "Bread" },
-    ],
-  },
-  {
-    id: "3",
-    name: "Beverages",
-    sub_categories: [
-      { id: "3-1", name: "Juice" },
-      { id: "3-2", name: "Water" },
-      { id: "3-3", name: "Tea" },
-      { id: "3-4", name: "Coffee" },
-    ],
-  },
-  {
-    id: "4",
-    name: "Snacks",
-    sub_categories: [
-      { id: "4-1", name: "Chips" },
-      { id: "4-2", name: "Chocolate" },
-      { id: "4-3", name: "Biscuits" },
-    ],
-  },
-  {
-    id: "5",
-    name: "Meat",
-    sub_categories: [
-      { id: "5-1", name: "Poultry" },
-      { id: "5-2", name: "Beef" },
-      { id: "5-3", name: "Fish" },
-    ],
-  },
-  {
-    id: "6",
-    name: "Oils",
-    sub_categories: [
-      { id: "6-1", name: "Cooking Oil" },
-      { id: "6-2", name: "Olive Oil" },
-    ],
-  },
-  {
-    id: "7",
-    name: "Bakery",
-    sub_categories: [
-      { id: "7-1", name: "Bread" },
-      { id: "7-2", name: "Pastry" },
-    ],
-  },
-  {
-    id: "8",
-    name: "Canned Goods",
-    sub_categories: [
-      { id: "8-1", name: "Paste" },
-      { id: "8-2", name: "Fish" },
-      { id: "8-3", name: "Vegetables" },
-    ],
-  },
+  { id: "1", name: "Dairy", sub_categories: [{ id: "3", name: "Milk" }] },
+  { id: "2", name: "Snacks", sub_categories: [] },
 ];
 
 type FormErrors = {
@@ -117,6 +47,7 @@ export default function CreateProductForm() {
   const [primaryIndex, setPrimaryIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [unitOpen, setUnitOpen] = useState(false);
+  const [categoryOpen, setCategoryOpen] = useState(false);
 
 const units = [
   "Piece",
@@ -216,13 +147,8 @@ const units = [
 
     if (!formData.product_name) newErrors.product_name = "Required field";
     if (!formData.brand) newErrors.brand = "Required field";
-    if (!formData.barcode) newErrors.barcode = "Required field";
     if (!formData.unit) newErrors.unit = "Required field";
     if (!formData.category_id) newErrors.category_id = "Category is required";
-
-    if (!formData.sub_category_id) {
-      newErrors.sub_category_id = "Sub-category is required";
-    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -231,9 +157,15 @@ const units = [
 
     if (barcodeConflict) return;
 
-    createProduct.mutate(formData, {
-      onSuccess: () => navigate("/app/inventory"),
-    });
+    if (images.length === 0) {
+      window.alert("At least one product image is required");
+      return;
+    }
+
+    createProduct.mutate(
+      { data: formData, files: images.map((img) => img.file) },
+      { onSuccess: () => navigate("/app/inventory") }
+    );
   };
 
   return (
@@ -286,19 +218,51 @@ const units = [
                 Top-Level Category *
               </Label>
 
-              <select
-                name="category_id"
-                value={formData.category_id}
-                onChange={handleChange}
-                className="h-9 w-full rounded-lg border border-[#DDE7DF] bg-[#F8FAF8] px-3 text-sm text-[#101828] outline-none transition focus:border-[#2D6A4F] focus:ring-2 focus:ring-[#2D6A4F]/10"
-              >
-                <option value="">Select category</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setCategoryOpen((prev) => !prev)}
+                  className={`flex h-9 w-full items-center justify-between rounded-lg border bg-[#F8FAF8] px-3 text-left text-sm outline-none transition focus:border-[#2D6A4F] focus:ring-2 focus:ring-[#2D6A4F]/10 ${
+                    errors.category_id ? "border-red-500" : "border-[#DDE7DF]"
+                  }`}
+                >
+                  <span className={selectedCategory ? "text-[#101828]" : "text-[#667085]"}>
+                    {selectedCategory ? selectedCategory.name : "Select category"}
+                  </span>
+                  <ChevronDown className="h-4 w-4 text-[#5F7168]" />
+                </button>
+
+                {categoryOpen && (
+                  <div className="absolute left-0 right-0 top-[42px] z-50 overflow-hidden rounded-lg border border-[#DDE7DF] bg-white shadow-[0_10px_24px_rgba(15,23,42,0.12)]">
+                    {categories.map((category) => (
+                      <button
+                        key={category.id}
+                        type="button"
+                        onClick={() => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            category_id: category.id,
+                            sub_category_id: "",
+                          }));
+                          setErrors((prev) => {
+                            const next = { ...prev };
+                            delete next.category_id;
+                            return next;
+                          });
+                          setCategoryOpen(false);
+                        }}
+                        className={`block w-full px-3 py-2 text-left text-sm transition hover:bg-[#EAF7EE] ${
+                          formData.category_id === category.id
+                            ? "bg-[#EAF7EE] font-semibold text-[#006B22]"
+                            : "text-[#101828]"
+                        }`}
+                      >
+                        {category.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {errors.category_id && (
                 <p className="text-xs text-red-600">{errors.category_id}</p>
@@ -351,7 +315,7 @@ const units = [
                 </h2>
 
                 <p className="mt-0.5 text-xs text-[#667085]">
-                  Upload up to 5 product images.
+                  Upload up to 5 product images. Click an image to make it primary.
                 </p>
               </div>
 
@@ -404,11 +368,16 @@ const units = [
               {images.map((image, index) => (
                 <div
                   key={index}
-                  className="group relative h-28 overflow-hidden rounded-xl border border-[#DDE7DF] bg-[#F8FAF8]"
+                  className={`group relative h-28 overflow-hidden rounded-xl border bg-[#F8FAF8] transition ${
+                    index === primaryIndex
+                      ? "border-[#006B22] ring-2 ring-[#006B22]"
+                      : "border-[#DDE7DF]"
+                  }`}
                 >
                   <img
                     src={image.preview}
                     alt=""
+                    title="Click to make primary"
                     className="h-full w-full cursor-pointer object-cover"
                     onClick={() => setPrimaryIndex(index)}
                   />

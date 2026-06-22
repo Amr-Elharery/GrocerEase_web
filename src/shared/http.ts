@@ -11,9 +11,7 @@ const tokenStorageKey = 'auth_token';
 
 const http: AxiosInstance = axios.create({
   baseURL: apiBaseUrl,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  
 });
 
 const getToken = () => {
@@ -27,6 +25,16 @@ http.interceptors.request.use((config) => {
     config.headers = config.headers ?? {};
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  if (config.data instanceof FormData) {
+    if (config.headers) delete config.headers['Content-Type'];
+  } else {
+    config.headers = config.headers ?? {};
+    if (!config.headers['Content-Type']) {
+      config.headers['Content-Type'] = 'application/json';
+    }
+  }
+
   return config;
 });
 
