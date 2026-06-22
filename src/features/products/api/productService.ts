@@ -1,5 +1,6 @@
 import { z } from "zod";
 import http from "@/shared/http";
+
 export const ProductSchema = z.object({
   id: z.number(),
   product_name: z.string(),
@@ -26,32 +27,52 @@ export const ProductsResponseSchema = z.array(ProductSchema);
 
 export const CreateProductSchema = z.object({
   product_name: z.string().min(2, "Product name must be at least 2 characters"),
-  brand: z.string().min(1, "Brand is required"),
+  category_id: z.coerce.number().int().min(1, "Category is required"),
+  sub_category_id: z.preprocess(
+    (v) => (v === "" || v === null || v === undefined || Number(v) === 0 ? undefined : Number(v)),
+    z.number().int().optional()
+  ),
+  brand: z.string().optional(),
+  unit: z.string().optional(),
   description: z.string().optional(),
-  barcode: z.string().min(1, "Barcode is required"),
-  unit: z.string().min(1, "Unit is required"),
-  category_id: z.string().min(1, "Category is required"),
-  sub_category_id: z.string().min(1, "Sub-category is required"),
 });
 
-export const UpdateProductSchema = z.object({
-  product_name: z.string().min(2, "Product name must be at least 2 characters"),
-  brand: z.string().min(1, "Brand is required"),
-  description: z.string().optional(),
-  barcode: z.string().min(1, "Barcode is required"),
-  unit: z.string().min(1, "Unit is required"),
-  category_id: z.string().min(1, "Category is required"),
-  sub_category_id: z.string().min(1, "Sub-category is required"),
-});
+export const UpdateProductSchema = CreateProductSchema;
 
 export type Product = z.infer<typeof ProductSchema>;
 export type ProductsResponse = Product[];
 export type CreateProductInput = z.infer<typeof CreateProductSchema>;
 export type UpdateProductInput = z.infer<typeof UpdateProductSchema>;
 
+export interface GetProductsParams {
+  limit?: number;
+  offset?: number;
+  search?: string;
+}
+
+function buildProductFormData(input: CreateProductInput, files: File[]): FormData {
+  const fd = new FormData();
+  fd.append("product_name", input.product_name);
+  fd.append("category_id", String(input.category_id));
+  if (input.sub_category_id) {
+    fd.append("sub_category_id", String(input.sub_category_id));
+  }
+  if (input.brand) fd.append("brand", input.brand);
+  if (input.unit) fd.append("unit", input.unit);
+  if (input.description) fd.append("description", input.description);
+  files.forEach((file) => fd.append("files", file));
+  return fd;
+}
+
 export const productService = {
-  async getProducts(): Promise<ProductsResponse> {
-    const res = await http.get("/products/");
+  async getProducts(params: GetProductsParams = {}): Promise<ProductsResponse> {
+    const res = await http.get("/products/", {
+      params: {
+        limit: params.limit ?? 10,
+        offset: params.offset ?? 0,
+        ...(params.search ? { search: params.search } : {}),
+      },
+    });
     const parsed = ProductsResponseSchema.safeParse(res.data);
     if (!parsed.success) throw new Error("Invalid products data");
     return parsed.data;
@@ -64,17 +85,18 @@ export const productService = {
     return parsed.data;
   },
 
-  async createProduct(payload: unknown): Promise<Product> {
+  async createProduct(payload: unknown, files: File[]): Promise<string> {
     const parsed = CreateProductSchema.safeParse(payload);
     if (!parsed.success) throw new Error(parsed.error.issues[0].message);
-    const res = await http.post("/products/", parsed.data);
+    if (files.length === 0) throw new Error("At least one image is required");
+    const res = await http.post("/products/", buildProductFormData(parsed.data, files));
     return res.data;
   },
 
-  async updateProduct(id: string, payload: unknown): Promise<Product> {
+  async updateProduct(id: string, payload: unknown, files: File[] = []): Promise<Product> {
     const parsed = UpdateProductSchema.safeParse(payload);
     if (!parsed.success) throw new Error(parsed.error.issues[0].message);
-    const res = await http.put(`/products/${id}`, parsed.data);
+    const res = await http.put(`/products/${id}`, buildProductFormData(parsed.data, files));
     return res.data;
   },
 

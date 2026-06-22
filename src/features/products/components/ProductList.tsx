@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Plus, MoreVertical } from "lucide-react";
+import { Plus, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { useProducts } from "../hooks/useProducts";
+import { useDeleteProduct } from "../hooks/useDeleteProduct";
 import { Button } from "@/components/ui/button";
 import type { Product } from "../api/productService";
 import { useSearch } from "@/Context/SearchContext";
@@ -39,17 +40,32 @@ function StatCard({ label, value, helper, danger = false }: {
 export default function ProductList() {
   const [page, setPage] = useState(1);
   const { search } = useSearch();
-  const { data: products = [], isLoading } = useProducts(page);
+  const { data: products = [], isLoading } = useProducts(page, search);
   const navigate = useNavigate();
+  const deleteProduct = useDeleteProduct();
 
-  const filtered = products.filter((product) => {
-    const searchValue = search.toLowerCase();
-    return (
-      product.product_name.toLowerCase().includes(searchValue) ||
-      (product.brand ?? "").toLowerCase().includes(searchValue) ||
-      (product.category?.category_name ?? "").toLowerCase().includes(searchValue)
-    );
-  });
+  const [menuId, setMenuId] = useState<number | null>(null);
+  const [confirmTarget, setConfirmTarget] = useState<Product | null>(null);
+
+  const [prevSearch, setPrevSearch] = useState(search);
+  if (search !== prevSearch) {
+    setPrevSearch(search);
+    setPage(1);
+  }
+
+  const filtered = products;
+
+  const handleDelete = (product: Product) => {
+    setMenuId(null);
+    setConfirmTarget(product);
+  };
+
+  const confirmDelete = () => {
+    if (!confirmTarget) return;
+    deleteProduct.mutate(String(confirmTarget.id), {
+      onSettled: () => setConfirmTarget(null),
+    });
+  };
 
   if (isLoading) {
     return (
@@ -62,7 +78,40 @@ export default function ProductList() {
   return (
     <section className="mx-auto max-w-[1420px] space-y-4">
 
-      {/* Breadcrumb */}
+      {confirmTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          onClick={() => !deleteProduct.isPending && setConfirmTarget(null)}>
+          <div className="w-full max-w-sm rounded-xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50">
+                <Trash2 className="h-5 w-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-[#101828]">Delete product</h3>
+              </div>
+            </div>
+            <p className="mt-4 text-sm text-[#475467]">
+              Are you sure you want to delete{" "}
+              <span className="font-semibold text-[#101828]">{confirmTarget.product_name}</span>?
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button type="button" onClick={() => setConfirmTarget(null)} disabled={deleteProduct.isPending}
+                className="h-9 rounded-lg border border-[#DDE7DF] px-4 text-sm font-semibold text-[#5F7168] transition hover:bg-[#F8FAF8] disabled:opacity-40">
+                Cancel
+              </button>
+              <button type="button" onClick={confirmDelete} disabled={deleteProduct.isPending}
+                className="h-9 rounded-lg bg-red-600 px-4 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60">
+                {deleteProduct.isPending ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {menuId !== null && (
+        <div className="fixed inset-0 z-10" onClick={() => setMenuId(null)} />
+      )}
+
       <div className="flex items-center gap-2 text-xs text-[#667085]">
         <span>Catalogue</span>
         <span>›</span>
@@ -132,12 +181,29 @@ export default function ProductList() {
                   {product.sub_category?.category_name ?? "—"}
                 </td>
                 <td className="whitespace-nowrap px-2 py-2.5 text-center text-sm text-[#5F7168]">{product.unit ?? "—"}</td>
-                <td className="px-2 py-2.5 text-right">
+                <td className="relative px-2 py-2.5 text-right">
                   <button type="button"
-                    onClick={() => navigate(`/app/inventory/${product.id}/edit`)}
+                    onClick={() => setMenuId(menuId === product.id ? null : product.id)}
                     className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-[#5F7168] transition hover:bg-[#E8F0EA] hover:text-[#101828]">
                     <MoreVertical className="h-4 w-4" />
                   </button>
+
+                  {menuId === product.id && (
+                    <div className="absolute right-2 top-10 z-20 w-36 overflow-hidden rounded-lg border border-[#DDE7DF] bg-white shadow-[0_10px_24px_rgba(15,23,42,0.12)]">
+                      <button type="button"
+                        onClick={() => { setMenuId(null); navigate(`/app/inventory/${product.id}/edit`); }}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-[#101828] transition hover:bg-[#F8FAF8]">
+                        <Pencil className="h-3.5 w-3.5" />
+                        Edit
+                      </button>
+                      <button type="button"
+                        onClick={() => handleDelete(product)}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50">
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Delete
+                      </button>
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}
@@ -154,8 +220,8 @@ export default function ProductList() {
               className="flex h-8 items-center justify-center rounded-lg border border-[#DDE7DF] px-3 text-xs font-semibold text-[#5F7168] transition hover:bg-[#F8FAF8] disabled:opacity-40">
               Previous
             </button>
-            <button type="button" onClick={() => setPage(p => p + 1)}
-              className="flex h-8 items-center justify-center rounded-lg border border-[#DDE7DF] px-3 text-xs font-semibold text-[#5F7168] transition hover:bg-[#F8FAF8]">
+            <button type="button" onClick={() => setPage(p => p + 1)} disabled={products.length < 10}
+              className="flex h-8 items-center justify-center rounded-lg border border-[#DDE7DF] px-3 text-xs font-semibold text-[#5F7168] transition hover:bg-[#F8FAF8] disabled:opacity-40">
               Next
             </button>
           </div>
