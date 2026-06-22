@@ -41,8 +41,7 @@ type StoreRow = {
 type ImageFile = {
   preview: string;
   file?: File;
-  id?: number; // موجود بس للصور القديمة اللي في الداتابيز
-};
+  id?: number; };
 
 const mockStores: StoreRow[] = [
   { id: "1", name: "Cairo Store", price: 25.99, stock: 150, is_active: true },
@@ -153,7 +152,6 @@ export default function EditProductForm() {
 
   const removeImage = (index: number) => {
     const img = images[index];
-    // لو الصورة موجودة في الداتابيز (ليها id) → امسحها من الباك كمان
     if (img.id !== undefined && id) {
       deleteImage.mutate({ productId: id, imageId: String(img.id) });
     }

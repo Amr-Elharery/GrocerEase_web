@@ -157,14 +157,11 @@ const units = [
 
     if (barcodeConflict) return;
 
-    // الصور مطلوبة على الـ API (files * في الـ POST)
     if (images.length === 0) {
       window.alert("At least one product image is required");
       return;
     }
 
-    // ملاحظة: barcode مش بيتبعت للـ API (مش موجود في الـ endpoint)؛
-    // الـ CreateProductSchema بيشيله تلقائياً (Zod strips unknown keys).
     createProduct.mutate(
       { data: formData, files: images.map((img) => img.file) },
       { onSuccess: () => navigate("/app/inventory") }
