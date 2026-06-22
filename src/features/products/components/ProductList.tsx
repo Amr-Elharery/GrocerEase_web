@@ -112,7 +112,6 @@ export default function ProductList() {
         </div>
       )}
 
-      {/* خلفية شفافة بتقفل القايمة لو دوست بره */}
       {menuId !== null && (
         <div className="fixed inset-0 z-10" onClick={() => setMenuId(null)} />
       )}
