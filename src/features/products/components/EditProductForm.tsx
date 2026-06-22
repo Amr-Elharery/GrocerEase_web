@@ -7,11 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   ChevronDown,
-  ChevronUp,
   Upload,
   X,
   AlertTriangle,
-  Store,
 } from "lucide-react";
 
 const categories = [
@@ -30,26 +28,13 @@ type FormErrors = {
   sub_category_id?: string;
 };
 
-type StoreRow = {
-  id: string;
-  name: string;
-  price: number;
-  stock: number;
-  is_active: boolean;
-};
+
 
 type ImageFile = {
   preview: string;
   file?: File;
   id?: number; };
 
-const mockStores: StoreRow[] = [
-  { id: "1", name: "Cairo Store", price: 25.99, stock: 150, is_active: true },
-  { id: "2", name: "Alexandria Store", price: 24.99, stock: 80, is_active: true },
-  { id: "3", name: "Giza Store", price: 26.5, stock: 0, is_active: false },
-  { id: "4", name: "Mansoura Store", price: 25.0, stock: 45, is_active: true },
-  { id: "5", name: "Aswan Store", price: 27.0, stock: 20, is_active: false },
-];
 
 export default function EditProductForm() {
   const { id } = useParams<{ id: string }>();
@@ -76,8 +61,6 @@ export default function EditProductForm() {
   const [images, setImages] = useState<ImageFile[]>([]);
   const [primaryIndex, setPrimaryIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [storesOpen, setStoresOpen] = useState(true);
-  const [stores, setStores] = useState<StoreRow[]>(mockStores);
   const [hasChanges, setHasChanges] = useState(false);
   const [unitOpen, setUnitOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
@@ -162,16 +145,12 @@ export default function EditProductForm() {
   const handleSetPrimary = (index: number) => {
     setPrimaryIndex(index);
     const img = images[index];
-    // لو صورة موجودة في الداتابيز → خليها رئيسية في الباك
     if (img.id !== undefined && id) {
       makePrimary.mutate({ productId: id, imageId: String(img.id) });
     }
   };
 
-  const handleStoreChange = (storeId: string, field: keyof StoreRow, value: string | boolean | number) => {
-    setStores(prev => prev.map(s => s.id === storeId ? { ...s, [field]: value } : s));
-  };
-
+  
   const handleNavigateAway = () => {
     if (hasChanges && !window.confirm("You have unsaved changes. Are you sure you want to leave?")) return;
     navigate("/app/inventory");
@@ -240,11 +219,7 @@ export default function EditProductForm() {
         <div className="flex items-center gap-6 text-xs text-[#667085]">
           <span className="font-semibold text-[#5F7168]">ID: {product?.id}</span>
         </div>
-        <button type="button" onClick={() => setStoresOpen(true)}
-          className="flex items-center gap-1.5 text-xs font-semibold text-[#006B22] hover:underline">
-          <Store className="h-3.5 w-3.5" />
-          Store Inventory
-        </button>
+        
       </div>
 
       {/* Main Layout */}
@@ -417,59 +392,7 @@ export default function EditProductForm() {
         </div>
       </div>
 
-      {/* Store Inventory & Pricing */}
-      <div className="overflow-hidden rounded-xl border border-[#DDE7DF] bg-white shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
-        <button type="button" className="flex w-full items-center justify-between px-4 py-2.5 transition hover:bg-[#F8FAF8]"
-          onClick={() => setStoresOpen(prev => !prev)}>
-          <div className="flex items-center gap-2">
-            <span className="text-[15px] font-bold text-[#101828]">Store Inventory & Pricing</span>
-            <span className="text-xs text-[#667085]">({stores.length} stores)</span>
-          </div>
-          {storesOpen ? <ChevronUp className="h-4 w-4 text-[#5F7168]" /> : <ChevronDown className="h-4 w-4 text-[#5F7168]" />}
-        </button>
-
-        {storesOpen && (
-          <table className="w-full table-fixed text-sm">
-            <thead>
-              <tr className="border-y border-[#DDE7DF] bg-[#F8FAF8] text-[11px] font-semibold uppercase tracking-wide text-[#5F7168]">
-                <th className="w-[35%] px-4 py-2 text-left">Store Name</th>
-                <th className="w-[22%] px-4 py-2 text-left">Price</th>
-                <th className="w-[25%] px-4 py-2 text-left">Stock</th>
-                <th className="w-[18%] px-4 py-2 text-left">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#DDE7DF]">
-              {stores.map(store => (
-                <tr key={store.id} className="transition hover:bg-[#F8FAF8]">
-                  <td className="px-4 py-1.5 font-semibold text-[#101828]">{store.name}</td>
-                  <td className="px-4 py-1.5">
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs text-[#667085]">EGP</span>
-                      <input type="number" value={store.price} step="0.01"
-                        onChange={e => handleStoreChange(store.id, "price", parseFloat(e.target.value))}
-                        className="h-7 w-24 rounded-lg border border-[#DDE7DF] bg-[#F8FAF8] px-2 text-sm outline-none focus:border-[#2D6A4F]" />
-                    </div>
-                  </td>
-                  <td className="px-4 py-1.5">
-                    <div className="flex items-center gap-2">
-                      <input type="number" value={store.stock}
-                        onChange={e => handleStoreChange(store.id, "stock", parseInt(e.target.value))}
-                        className="h-7 w-24 rounded-lg border border-[#DDE7DF] bg-[#F8FAF8] px-2 text-sm outline-none focus:border-[#2D6A4F]" />
-                      <span className="text-xs text-[#667085]">units</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-1.5">
-                    <button type="button" onClick={() => handleStoreChange(store.id, "is_active", !store.is_active)}
-                      className={`relative h-5 w-10 rounded-full transition-colors ${store.is_active ? "bg-[#006B22]" : "bg-[#C7CEC9]"}`}>
-                      <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${store.is_active ? "left-5" : "left-0.5"}`} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+     
     </section>
   );
 }

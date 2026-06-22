@@ -53,6 +53,10 @@ export default function ProductList() {
     setPage(1);
   }
 
+  if (!isLoading && products.length === 0 && page > 1) {
+    setPage((p) => p - 1);
+  }
+
   const filtered = products;
 
   const handleDelete = (product: Product) => {
@@ -108,6 +112,7 @@ export default function ProductList() {
         </div>
       )}
 
+      {/* خلفية شفافة بتقفل القايمة لو دوست بره */}
       {menuId !== null && (
         <div className="fixed inset-0 z-10" onClick={() => setMenuId(null)} />
       )}
