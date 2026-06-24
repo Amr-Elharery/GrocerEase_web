@@ -10,6 +10,7 @@ import {
   ChevronDown,
   Check,
 } from "lucide-react";
+import ChangePassword from "@/features/auth/components/ChangePassword";
 
 function ZadLogo({ small = false }: { small?: boolean }) {
   return (
@@ -200,17 +201,21 @@ export default function Settings() {
   const [brandColor, setBrandColor] = useState("#1B4332");
 
   return (
-    <section className="mx-auto max-w-[1420px] space-y-3">
-      <div>
-        <h1 className="text-[24px] font-bold tracking-tight text-[#101828]">
-          System Settings
-        </h1>
+   <section className="mx-auto max-w-[1420px] space-y-3">
+  <div className="flex items-start justify-between">
+    <div>
+      <h1 className="text-[24px] font-bold tracking-tight text-[#101828]">
+        System Settings
+      </h1>
 
-        <p className="mt-1 text-[15px] text-[#667085]">
-          Manage global configurations, security protocols, and platform visual
-          identity.
-        </p>
-      </div>
+      <p className="mt-1 text-[15px] text-[#667085]">
+        Manage global configurations, security protocols, and platform visual
+        identity.
+      </p>
+    </div>
+
+    <ChangePassword />
+  </div>
 
       <div className="grid grid-cols-1 gap-3 xl:grid-cols-[1fr_420px] xl:items-stretch">
         <SectionCard className="min-h-[355px] p-5">
@@ -436,6 +441,8 @@ export default function Settings() {
           </div>
         </SectionCard>
       </div>
+
+     
 
       <SectionCard className="p-5">
         <div className="mb-5 flex items-center justify-between">
