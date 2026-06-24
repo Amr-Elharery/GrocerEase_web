@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Outlet, Link, useLocation } from "react-router";
 import { useLogout } from "@/features/auth/hooks/useAuth";
+import { useProfile } from "@/features/profile/hooks/useProfile";
 import { Leaf, LayoutDashboard, Package, ShoppingCart, BarChart, HelpCircle, LogOut, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useSearch } from "@/Context/SearchContext";
 
@@ -9,6 +10,9 @@ export default function StoreLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const { search, setSearch } = useSearch();
   const handleLogout = useLogout();
+  const { data: user } = useProfile();
+
+  const initial = (user?.full_name || "S").charAt(0).toUpperCase();
 
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/store/home" },
@@ -108,7 +112,7 @@ export default function StoreLayout() {
             <div className="h-6 w-px bg-border" />
             <Link to="/store/profile"
               className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-sm font-bold text-primary-foreground">
-              S
+              {initial}
             </Link>
           </div>
         </header>

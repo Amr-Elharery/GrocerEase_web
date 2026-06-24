@@ -1,13 +1,26 @@
+import http from "@/shared/http";
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  phone: string;
+  full_name: string;
+  roles: string[];
+}
+
+export interface UpdateProfilePayload {
+  full_name: string;
+  phone: string;
+}
+
 export const profileService = {
-  async getProfile() {
-    return {
-      name: "Raghd Ahmed",
-      email: "raghd@zad.com",
-      phone: "01000000000"
-    };
+  async getProfile(): Promise<UserProfile> {
+    const res = await http.get("/auth/me");
+    return res.data;
   },
 
-  async updateProfile(payload: { name: string; phone: string }) {
-    return { ...payload, email: "raghd@zad.com" };
+  async updateProfile(payload: UpdateProfilePayload) {
+    const res = await http.put("/auth/profile", payload);
+    return res.data;
   },
 };

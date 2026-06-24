@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router';
 import { useAuth } from '@/Context/AuthContext';
 import { authService } from '../api/authService';
@@ -6,7 +6,7 @@ import { authService } from '../api/authService';
 function getJwtExpiry(token: string): number {
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
-    if (payload.exp) return payload.exp * 1000;
+    if (payload.exp) return payload.exp * 1000; 
   } catch {
     /* ignore */
   }
@@ -16,11 +16,14 @@ function getJwtExpiry(token: string): number {
 export function useLogin() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const qc = useQueryClient();
 
   return useMutation({
     mutationFn: (data: { email: string; password: string }) =>
       authService.login(data.email, data.password),
     onSuccess: (res) => {
+      qc.clear();
+
       login(res.access_token, getJwtExpiry(res.access_token));
       localStorage.setItem('refresh_token', res.refresh_token);
 
@@ -70,11 +73,13 @@ export function useResetPassword() {
 export function useLogout() {
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const qc = useQueryClient();
 
   return () => {
     authService.logout().catch(() => {});
     logout();
     localStorage.removeItem('refresh_token');
+    qc.clear(); 
     navigate('/auth/login');
   };
 }

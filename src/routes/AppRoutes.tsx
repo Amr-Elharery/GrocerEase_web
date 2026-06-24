@@ -74,6 +74,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="/store/inventory" replace /> },
       { path: "home", element: <ComingSoon page="Store Dashboard" /> },
+      { path: "profile", element: <Profile /> },
       { path: "inventory", element: <ShopInventory /> },
       { path: "orders", element: <StoreOrders /> },
       { path: "reports", element: <ComingSoon page="Reports" /> },

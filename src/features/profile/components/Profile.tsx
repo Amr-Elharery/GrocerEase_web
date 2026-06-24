@@ -13,19 +13,30 @@ import {
   BadgeCheck,
 } from "lucide-react";
 
+function roleLabel(role?: string): string {
+  if (!role) return "User";
+  const r = role.toLowerCase();
+  if (r === "admin") return "Admin";
+  if (r === "vendor" || r.includes("store")) return "Store Manager";
+  return role.charAt(0).toUpperCase() + role.slice(1);
+}
+
 export default function Profile() {
   const { data: user, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
 
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
+    full_name: "",
     phone: "",
   });
 
+  const primaryRole = user?.roles?.[0];
+  const label = roleLabel(primaryRole);
+
   const handleEdit = () => {
     setFormData({
-      name: user?.name ?? "",
+      full_name: user?.full_name ?? "",
       phone: user?.phone ?? "",
     });
     setEditMode(true);
@@ -45,7 +56,7 @@ export default function Profile() {
   const handleCancel = () => {
     setEditMode(false);
     setFormData({
-      name: user?.name ?? "",
+      full_name: user?.full_name ?? "",
       phone: user?.phone ?? "",
     });
   };
@@ -69,7 +80,7 @@ export default function Profile() {
           <div className="relative z-10 flex items-start justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#D8F3DC]">
-                ZAD Admin Portal
+                ZAD {label} Portal
               </p>
 
               <h1 className="mt-2 text-2xl font-black tracking-tight text-white">
@@ -126,7 +137,7 @@ export default function Profile() {
               </div>
 
               <h2 className="mt-3 text-lg font-black text-[#1a1f2e]">
-                {user?.name}
+                {user?.full_name}
               </h2>
 
               <p className="mt-1 text-sm text-[#6B7A70]">{user?.email}</p>
@@ -139,7 +150,7 @@ export default function Profile() {
 
                 <span className="inline-flex items-center gap-2 rounded-full bg-[#E6F3EB] px-3 py-1 text-xs font-bold text-[#1B4332]">
                   <BadgeCheck className="h-4 w-4" />
-                  Admin
+                  {label}
                 </span>
               </div>
             </div>
@@ -147,7 +158,7 @@ export default function Profile() {
             <div className="mt-4 space-y-2 border-t border-[#E2E8E3] pt-4">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-[#6B7A70]">Account Type</span>
-                <span className="font-bold text-[#1a1f2e]">Admin</span>
+                <span className="font-bold text-[#1a1f2e]">{label}</span>
               </div>
 
               <div className="flex items-center justify-between text-sm">
@@ -184,14 +195,14 @@ export default function Profile() {
 
                 {editMode ? (
                   <Input
-                    name="name"
-                    value={formData.name}
+                    name="full_name"
+                    value={formData.full_name}
                     onChange={handleChange}
                     className="h-10 rounded-xl border-[#DFE7E1] bg-white text-sm focus-visible:ring-[#52B788]/30"
                   />
                 ) : (
                   <div className="flex h-10 items-center rounded-xl border border-[#DFE7E1] bg-[#F8FAF8] px-4 text-sm font-medium text-[#1a1f2e]">
-                    {user?.name}
+                    {user?.full_name}
                   </div>
                 )}
               </div>
@@ -234,7 +245,7 @@ export default function Profile() {
                 </label>
 
                 <div className="flex h-10 items-center rounded-xl border border-[#DFE7E1] bg-[#F8FAF8] px-4 text-sm font-medium text-[#1a1f2e]">
-                  System Administrator
+                  {user?.roles?.map(roleLabel).join(", ") || "N/A"}
                 </div>
               </div>
             </div>
@@ -247,7 +258,7 @@ export default function Profile() {
 
                 <div>
                   <p className="text-sm font-bold text-[#1a1f2e]">
-                    Secure Admin Account
+                    Secure {label} Account
                   </p>
                   <p className="mt-1 text-xs leading-5 text-[#6B7A70]">
                     Keep your contact information updated to maintain secure

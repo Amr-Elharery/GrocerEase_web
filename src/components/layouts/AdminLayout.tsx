@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 
 import { useLogout } from "@/features/auth/hooks/useAuth";
+import { useProfile } from "@/features/profile/hooks/useProfile";
 import { useSearch } from "@/Context/SearchContext";
 
 type NavItem = {
@@ -53,6 +54,10 @@ export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const { search, setSearch } = useSearch();
   const handleLogout = useLogout();
+  const { data: user } = useProfile();
+
+  const displayName = user?.full_name || "Admin";
+  const initial = (user?.full_name || "A").charAt(0).toUpperCase();
 
   const navItems: NavItem[] = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/app/home" },
@@ -186,11 +191,11 @@ export default function AppLayout() {
               className="flex h-9 items-center gap-2 rounded-full px-2 pr-3 transition hover:bg-[#F3F6F2]"
             >
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#2D6A4F] text-sm font-bold text-white">
-                A
+                {initial}
               </div>
 
               <span className="whitespace-nowrap text-sm font-bold text-[#1a1f2e]">
-                Admin
+                {displayName}
               </span>
             </Link>
           </div>
