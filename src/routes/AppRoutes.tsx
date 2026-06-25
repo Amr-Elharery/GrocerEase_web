@@ -17,9 +17,6 @@ import ResetPassword from "@/features/auth/components/ResetPassword";
 import Home from "@/features/auth/components/Home";
 import Profile from "@/features/profile/components/Profile";
 import OrderList from "@/features/orders/components/OrderList";
-import Reports from "@/features/reports/components/Reports";
-import Settings from "@/features/settings/components/Settings";
-import Support from "@/features/support/components/Support";//#endregion
 import StoreOrders from  "@/features/orders/components/StoreOrders";
 
 const ComingSoon = ({ page }: { page: string }) => (
@@ -29,7 +26,10 @@ const ComingSoon = ({ page }: { page: string }) => (
 );
 
 const router = createBrowserRouter([
-  { path: "/", element: <Home /> },
+{
+  path: "/",
+  element: <Navigate to="/auth/login" replace />,
+},
   {
     path: "/auth",
     element: <AuthLayout />,
@@ -59,10 +59,8 @@ const router = createBrowserRouter([
       { path: "submissions", element: <SubmissionList /> },
       { path: "users", element: <UserManagement /> },
 
-{ path: "settings", element: <Settings /> },
 { path: "orders", element: <OrderList /> },
-{ path: "reports", element: <Reports /> }, 
-{ path: "support", element: <Support /> },   ],
+   ],
   },
   {
     path: "/store",
@@ -74,6 +72,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="/store/inventory" replace /> },
       { path: "home", element: <ComingSoon page="Store Dashboard" /> },
+      { path: "profile", element: <Profile /> },
       { path: "inventory", element: <ShopInventory /> },
       { path: "orders", element: <StoreOrders /> },
       { path: "reports", element: <ComingSoon page="Reports" /> },

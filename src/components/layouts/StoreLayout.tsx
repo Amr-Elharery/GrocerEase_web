@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Outlet, Link, useLocation } from "react-router";
 import { useLogout } from "@/features/auth/hooks/useAuth";
-import { Leaf, LayoutDashboard, Package, ShoppingCart, BarChart, HelpCircle, LogOut, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { useProfile } from "@/features/profile/hooks/useProfile";
+import { Leaf, LayoutDashboard, Package, ShoppingCart, LogOut, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useSearch } from "@/Context/SearchContext";
 
 export default function StoreLayout() {
@@ -9,12 +10,14 @@ export default function StoreLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const { search, setSearch } = useSearch();
   const handleLogout = useLogout();
+  const { data: user } = useProfile();
+
+  const initial = (user?.full_name || "S").charAt(0).toUpperCase();
 
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/store/home" },
     { icon: Package, label: "Inventory", path: "/store/inventory" },
     { icon: ShoppingCart, label: "Orders", path: "/store/orders" },
-    { icon: BarChart, label: "Reports", path: "/store/reports" },
   ];
 
   return (
@@ -62,13 +65,7 @@ export default function StoreLayout() {
 
         {/* Bottom */}
         <div className="px-2 pt-4 border-t border-[#2D6A4F] space-y-1">
-          <Link to="/store/profile"
-            className={`flex items-center gap-3 px-3 py-2.5 rounded text-green-200 hover:bg-[#2D6A4F]/50 hover:text-white transition-colors ${collapsed ? "justify-center" : ""}`}
-            title={collapsed ? "Support" : undefined}
-          >
-            <HelpCircle className="w-4 h-4 shrink-0" />
-            {!collapsed && <span className="text-xs font-semibold uppercase tracking-wide">Support</span>}
-          </Link>
+          
           <button onClick={handleLogout}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded text-green-200 hover:bg-[#2D6A4F]/50 hover:text-white transition-colors ${collapsed ? "justify-center" : ""}`}
             title={collapsed ? "Sign Out" : undefined}
@@ -108,7 +105,7 @@ export default function StoreLayout() {
             <div className="h-6 w-px bg-border" />
             <Link to="/store/profile"
               className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-sm font-bold text-primary-foreground">
-              S
+              {initial}
             </Link>
           </div>
         </header>

@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { Outlet, Link, useLocation } from "react-router";
-import { Settings as SettingsIcon } from "lucide-react";
 
 import {
   Search,
   LayoutDashboard,
   Package,
   Warehouse,
-  HelpCircle,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -15,10 +13,10 @@ import {
   ClipboardList,
   Users,
   Bell,
-  BarChart3,
 } from "lucide-react";
 
 import { useLogout } from "@/features/auth/hooks/useAuth";
+import { useProfile } from "@/features/profile/hooks/useProfile";
 import { useSearch } from "@/Context/SearchContext";
 
 type NavItem = {
@@ -53,6 +51,10 @@ export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const { search, setSearch } = useSearch();
   const handleLogout = useLogout();
+  const { data: user } = useProfile();
+
+  const displayName = user?.full_name || "Admin";
+  const initial = (user?.full_name || "A").charAt(0).toUpperCase();
 
   const navItems: NavItem[] = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/app/home" },
@@ -61,8 +63,6 @@ export default function AppLayout() {
     { icon: ClipboardList, label: "Submissions", path: "/app/submissions" },
     { icon: Users, label: "Users", path: "/app/users" },
     { icon: Warehouse, label: "Orders", path: "/app/orders" },
-    { icon: BarChart3, label: "Reports", path: "/app/reports" },
-{ icon: SettingsIcon, label: "Settings", path: "/app/settings" },
   ];
 
   return (
@@ -105,17 +105,7 @@ export default function AppLayout() {
 
         {/* Bottom Navigation */}
         <div className="mt-auto space-y-2 border-t border-white/10 px-3 pt-4">
-          <Link
-            to="/app/support"
-            title={collapsed ? "Support" : undefined}
-            className={`flex items-center gap-3 rounded-xl px-4 py-1.5 text-sm font-semibold text-[#D8F3DC] transition-all hover:bg-white/10 hover:text-white ${
-              collapsed ? "justify-center" : ""
-            }`}
-          >
-            <HelpCircle className="h-5 w-5 shrink-0" />
-            {!collapsed && <span>Support</span>}
-          </Link>
-
+        
           <button
             type="button"
             onClick={handleLogout}
@@ -186,11 +176,11 @@ export default function AppLayout() {
               className="flex h-9 items-center gap-2 rounded-full px-2 pr-3 transition hover:bg-[#F3F6F2]"
             >
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#2D6A4F] text-sm font-bold text-white">
-                A
+                {initial}
               </div>
 
               <span className="whitespace-nowrap text-sm font-bold text-[#1a1f2e]">
-                Admin
+                {displayName}
               </span>
             </Link>
           </div>

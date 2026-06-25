@@ -17,6 +17,18 @@ type LoginErrors = {
   password?: string;
 };
 
+function readApiError(err: unknown): string {
+  const detail = (err as { data?: { detail?: unknown } })?.data?.detail;
+  if (typeof detail === "string") {
+    if (detail.toLowerCase().includes("invalid")) return "Wrong email or password.";
+    return detail;
+  }
+  if (Array.isArray(detail) && (detail[0] as { msg?: string })?.msg) {
+    return (detail[0] as { msg: string }).msg;
+  }
+  return "Something went wrong. Please try again.";
+}
+
 const ZADLogo = () => (
   <div className="flex items-center justify-center gap-1 mb-4">
     <svg width="36" height="44" viewBox="0 0 32 38" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -37,6 +49,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [errors, setErrors] = useState<LoginErrors>({});
+  const [serverError, setServerError] = useState("");
   const login = useLogin();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -52,7 +65,10 @@ export default function Login() {
       return;
     }
     setErrors({});
-    login.mutate(result.data);
+    setServerError("");
+    login.mutate(result.data, {
+      onError: (err) => setServerError(readApiError(err)),
+    });
   };
 
   return (
@@ -86,14 +102,15 @@ export default function Login() {
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input id="password" type={show ? "text" : "password"} placeholder="Enter your password"
               value={password}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-              className={`pl-9 pr-10 ${errors.password ? "border-destructive" : ""}`} />
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setPassword(e.target.value); setServerError(""); }}
+              className={`pl-9 pr-10 ${errors.password || serverError ? "border-destructive" : ""}`} />
             <button type="button" onClick={() => setShow(!show)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
               {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
           {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
+          {serverError && <p className="text-xs text-destructive">{serverError}</p>}
         </div>
 
         <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">

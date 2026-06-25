@@ -4,12 +4,13 @@ import { useRegister } from "@/features/auth/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Phone } from "lucide-react";
 import { z } from "zod";
 
 const signUpSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
+  phone: z.string().min(8, "Invalid phone number"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -20,9 +21,18 @@ const signUpSchema = z.object({
 type SignUpErrors = {
   name?: string;
   email?: string;
+  phone?: string;
   password?: string;
   confirmPassword?: string;
 };
+
+function toE164(raw: string): string {
+  const trimmed = raw.replace(/\s|-/g, ""); 
+  if (trimmed.startsWith("+")) return trimmed; 
+  if (trimmed.startsWith("00")) return "+" + trimmed.slice(2); 
+  if (trimmed.startsWith("0")) return "+20" + trimmed.slice(1); 
+  return "+20" + trimmed; 
+}
 
 const ZADLogo = () => (
   <div className="flex items-center justify-center gap-1 mb-4">
@@ -42,16 +52,29 @@ const ZADLogo = () => (
 export default function SignUp() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [accountType, setAccountType] = useState<"admin" | "vendor">("admin");
   const [show, setShow] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [errors, setErrors] = useState<SignUpErrors>({});
+  const [serverError, setServerError] = useState("");
   const register = useRegister();
+
+  function readApiError(err: unknown): string {
+    const detail = (err as { data?: { detail?: unknown } })?.data?.detail;
+    if (typeof detail === "string") {
+      if (detail.toLowerCase().includes("already")) return "This email is already registered.";
+      return detail;
+    }
+    if (Array.isArray(detail) && detail[0]?.msg) return detail[0].msg;
+    return "Something went wrong. Please try again.";
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const result = signUpSchema.safeParse({ name, email, password, confirmPassword });
+    const result = signUpSchema.safeParse({ name, email, phone, password, confirmPassword });
     if (!result.success) {
       const fieldErrors: SignUpErrors = {};
       result.error.issues.forEach((err) => {
@@ -62,7 +85,17 @@ export default function SignUp() {
       return;
     }
     setErrors({});
-    register.mutate({ name, email, password });
+    setServerError("");
+    register.mutate({
+      full_name: name,
+      email,
+      phone: toE164(phone),
+      password,
+      confirmPassword,
+      accountType,
+    }, {
+      onError: (err) => setServerError(readApiError(err)),
+    });
   };
 
   return (
@@ -74,6 +107,28 @@ export default function SignUp() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-1.5">
+          <Label>Account Type</Label>
+          <div className="grid grid-cols-2 gap-2">
+            <button type="button" onClick={() => setAccountType("admin")}
+              className={`h-10 rounded-lg border text-sm font-semibold transition ${
+                accountType === "admin"
+                  ? "border-[#1B4332] bg-[#1B4332] text-white"
+                  : "border-[#DDE7DF] bg-white text-[#5F7168] hover:bg-[#F8FAF8]"
+              }`}>
+              Admin
+            </button>
+            <button type="button" onClick={() => setAccountType("vendor")}
+              className={`h-10 rounded-lg border text-sm font-semibold transition ${
+                accountType === "vendor"
+                  ? "border-[#1B4332] bg-[#1B4332] text-white"
+                  : "border-[#DDE7DF] bg-white text-[#5F7168] hover:bg-[#F8FAF8]"
+              }`}>
+              Store Manager
+            </button>
+          </div>
+        </div>
+
         <div className="space-y-1.5">
           <Label htmlFor="name">Full Name</Label>
           <div className="relative">
@@ -90,10 +145,22 @@ export default function SignUp() {
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input id="email" type="email" placeholder="you@example.com" value={email}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-              className={`pl-9 ${errors.email ? "border-destructive" : ""}`} />
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setEmail(e.target.value); setServerError(""); }}
+              className={`pl-9 ${errors.email || serverError ? "border-destructive" : ""}`} />
           </div>
           {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+          {serverError && <p className="text-xs text-destructive">{serverError}</p>}
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="phone">Phone Number</Label>
+          <div className="relative">
+            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input id="phone" type="tel" placeholder="e.g. 01012345678" value={phone}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)}
+              className={`pl-9 ${errors.phone ? "border-destructive" : ""}`} />
+          </div>
+          {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
         </div>
 
         <div className="space-y-1.5">
