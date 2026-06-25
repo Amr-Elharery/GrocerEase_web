@@ -13,6 +13,7 @@ import {
   ClipboardList,
   Users,
   Bell,
+  Store,
 } from "lucide-react";
 
 import { useLogout } from "@/features/auth/hooks/useAuth";
@@ -62,6 +63,7 @@ export default function AppLayout() {
     { icon: Tag, label: "Categories", path: "/app/categories" },
     { icon: ClipboardList, label: "Submissions", path: "/app/submissions" },
     { icon: Users, label: "Users", path: "/app/users" },
+    { icon: Store, label: "Shops", path: "/app/shops" },
     { icon: Warehouse, label: "Orders", path: "/app/orders" },
   ];
 

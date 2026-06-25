@@ -2,13 +2,14 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router';
 import { useAuth } from '@/Context/AuthContext';
 import { authService } from '../api/authService';
+import { shopApi } from '@/features/shop/api/shopApi';
 
 function getJwtExpiry(token: string): number {
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
     if (payload.exp) return payload.exp * 1000; 
   } catch {
-    /* ignore */
+    /*  */
   }
   return Date.now() + 24 * 60 * 60 * 1000;
 }
@@ -21,7 +22,7 @@ export function useLogin() {
   return useMutation({
     mutationFn: (data: { email: string; password: string }) =>
       authService.login(data.email, data.password),
-    onSuccess: (res) => {
+    onSuccess: async (res) => {
       qc.clear();
 
       login(res.access_token, getJwtExpiry(res.access_token));
@@ -31,15 +32,29 @@ export function useLogin() {
       const isStore = roles.some(
         (r) => r.toLowerCase().includes('store') || r.toLowerCase().includes('vendor')
       );
-      navigate(isStore ? '/store/inventory' : '/app/home');
+
+      if (!isStore) {
+        navigate('/app/home');
+        return;
+      }
+
+      try {
+        await shopApi.getMyShop(); 
+        navigate('/store/inventory');
+      } catch {
+        navigate('/store/create-shop');
+      }
     },
   });
 }
 
 export function useRegister() {
   const navigate = useNavigate();
+  const { login } = useAuth();
+  const qc = useQueryClient();
+
   return useMutation({
-    mutationFn: (data: {
+    mutationFn: async (data: {
       full_name: string;
       email: string;
       phone: string;
@@ -48,9 +63,25 @@ export function useRegister() {
       accountType: 'admin' | 'vendor';
     }) => {
       const { accountType, ...payload } = data;
-      return authService.register(payload, accountType);
+      await authService.register(payload, accountType);
+      return { accountType, email: data.email, password: data.password };
     },
-    onSuccess: () => navigate('/auth/login'),
+    onSuccess: async ({ accountType, email, password }) => {
+      if (accountType === 'admin') {
+        navigate('/auth/login');
+        return;
+      }
+
+      try {
+        const res = await authService.login(email, password);
+        qc.clear();
+        login(res.access_token, getJwtExpiry(res.access_token));
+        localStorage.setItem('refresh_token', res.refresh_token);
+        navigate('/store/create-shop');
+      } catch {
+        navigate('/auth/login');
+      }
+    },
   });
 }
 
@@ -76,7 +107,7 @@ export function useLogout() {
   const qc = useQueryClient();
 
   return () => {
-    authService.logout().catch(() => {});
+    authService.logout().catch(() => {/*    */});
     logout();
     localStorage.removeItem('refresh_token');
     qc.clear(); 
