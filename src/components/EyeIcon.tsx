@@ -5,7 +5,7 @@
  * Props:
  * - open: boolean → true = eye open (password visible)
  */
-export default function EyeIcon({ open }) {
+export default function EyeIcon({ open }: { open: boolean }) {
   if (open) {
     return (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
