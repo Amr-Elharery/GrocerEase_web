@@ -90,15 +90,14 @@ export default function ChangePassword() {
 
   return (
     <>
-     <button
+<button
   type="button"
   onClick={() => setOpen(true)}
-  className="ml-auto flex h-10 items-center gap-2 rounded-lg bg-[#006B22] px-4 text-sm font-semibold text-white transition hover:bg-[#00571C]"
+  className="flex items-center gap-1.5 rounded-xl bg-white px-3 py-2 text-xs font-bold text-[#1B4332] hover:bg-[#E6F3EB]"
 >
-  <KeyRound className="h-4 w-4" />
+  <KeyRound className="h-3.5 w-3.5" />
   Change Password
 </button>
-
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
           onClick={close}>

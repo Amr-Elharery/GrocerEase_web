@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { Outlet, Link, useLocation } from "react-router";
-import { Settings as SettingsIcon } from "lucide-react";
 
 import {
   Search,
   LayoutDashboard,
   Package,
   Warehouse,
-  HelpCircle,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -15,7 +13,6 @@ import {
   ClipboardList,
   Users,
   Bell,
-  BarChart3,
 } from "lucide-react";
 
 import { useLogout } from "@/features/auth/hooks/useAuth";
@@ -66,8 +63,6 @@ export default function AppLayout() {
     { icon: ClipboardList, label: "Submissions", path: "/app/submissions" },
     { icon: Users, label: "Users", path: "/app/users" },
     { icon: Warehouse, label: "Orders", path: "/app/orders" },
-    { icon: BarChart3, label: "Reports", path: "/app/reports" },
-{ icon: SettingsIcon, label: "Settings", path: "/app/settings" },
   ];
 
   return (
@@ -110,17 +105,7 @@ export default function AppLayout() {
 
         {/* Bottom Navigation */}
         <div className="mt-auto space-y-2 border-t border-white/10 px-3 pt-4">
-          <Link
-            to="/app/support"
-            title={collapsed ? "Support" : undefined}
-            className={`flex items-center gap-3 rounded-xl px-4 py-1.5 text-sm font-semibold text-[#D8F3DC] transition-all hover:bg-white/10 hover:text-white ${
-              collapsed ? "justify-center" : ""
-            }`}
-          >
-            <HelpCircle className="h-5 w-5 shrink-0" />
-            {!collapsed && <span>Support</span>}
-          </Link>
-
+        
           <button
             type="button"
             onClick={handleLogout}

@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   BadgeCheck,
 } from "lucide-react";
+import ChangePassword from "@/features/auth/components/ChangePassword";
 
 function roleLabel(role?: string): string {
   if (!role) return "User";
@@ -91,39 +92,43 @@ export default function Profile() {
                 Manage your account information and access settings.
               </p>
             </div>
+    
+          <div className="flex shrink-0 items-center gap-2">
+  <ChangePassword />
 
-            {!editMode ? (
-              <Button
-                type="button"
-                onClick={handleEdit}
-                className="shrink-0 gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-[#1B4332] hover:bg-[#E6F3EB]"
-              >
-                <Pencil className="h-4 w-4" />
-                Edit Profile
-              </Button>
-            ) : (
-              <div className="flex shrink-0 gap-2">
-                <Button
-                  type="button"
-                  onClick={handleSave}
-                  disabled={updateProfile.isPending}
-                  className="gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-[#1B4332] hover:bg-[#E6F3EB]"
-                >
-                  <Save className="h-4 w-4" />
-                  {updateProfile.isPending ? "Saving..." : "Save"}
-                </Button>
+  {!editMode ? (
+    <Button
+      type="button"
+      onClick={handleEdit}
+      className="gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-[#1B4332] hover:bg-[#E6F3EB]"
+    >
+      <Pencil className="h-4 w-4" />
+      Edit Profile
+    </Button>
+  ) : (
+    <>
+      <Button
+        type="button"
+        onClick={handleSave}
+        disabled={updateProfile.isPending}
+        className="gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-[#1B4332] hover:bg-[#E6F3EB]"
+      >
+        <Save className="h-4 w-4" />
+        {updateProfile.isPending ? "Saving..." : "Save"}
+      </Button>
 
-                <Button
-                  type="button"
-                  onClick={handleCancel}
-                  variant="outline"
-                  className="gap-2 rounded-xl border-white/40 bg-white/10 px-5 py-2.5 text-sm font-bold text-white hover:bg-white/20"
-                >
-                  <X className="h-4 w-4" />
-                  Cancel
-                </Button>
-              </div>
-            )}
+      <Button
+        type="button"
+        onClick={handleCancel}
+        variant="outline"
+        className="gap-2 rounded-xl border-white/40 bg-white/10 px-5 py-2.5 text-sm font-bold text-white hover:bg-white/20"
+      >
+        <X className="h-4 w-4" />
+        Cancel
+      </Button>
+    </>
+  )}
+</div>
           </div>
         </div>
 
