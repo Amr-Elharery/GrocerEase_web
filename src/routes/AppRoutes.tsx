@@ -9,7 +9,12 @@ import UserManagement from "@/features/users/components/UserManagement";
 import AppLayout from "@/components/layouts/AdminLayout";
 import StoreLayout from "@/components/layouts/StoreLayout";
 import ShopInventory from "@/features/shop/components/ShopInventory";
+import CreateShopForm from "@/features/shop/components/CreateShopForm";
+import EditShopForm from "@/features/shop/components/EditShopForm";
+import ShopsList from "@/features/shop/components/admin/ShopsList";
+import ShopDetails from "@/features/shop/components/admin/ShopDetails";
 import AuthGuard from "@/components/AuthGuard";
+import ShopGuard from "@/components/ShopGuard";
 import Login from "@/features/auth/components/Login";
 import SignUp from "@/features/auth/components/SignUp";
 import ForgotPassword from "@/features/auth/components/ForgotPassword";
@@ -58,21 +63,34 @@ const router = createBrowserRouter([
       { path: "categories", element: <CategoryManagement /> },
       { path: "submissions", element: <SubmissionList /> },
       { path: "users", element: <UserManagement /> },
+      { path: "shops", element: <ShopsList /> },
+      { path: "shops/:id", element: <ShopDetails /> },
 
 { path: "orders", element: <OrderList /> },
    ],
   },
   {
+    path: "/store/create-shop",
+    element: (
+      <AuthGuard>
+        <CreateShopForm />
+      </AuthGuard>
+    ),
+  },
+  {
     path: "/store",
     element: (
       <AuthGuard>
-        <StoreLayout />
+        <ShopGuard>
+          <StoreLayout />
+        </ShopGuard>
       </AuthGuard>
     ),
     children: [
       { index: true, element: <Navigate to="/store/inventory" replace /> },
       { path: "home", element: <ComingSoon page="Store Dashboard" /> },
       { path: "profile", element: <Profile /> },
+      { path: "shop-settings", element: <EditShopForm /> },
       { path: "inventory", element: <ShopInventory /> },
       { path: "orders", element: <StoreOrders /> },
       { path: "reports", element: <ComingSoon page="Reports" /> },
