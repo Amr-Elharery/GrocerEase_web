@@ -27,7 +27,6 @@ export default function CreateProductForm() {
   const createProduct = useCreateProduct();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // التصنيفات الحقيقية من الباك، مرتّبة (رئيسي وجواه فرعياته)
   const { data: flatCategories = [] } = useCategories();
   const categories = flatCategories
     .filter((c) => c.parent_id === null)
