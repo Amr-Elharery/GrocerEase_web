@@ -31,6 +31,7 @@ export default function CategoryManagement() {
   const [addingChild, setAddingChild] = useState(false);
   const [newName, setNewName] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<Category | null>(null);
+  const [deleteError, setDeleteError] = useState("");
   const [error, setError] = useState("");
 
   const topLevel = categories.filter((category) => category.parent_id === null);
@@ -110,11 +111,13 @@ export default function CategoryManagement() {
   };
 
   const handleDeleteClick = (category: Category) => {
+    setDeleteError("");
     setDeleteConfirm(category);
   };
 
   const handleConfirmDelete = () => {
     if (!deleteConfirm) return;
+    setDeleteError("");
 
     deleteCategory.mutate(deleteConfirm.id, {
       onSuccess: () => {
@@ -123,6 +126,10 @@ export default function CategoryManagement() {
         if (selectedParent?.id === deleteConfirm.id) {
           setSelectedParent(null);
         }
+      },
+      onError: (err: unknown) => {
+        const message = err instanceof Error ? err.message : "Couldn't delete this category.";
+        setDeleteError(message);
       },
     });
   };
@@ -601,8 +608,13 @@ export default function CategoryManagement() {
                   <span className="font-semibold text-[#101828]">
                     "{deleteConfirm.name}"
                   </span>
-                  ? This action cannot be undone.
                 </p>
+
+                {deleteError && (
+                  <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-600">
+                    {deleteError}
+                  </div>
+                )}
 
                 <div className="mt-5 flex justify-end gap-2">
                   <Button
