@@ -1,15 +1,11 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router";
 import { useCreateProduct } from "../hooks/useCreateProduct";
+import { useCategories } from "@/features/categories/hooks/useCategories";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { X, Upload, Plus, AlertTriangle, ChevronDown } from "lucide-react";
-
-const categories = [
-  { id: "1", name: "Dairy", sub_categories: [{ id: "3", name: "Milk" }] },
-  { id: "2", name: "Snacks", sub_categories: [] },
-];
 
 type FormErrors = {
   product_name?: string;
@@ -31,6 +27,18 @@ export default function CreateProductForm() {
   const createProduct = useCreateProduct();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // التصنيفات الحقيقية من الباك، مرتّبة (رئيسي وجواه فرعياته)
+  const { data: flatCategories = [] } = useCategories();
+  const categories = flatCategories
+    .filter((c) => c.parent_id === null)
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      sub_categories: flatCategories
+        .filter((s) => s.parent_id === c.id)
+        .map((s) => ({ id: s.id, name: s.name })),
+    }));
+
   const [formData, setFormData] = useState({
     product_name: "",
     brand: "",
@@ -40,9 +48,9 @@ export default function CreateProductForm() {
     category_id: "",
     sub_category_id: "",
   });
-
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [barcodeConflict, setBarcodeConflict] = useState(false);
+const [errors, setErrors] = useState<FormErrors>({});
+const [barcodeConflict, setBarcodeConflict] = useState(false);
+const [submitError, setSubmitError] = useState("");
   const [images, setImages] = useState<ImageFile[]>([]);
   const [primaryIndex, setPrimaryIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -158,9 +166,9 @@ const units = [
     if (barcodeConflict) return;
 
     if (images.length === 0) {
-      window.alert("At least one product image is required");
-      return;
-    }
+  setSubmitError("At least one product image is required.");
+  return;
+}
 
     createProduct.mutate(
       { data: formData, files: images.map((img) => img.file) },
@@ -204,6 +212,16 @@ const units = [
       </div>
 
       {/* Main Layout */}
+      {submitError && (
+  <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+    <div className="flex items-center gap-2">
+      <AlertTriangle className="h-4 w-4 text-red-600" />
+      <p className="text-sm font-medium text-red-700">
+        {submitError}
+      </p>
+    </div>
+  </div>
+)}
       <div className="grid gap-3 xl:grid-cols-[0.82fr_1.8fr]">
         {/* Left Column */}
         <div className="space-y-3">

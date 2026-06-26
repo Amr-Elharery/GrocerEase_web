@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useProduct, useUpdateProduct } from "../hooks/useEditProduct";
 import { useDeleteProductImage, useMakePrimaryImage } from "../hooks/useProductImages";
+import { useCategories } from "@/features/categories/hooks/useCategories";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,11 +12,6 @@ import {
   X,
   AlertTriangle,
 } from "lucide-react";
-
-const categories = [
-  { id: "1", name: "Dairy", sub_categories: [{ id: "3", name: "Milk" }] },
-  { id: "2", name: "Snacks", sub_categories: [] },
-];
 
 const units = ["Piece", "Kg", "Litre", "Pack", "Box", "Bottle", "Can", "Bag", "Tray", "Jar"];
 
@@ -44,6 +40,17 @@ export default function EditProductForm() {
   const deleteImage = useDeleteProductImage();
   const makePrimary = useMakePrimaryImage();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { data: flatCategories = [] } = useCategories();
+  const categories = flatCategories
+    .filter((c) => c.parent_id === null)
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      sub_categories: flatCategories
+        .filter((s) => s.parent_id === c.id)
+        .map((s) => ({ id: s.id, name: s.name })),
+    }));
 
   const [formData, setFormData] = useState({
     product_name: "",
