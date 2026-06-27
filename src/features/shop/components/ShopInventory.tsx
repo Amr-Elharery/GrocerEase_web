@@ -1,49 +1,13 @@
-import { useState } from "react";
-import { useShopProducts, useUpdateShopProduct, useToggleShopProduct } from "../hooks/useShopProducts";
+import { useState, useRef } from "react";
+import { useShopProducts, useUpdateShopProduct, useDeleteShopProduct, useMarkAvailable, useMarkUnavailable } from "../hooks/useShopProducts";
+import { useMyShop } from "../hooks/useShop";
+import { useCategories } from "@/features/categories/hooks/useCategories";
 import { type ShopProduct } from "../api/shopService";
-import { Pencil, Check, X, Plus } from "lucide-react";
+import { Pencil, Check, X, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AddProductModal from "./AddProductModal";
-
-const SHOP_ID = "shop-1";
-
-const categories = [
-  { id: "1", name: "Dairy", sub_categories: [
-    { id: "1-1", name: "Milk" }, { id: "1-2", name: "Cheese" },
-    { id: "1-3", name: "Yogurt" }, { id: "1-4", name: "Eggs" },
-  ]},
-  { id: "2", name: "Grains", sub_categories: [
-    { id: "2-1", name: "Rice" }, { id: "2-2", name: "Pasta" }, { id: "2-3", name: "Bread" },
-  ]},
-  { id: "3", name: "Beverages", sub_categories: [
-    { id: "3-1", name: "Juice" }, { id: "3-2", name: "Water" },
-    { id: "3-3", name: "Tea" }, { id: "3-4", name: "Coffee" },
-  ]},
-  { id: "4", name: "Snacks", sub_categories: [
-    { id: "4-1", name: "Chips" }, { id: "4-2", name: "Chocolate" }, { id: "4-3", name: "Biscuits" },
-  ]},
-  { id: "5", name: "Meat", sub_categories: [
-    { id: "5-1", name: "Poultry" }, { id: "5-2", name: "Beef" }, { id: "5-3", name: "Fish" },
-  ]},
-  { id: "6", name: "Oils", sub_categories: [
-    { id: "6-1", name: "Cooking Oil" }, { id: "6-2", name: "Olive Oil" },
-  ]},
-  { id: "7", name: "Bakery", sub_categories: [
-    { id: "7-1", name: "Bread" }, { id: "7-2", name: "Pastry" },
-  ]},
-  { id: "8", name: "Canned Goods", sub_categories: [
-    { id: "8-1", name: "Paste" }, { id: "8-2", name: "Fish" }, { id: "8-3", name: "Vegetables" },
-  ]},
-  { id: "10", name: "Spreads", sub_categories: [
-    { id: "10-1", name: "Honey" }, { id: "10-2", name: "Jam" },
-  ]},
-  { id: "11", name: "Condiments", sub_categories: [
-    { id: "11-1", name: "Sauces" }, { id: "11-2", name: "Vinegar" },
-  ]},
-  { id: "12", name: "Baking", sub_categories: [
-    { id: "12-1", name: "Sugar" }, { id: "12-2", name: "Salt" },
-  ]},
-];
+import FilterDropdown from "./FilterDropdown";
+import { Switch } from "@/components/ui/switch";
 
 type EditingRow = {
   productId: string;
@@ -54,36 +18,90 @@ type EditingRow = {
 type Toast = {
   id: number;
   message: string;
-  type: "success" | "warning";
+  type: "success" | "warning" | "error";
 };
+
+function readApiError(err: unknown, fallback: string): string {
+  const detail = (err as { data?: { detail?: unknown } })?.data?.detail;
+  let message = fallback;
+  if (typeof detail === "string") message = detail;
+  else if (Array.isArray(detail) && (detail[0] as { msg?: string })?.msg) {
+    message = (detail[0] as { msg: string }).msg;
+  }
+  return message.replace(/^\d{3}:\s*/, "");
+}
 
 export default function ShopInventory() {
   const [page, setPage] = useState(1);
   const [categoryFilter, setCategoryFilter] = useState("");
   const [subCategoryFilter, setSubCategoryFilter] = useState("");
   const [editingRow, setEditingRow] = useState<EditingRow | null>(null);
-  const [confirmToggle, setConfirmToggle] = useState<ShopProduct | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<ShopProduct | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const toastIdRef = useRef(0);
   const [showAddModal, setShowAddModal] = useState(false);
+
+  const { data: myShop } = useMyShop();
+  const SHOP_ID = myShop ? String(myShop.id) : "";
+
+  const { data: flatCategories = [] } = useCategories();
+  const categories = flatCategories
+    .filter((c) => c.parent_id === null)
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      sub_categories: flatCategories
+        .filter((s) => s.parent_id === c.id)
+        .map((s) => ({ id: s.id, name: s.name })),
+    }));
 
   const { data, isLoading } = useShopProducts(SHOP_ID, page);
   const updateProduct = useUpdateShopProduct();
-  const toggleProduct = useToggleShopProduct();
+  const deleteProduct = useDeleteShopProduct();
+  const markAvailable = useMarkAvailable();
+  const markUnavailable = useMarkUnavailable();
+
+  const addToast = (message: string, type: "success" | "warning" | "error" = "success") => {
+    const id = ++toastIdRef.current;
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!confirmDelete) return;
+    deleteProduct.mutate(confirmDelete.product_id, {
+      onSuccess: () => {
+        addToast(`"${confirmDelete.product_name}" was removed from your shop`);
+        setConfirmDelete(null);
+      },
+      onError: (err) => {
+        addToast(readApiError(err, "Couldn't remove the product. Please try again."), "error");
+        setConfirmDelete(null);
+      },
+    });
+  };
+
+  const handleToggleAvailability = (product: ShopProduct) => {
+    if (product.is_available) {
+      markUnavailable.mutate({ shopId: SHOP_ID, productId: product.product_id }, {
+        onSuccess: () => addToast(`"${product.product_name}" is now hidden from customers`, "warning"),
+        onError: (err) => addToast(readApiError(err, "Couldn't update product status."), "error"),
+      });
+    } else {
+      markAvailable.mutate({ shopId: SHOP_ID, productId: product.product_id }, {
+        onSuccess: () => addToast(`"${product.product_name}" is now visible to customers`),
+        onError: (err) => addToast(readApiError(err, "Couldn't update product status."), "error"),
+      });
+    }
+  };
 
   const totalPages = Math.ceil((data?.total ?? 0) / 25);
-  const selectedCategory = categories.find(c => c.id === categoryFilter);
 
   const filtered = data?.data.filter(p => {
     if (categoryFilter && p.category_id !== categoryFilter) return false;
     if (subCategoryFilter && p.sub_category_id !== subCategoryFilter) return false;
     return true;
   });
-
-  const addToast = (message: string, type: "success" | "warning" = "success") => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
-  };
 
   const handleStartEdit = (product: ShopProduct) => {
     setEditingRow({
@@ -114,25 +132,9 @@ export default function ShopInventory() {
         }
         setEditingRow(null);
       },
-    });
-  };
-
-  const handleToggleClick = (product: ShopProduct) => {
-    if (product.is_active) {
-      setConfirmToggle(product);
-    } else {
-      toggleProduct.mutate({ shopId: SHOP_ID, productId: product.product_id, is_active: true });
-    }
-  };
-
-  const handleConfirmToggle = () => {
-    if (!confirmToggle) return;
-    toggleProduct.mutate({
-      shopId: SHOP_ID,
-      productId: confirmToggle.product_id,
-      is_active: false,
-    }, {
-      onSuccess: () => setConfirmToggle(null),
+      onError: (err) => {
+        addToast(readApiError(err, "Couldn't save changes. Please try again."), "error");
+      },
     });
   };
 
@@ -149,11 +151,15 @@ export default function ShopInventory() {
       <div className="fixed top-4 right-4 z-50 space-y-2">
         {toasts.map(toast => (
           <div key={toast.id} className={`px-4 py-3 rounded-lg shadow-lg text-sm font-medium flex items-center gap-2 ${
-            toast.type === "warning"
+            toast.type === "error"
+              ? "bg-red-50 text-red-700 border border-red-200"
+              : toast.type === "warning"
               ? "bg-yellow-50 text-yellow-800 border border-yellow-200"
               : "bg-green-50 text-green-800 border border-green-200"
           }`}>
-            <Check className="w-4 h-4 shrink-0" />
+            {toast.type === "error"
+              ? <X className="w-4 h-4 shrink-0" />
+              : <Check className="w-4 h-4 shrink-0" />}
             {toast.message}
           </div>
         ))}
@@ -173,27 +179,19 @@ export default function ShopInventory() {
 
       {/* Filters */}
       <div className="flex gap-3">
-        <select value={categoryFilter}
-          onChange={e => { setCategoryFilter(e.target.value); setSubCategoryFilter(""); }}
-          className="h-8 rounded-lg border border-input bg-white px-3 text-sm outline-none focus:border-ring">
-          <option value="">All Categories</option>
-          {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-        </select>
-
-        {selectedCategory && (
-          <select value={subCategoryFilter}
-            onChange={e => setSubCategoryFilter(e.target.value)}
-            className="h-8 rounded-lg border border-input bg-white px-3 text-sm outline-none focus:border-ring">
-            <option value="">All Sub-Categories</option>
-            {selectedCategory.sub_categories.map(s => (
-              <option key={s.id} value={s.id}>{s.name}</option>
-            ))}
-          </select>
-        )}
+        <FilterDropdown
+          value={categoryFilter}
+          onChange={(v) => { setCategoryFilter(v); setSubCategoryFilter(""); }}
+          placeholder="All Categories"
+          options={[
+            { value: "", label: "All Categories" },
+            ...categories.map((c) => ({ value: c.id, label: c.name })),
+          ]}
+        />
 
         {(categoryFilter || subCategoryFilter) && (
           <button onClick={() => { setCategoryFilter(""); setSubCategoryFilter(""); }}
-            className="h-8 px-3 rounded-lg border border-border text-xs text-muted-foreground hover:bg-muted/50 flex items-center gap-1.5">
+            className="h-9 px-3 rounded-lg border border-[#DDE7DF] text-xs font-medium text-[#5F7168] hover:bg-[#F8FAF8] flex items-center gap-1.5">
             <X className="w-3 h-3" /> Clear
           </button>
         )}
@@ -207,10 +205,11 @@ export default function ShopInventory() {
               <tr className="border-b border-border bg-muted/20">
                 <th className="px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Product Name</th>
                 <th className="px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Category</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Sub-Category</th>
                 <th className="px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Price (EGP)</th>
                 <th className="px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Stock</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Active</th>
+                <th className="px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
+  Availability
+</th>
                 <th className="px-4 py-2.5"></th>
               </tr>
             </thead>
@@ -221,8 +220,12 @@ export default function ShopInventory() {
                   <tr key={product.product_id} className="hover:bg-muted/20 transition-colors">
                     <td className="px-4 py-2.5">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground shrink-0">
-                          {product.product_name.charAt(0)}
+                        <div className="w-7 h-7 rounded bg-muted flex items-center justify-center overflow-hidden text-xs font-bold text-muted-foreground shrink-0">
+                          {product.image_url ? (
+                            <img src={product.image_url} alt="" className="h-full w-full object-cover" />
+                          ) : (
+                            product.product_name.charAt(0)
+                          )}
                         </div>
                         <div>
                           <p className="text-sm font-semibold whitespace-nowrap">{product.product_name}</p>
@@ -231,7 +234,6 @@ export default function ShopInventory() {
                       </div>
                     </td>
                     <td className="px-4 py-2.5 text-sm whitespace-nowrap">{product.category_name}</td>
-                    <td className="px-4 py-2.5 text-sm text-muted-foreground whitespace-nowrap">{product.sub_category_name}</td>
                     <td className="px-4 py-2.5 whitespace-nowrap">
                       {isEditing ? (
                         <input type="number" value={editingRow.price} step="0.01"
@@ -252,13 +254,12 @@ export default function ShopInventory() {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-2.5">
-                      <button type="button"
-                        onClick={() => handleToggleClick(product)}
-                        className={`relative w-10 h-5 rounded-full transition-colors ${product.is_active ? "bg-primary" : "bg-muted-foreground/30"}`}>
-                        <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${product.is_active ? "left-5" : "left-0.5"}`} />
-                      </button>
-                    </td>
+                   <td className="px-4 py-2.5">
+  <Switch
+checked={product.is_available}
+onCheckedChange={() => handleToggleAvailability(product)}
+  />
+</td>
                     <td className="px-4 py-2.5 text-right whitespace-nowrap">
                       {isEditing ? (
                         <div className="flex items-center justify-end gap-1.5">
@@ -272,10 +273,18 @@ export default function ShopInventory() {
                           </button>
                         </div>
                       ) : (
-                        <button onClick={() => handleStartEdit(product)}
-                          className="w-7 h-7 flex items-center justify-center rounded border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
+                        <div className="flex items-center justify-end gap-1.5">
+                          {/* Toggle available/unavailable */}
+                          
+                          <button onClick={() => handleStartEdit(product)}
+                            className="w-7 h-7 flex items-center justify-center rounded border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button onClick={() => setConfirmDelete(product)}
+                            className="w-7 h-7 flex items-center justify-center rounded border border-red-200 text-red-600 hover:bg-red-50 transition-colors">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -320,19 +329,19 @@ export default function ShopInventory() {
         </div>
       </div>
 
-      {/* Confirm Toggle Modal */}
-      {confirmToggle && (
+      {/* Confirm Delete Modal */}
+      {confirmDelete && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
           <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4 space-y-4">
-            <h3 className="text-base font-semibold">Hide Product</h3>
+            <h3 className="text-base font-semibold">Remove Product</h3>
             <p className="text-sm text-muted-foreground">
-              This will hide <span className="font-semibold text-foreground">"{confirmToggle.product_name}"</span> from all customers. Continue?
+              This will remove <span className="font-semibold text-foreground">"{confirmDelete.product_name}"</span> from your shop.
             </p>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" size="sm" onClick={() => setConfirmToggle(null)}>Cancel</Button>
-              <Button variant="destructive" size="sm" onClick={handleConfirmToggle}
-                disabled={toggleProduct.isPending}>
-                {toggleProduct.isPending ? "Hiding..." : "Hide Product"}
+              <Button variant="outline" size="sm" onClick={() => setConfirmDelete(null)}>Cancel</Button>
+              <Button variant="destructive" size="sm" onClick={handleConfirmDelete}
+                disabled={deleteProduct.isPending}>
+                {deleteProduct.isPending ? "Removing..." : "Remove"}
               </Button>
             </div>
           </div>
@@ -340,7 +349,7 @@ export default function ShopInventory() {
       )}
 
       {/* Add Product Modal */}
-      {showAddModal && <AddProductModal onClose={() => setShowAddModal(false)} />}
+      {showAddModal && <AddProductModal shopId={SHOP_ID} onClose={() => setShowAddModal(false)} />}
     </div>
   );
 }

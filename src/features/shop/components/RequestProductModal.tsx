@@ -1,52 +1,12 @@
 import { useState, useRef } from "react";
-import { useSubmitProductRequest } from "../hooks/useSubmissionRequest";
+import { useCreateProductRequest } from "../hooks/useSubmissionRequest";
+import { useCategories } from "@/features/categories/hooks/useCategories";
 import { X, Upload, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import FilterDropdown from "./FilterDropdown";
 
-const SHOP_ID = "shop-1";
-
-const categories = [
-  { id: "1", name: "Dairy", sub_categories: [
-    { id: "1-1", name: "Milk" }, { id: "1-2", name: "Cheese" },
-    { id: "1-3", name: "Yogurt" }, { id: "1-4", name: "Eggs" },
-  ]},
-  { id: "2", name: "Grains", sub_categories: [
-    { id: "2-1", name: "Rice" }, { id: "2-2", name: "Pasta" }, { id: "2-3", name: "Bread" },
-  ]},
-  { id: "3", name: "Beverages", sub_categories: [
-    { id: "3-1", name: "Juice" }, { id: "3-2", name: "Water" },
-    { id: "3-3", name: "Tea" }, { id: "3-4", name: "Coffee" },
-  ]},
-  { id: "4", name: "Snacks", sub_categories: [
-    { id: "4-1", name: "Chips" }, { id: "4-2", name: "Chocolate" }, { id: "4-3", name: "Biscuits" },
-  ]},
-  { id: "5", name: "Meat", sub_categories: [
-    { id: "5-1", name: "Poultry" }, { id: "5-2", name: "Beef" }, { id: "5-3", name: "Fish" },
-  ]},
-  { id: "6", name: "Oils", sub_categories: [
-    { id: "6-1", name: "Cooking Oil" }, { id: "6-2", name: "Olive Oil" },
-  ]},
-  { id: "7", name: "Bakery", sub_categories: [
-    { id: "7-1", name: "Bread" }, { id: "7-2", name: "Pastry" },
-  ]},
-  { id: "8", name: "Canned Goods", sub_categories: [
-    { id: "8-1", name: "Paste" }, { id: "8-2", name: "Fish" }, { id: "8-3", name: "Vegetables" },
-  ]},
-  { id: "9", name: "Frozen", sub_categories: [
-    { id: "9-1", name: "Vegetables" }, { id: "9-2", name: "Meat" },
-  ]},
-  { id: "10", name: "Spreads", sub_categories: [
-    { id: "10-1", name: "Honey" }, { id: "10-2", name: "Jam" },
-  ]},
-  { id: "11", name: "Condiments", sub_categories: [
-    { id: "11-1", name: "Sauces" }, { id: "11-2", name: "Vinegar" },
-  ]},
-  { id: "12", name: "Baking", sub_categories: [
-    { id: "12-1", name: "Sugar" }, { id: "12-2", name: "Salt" },
-  ]},
-];
 
 type FormErrors = {
   product_name?: string;
@@ -55,12 +15,24 @@ type FormErrors = {
 };
 
 type Props = {
+  shopId: string;
   onClose: () => void;
   onBack: () => void;
 };
 
-export default function RequestProductModal({ onClose, onBack }: Props) {
-  const submitRequest = useSubmitProductRequest();
+export default function RequestProductModal({ shopId, onClose, onBack }: Props) {
+  const submitRequest = useCreateProductRequest();
+
+  const { data: flatCategories = [] } = useCategories();
+  const categories = flatCategories
+    .filter((c) => c.parent_id === null)
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      sub_categories: flatCategories
+        .filter((s) => s.parent_id === c.id)
+        .map((s) => ({ id: s.id, name: s.name })),
+    }));
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [success, setSuccess] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -77,6 +49,7 @@ export default function RequestProductModal({ onClose, onBack }: Props) {
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
+  const [apiError, setApiError] = useState("");
 
   const selectedCategory = categories.find(c => c.id === formData.category_id);
 
@@ -99,15 +72,30 @@ export default function RequestProductModal({ onClose, onBack }: Props) {
       newErrors.product_name = "Product name must be at least 2 characters";
     }
     if (!formData.category_id) newErrors.category_id = "Category is required";
-    if (!formData.sub_category_id) newErrors.sub_category_id = "Sub-category is required";
 
     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
+    setApiError("");
 
     submitRequest.mutate({
-      ...formData,
-      submitted_by_shop_id: SHOP_ID,
+      shop_id: Number(shopId),
+      name: formData.product_name,
+      description: formData.description || "",
+      brand: formData.brand || "",
+      unit: formData.unit || "",
+      category_id: Number(formData.category_id),
+      subcategory_id: formData.sub_category_id ? Number(formData.sub_category_id) : undefined,
+      image: image || undefined,
     }, {
       onSuccess: () => setSuccess(true),
+      onError: (err: unknown) => {
+        const detail = (err as { data?: { detail?: unknown } })?.data?.detail;
+        let msg = "Couldn't submit the request. Please try again.";
+        if (typeof detail === "string") msg = detail;
+        else if (Array.isArray(detail) && (detail[0] as { msg?: string })?.msg) {
+          msg = (detail[0] as { msg: string }).msg;
+        }
+        setApiError(msg.replace(/^\d{3}:\s*/, ""));
+      },
     });
   };
 
@@ -151,11 +139,15 @@ export default function RequestProductModal({ onClose, onBack }: Props) {
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Classification</h3>
             <div className="space-y-1.5">
               <Label className="text-xs">Top-Level Category *</Label>
-              <select name="category_id" value={formData.category_id} onChange={handleChange}
-                className={`h-8 w-full rounded-lg border bg-transparent px-3 text-sm outline-none focus:border-ring ${errors.category_id ? "border-destructive" : "border-input"}`}>
-                <option value="">Select a primary category</option>
-                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
+              <FilterDropdown
+                value={formData.category_id}
+                onChange={(v) => setFormData(prev => ({ ...prev, category_id: v, sub_category_id: "" }))}
+                placeholder="Select a primary category"
+                options={[
+                  { value: "", label: "Select a primary category" },
+                  ...categories.map((c) => ({ value: c.id, label: c.name })),
+                ]}
+              />
               {errors.category_id && <p className="text-xs text-destructive">{errors.category_id}</p>}
             </div>
 
@@ -253,6 +245,12 @@ export default function RequestProductModal({ onClose, onBack }: Props) {
             )}
           </div>
         </div>
+
+        {apiError && (
+          <div className="mx-5 mb-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-600">
+            {apiError}
+          </div>
+        )}
 
         {/* Footer */}
         <div className="flex items-center justify-between px-5 py-4 border-t border-border shrink-0">

@@ -61,7 +61,7 @@ export default function AppLayout() {
     { icon: LayoutDashboard, label: "Dashboard", path: "/app/home" },
     { icon: Package, label: "Products", path: "/app/inventory" },
     { icon: Tag, label: "Categories", path: "/app/categories" },
-    { icon: ClipboardList, label: "Submissions", path: "/app/submissions" },
+    { icon: ClipboardList, label: "Requests", path: "/app/submissions" },
     { icon: Users, label: "Users", path: "/app/users" },
     { icon: Store, label: "Shops", path: "/app/shops" },
     { icon: Warehouse, label: "Orders", path: "/app/orders" },

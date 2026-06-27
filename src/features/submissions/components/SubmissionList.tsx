@@ -17,96 +17,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const categories = [
-  {
-    id: "1",
-    name: "Dairy",
-    sub_categories: [
-      { id: "1-1", name: "Milk" },
-      { id: "1-2", name: "Cheese" },
-      { id: "1-3", name: "Yogurt" },
-      { id: "1-4", name: "Eggs" },
-    ],
-  },
-  {
-    id: "2",
-    name: "Grains",
-    sub_categories: [
-      { id: "2-1", name: "Rice" },
-      { id: "2-2", name: "Pasta" },
-      { id: "2-3", name: "Bread" },
-    ],
-  },
-  {
-    id: "3",
-    name: "Beverages",
-    sub_categories: [
-      { id: "3-1", name: "Juice" },
-      { id: "3-2", name: "Water" },
-      { id: "3-3", name: "Tea" },
-      { id: "3-4", name: "Coffee" },
-    ],
-  },
-  {
-    id: "4",
-    name: "Snacks",
-    sub_categories: [
-      { id: "4-1", name: "Chips" },
-      { id: "4-2", name: "Chocolate" },
-      { id: "4-3", name: "Biscuits" },
-    ],
-  },
-  {
-    id: "5",
-    name: "Meat",
-    sub_categories: [
-      { id: "5-1", name: "Poultry" },
-      { id: "5-2", name: "Beef" },
-      { id: "5-3", name: "Fish" },
-    ],
-  },
-  {
-    id: "6",
-    name: "Oils",
-    sub_categories: [
-      { id: "6-1", name: "Cooking Oil" },
-      { id: "6-2", name: "Olive Oil" },
-    ],
-  },
-  {
-    id: "7",
-    name: "Bakery",
-    sub_categories: [
-      { id: "7-1", name: "Bread" },
-      { id: "7-2", name: "Pastry" },
-    ],
-  },
-  {
-    id: "8",
-    name: "Canned Goods",
-    sub_categories: [
-      { id: "8-1", name: "Paste" },
-      { id: "8-2", name: "Fish" },
-      { id: "8-3", name: "Vegetables" },
-    ],
-  },
-  {
-    id: "9",
-    name: "Frozen",
-    sub_categories: [
-      { id: "9-1", name: "Vegetables" },
-      { id: "9-2", name: "Meat" },
-    ],
-  },
-  {
-    id: "10",
-    name: "Spreads",
-    sub_categories: [
-      { id: "10-1", name: "Honey" },
-      { id: "10-2", name: "Jam" },
-    ],
-  },
-];
 
 const rejectReasons = [
   "Duplicate product",
@@ -147,7 +57,8 @@ export default function SubmissionList() {
   const { data: submissions = [], isLoading } = useSubmissions();
   const approveSubmission = useApproveSubmission();
   const rejectSubmission = useRejectSubmission();
-
+  const [apiError, setApiError] = useState("");
+  
   const [selectedSubmission, setSelectedSubmission] =
     useState<Submission | null>(null);
 
@@ -159,10 +70,7 @@ export default function SubmissionList() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
-  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
-
   const statusDropdownRef = useRef<HTMLDivElement | null>(null);
-  const categoryDropdownRef = useRef<HTMLDivElement | null>(null);
 
   const pendingCount = submissions.filter(
     (submission) => submission.status === "pending"
@@ -202,12 +110,22 @@ export default function SubmissionList() {
     setEditData(getEditData(submission));
     setRejectMode(false);
     setRejectReason("");
-    setCategoryDropdownOpen(false);
     setStatusDropdownOpen(false);
+  };
+
+  const readErr = (err: unknown, fallback: string): string => {
+    const detail = (err as { data?: { detail?: unknown } })?.data?.detail;
+    let msg = fallback;
+    if (typeof detail === "string") msg = detail;
+    else if (Array.isArray(detail) && (detail[0] as { msg?: string })?.msg) {
+      msg = (detail[0] as { msg: string }).msg;
+    }
+    return msg.replace(/^\d{3}:\s*/, "");
   };
 
   const handleApprove = () => {
     if (!selectedSubmission) return;
+    setApiError("");
 
     approveSubmission.mutate(
       {
@@ -220,19 +138,24 @@ export default function SubmissionList() {
           setRejectMode(false);
           setRejectReason("");
         },
+        onError: (err) => setApiError(readErr(err, "Couldn't approve this request.")),
       }
     );
   };
 
   const handleQuickApprove = (submission: Submission) => {
+    setApiError("");
     approveSubmission.mutate({
       id: submission.id,
       data: getEditData(submission),
+    }, {
+      onError: (err) => setApiError(readErr(err, "Couldn't approve this request.")),
     });
   };
 
   const handleReject = () => {
     if (!selectedSubmission || !rejectReason) return;
+    setApiError("");
 
     rejectSubmission.mutate(
       {
@@ -245,16 +168,11 @@ export default function SubmissionList() {
           setRejectMode(false);
           setRejectReason("");
         },
+        onError: (err) => setApiError(readErr(err, "Couldn't reject this request.")),
       }
     );
   };
 
-  const selectedCategory = categories.find(
-    (category) => category.id === editData.category_id
-  );
-
-  const selectedCategoryLabel =
-    selectedCategory?.name ?? "Select category";
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -267,12 +185,6 @@ export default function SubmissionList() {
         setStatusDropdownOpen(false);
       }
 
-      if (
-        categoryDropdownRef.current &&
-        !categoryDropdownRef.current.contains(target)
-      ) {
-        setCategoryDropdownOpen(false);
-      }
     }
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -302,13 +214,22 @@ export default function SubmissionList() {
           {/* Header */}
           <div>
             <h1 className="text-[23px] font-bold tracking-tight text-[#101828]">
-              Product Submissions
+              Product Requests
             </h1>
 
             <p className="mt-1 text-sm text-[#667085]">
-              {pendingCount} pending submissions requiring your review.
+              {pendingCount} pending requests requiring your review.
             </p>
           </div>
+
+          {apiError && (
+            <div className="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
+              <span>{apiError}</span>
+              <button type="button" onClick={() => setApiError("")} className="text-red-400 hover:text-red-600">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          )}
 
           {/* Table Card */}
           <div className="overflow-hidden rounded-xl border border-[#DDE7DF] bg-white shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
@@ -409,7 +330,6 @@ export default function SubmissionList() {
                 <thead>
                   <tr className="border-b border-[#DDE7DF] bg-[#F8FAF8] text-[11px] font-semibold uppercase tracking-wide text-[#5F7168]">
                   <th className="w-[120px] px-2.5 py-2.5 whitespace-nowrap">Submission ID</th>                    <th className="w-[175px] px-2.5 py-2.5">Product Name</th>
-                    <th className="w-[120px] px-2.5 py-2.5">Barcode</th>
                     <th className="w-[115px] px-2.5 py-2.5">Category</th>
                     <th className="w-[135px] px-2.5 py-2.5">Submitter</th>
                     <th className="w-[95px] px-2.5 py-2.5">Date</th>
@@ -451,10 +371,6 @@ export default function SubmissionList() {
                             {submission.product_name}
                           </span>
                         </div>
-                      </td>
-
-                      <td className="px-2.5 py-3 font-mono text-xs text-[#5F7168]">
-                        {submission.barcode}
                       </td>
 
                       <td className="px-2.5 py-3">
@@ -538,7 +454,7 @@ export default function SubmissionList() {
                   {filtered.length === 0 && (
                     <tr>
                       <td
-                        colSpan={8}
+                        colSpan={7}
                         className="px-4 py-10 text-center text-sm text-[#667085]"
                       >
                         No submissions match your filters.
@@ -665,115 +581,28 @@ export default function SubmissionList() {
                     />
                   </div>
 
-                  {/* Custom Category Dropdown */}
-                  <div>
-                    <label className="text-[10px] font-semibold uppercase tracking-wide text-[#667085]">
-                      Category
-                    </label>
+    {/* Category */}
+<div>
+  <label className="text-[10px] font-semibold uppercase tracking-wide text-[#667085]">
+    Category
+  </label>
 
-                    <div className="relative mt-1" ref={categoryDropdownRef}>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setCategoryDropdownOpen((prev) => !prev)
-                        }
-                        className="flex h-8 w-full items-center justify-between rounded-lg border border-[#DDE7DF] bg-[#F8FAF8] px-2 text-sm text-[#101828] outline-none transition hover:bg-white focus:border-[#2D6A4F]"
-                      >
-                        <span className="truncate">
-                          {selectedCategoryLabel}
-                        </span>
+  <div className="mt-1 flex h-8 items-center rounded-lg border border-[#DDE7DF] bg-[#F8FAF8] px-2 text-sm text-[#101828]">
+    {selectedSubmission.category_name || "-"}
+  </div>
+</div>
 
-                        <ChevronDown
-                          className={`h-4 w-4 shrink-0 text-[#5F7168] transition-transform ${
-                            categoryDropdownOpen ? "rotate-180" : ""
-                          }`}
-                        />
-                      </button>
+{/* Sub-Category */}
+<div>
+  <label className="text-[10px] font-semibold uppercase tracking-wide text-[#667085]">
+    Sub-Category
+  </label>
 
-                      {categoryDropdownOpen && (
-                        <div className="absolute left-0 top-9 z-50 max-h-[240px] w-full overflow-y-auto rounded-lg border border-[#DDE7DF] bg-white shadow-[0_12px_28px_rgba(15,23,42,0.14)]">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditData((prev) => ({
-                                ...prev,
-                                category_id: "",
-                                sub_category_id: "",
-                              }));
-                              setCategoryDropdownOpen(false);
-                            }}
-                            className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition ${
-                              !editData.category_id
-                                ? "bg-[#EAF7EE] font-semibold text-[#006B22]"
-                                : "text-[#101828] hover:bg-[#F8FAF8]"
-                            }`}
-                          >
-                            <span>Select category</span>
-
-                            {!editData.category_id && (
-                              <Check className="h-3.5 w-3.5 text-[#006B22]" />
-                            )}
-                          </button>
-
-                          {categories.map((category) => (
-                            <button
-                              key={category.id}
-                              type="button"
-                              onClick={() => {
-                                setEditData((prev) => ({
-                                  ...prev,
-                                  category_id: category.id,
-                                  sub_category_id: "",
-                                }));
-                                setCategoryDropdownOpen(false);
-                              }}
-                              className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition ${
-                                editData.category_id === category.id
-                                  ? "bg-[#EAF7EE] font-semibold text-[#006B22]"
-                                  : "text-[#101828] hover:bg-[#F8FAF8]"
-                              }`}
-                            >
-                              <span>{category.name}</span>
-
-                              {editData.category_id === category.id && (
-                                <Check className="h-3.5 w-3.5 text-[#006B22]" />
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {selectedCategory && (
-                    <div>
-                      <label className="text-[10px] font-semibold uppercase tracking-wide text-[#667085]">
-                        Sub-Category
-                      </label>
-
-                      <div className="mt-1 flex flex-wrap gap-1.5">
-                        {selectedCategory.sub_categories.map((subCategory) => (
-                          <button
-                            key={subCategory.id}
-                            type="button"
-                            onClick={() =>
-                              setEditData((prev) => ({
-                                ...prev,
-                                sub_category_id: subCategory.id,
-                              }))
-                            }
-                            className={`rounded-full border px-2 py-0.5 text-xs transition ${
-                              editData.sub_category_id === subCategory.id
-                                ? "border-[#006B22] bg-[#006B22] text-white"
-                                : "border-[#DDE7DF] bg-white text-[#5F7168] hover:bg-[#F8FAF8]"
-                            }`}
-                          >
-                            {subCategory.name}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+  <div className="mt-1 flex h-8 items-center rounded-lg border border-[#DDE7DF] bg-[#F8FAF8] px-2 text-sm text-[#101828]">
+    {selectedSubmission.sub_category_name || "-"}
+  </div>
+</div>
+    
 
                   <div>
                     <label className="text-[10px] font-semibold uppercase tracking-wide text-[#667085]">

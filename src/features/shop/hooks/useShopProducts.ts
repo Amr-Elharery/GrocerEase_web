@@ -35,7 +35,7 @@ export function useUpdateShopProduct() {
     mutationFn: ({ shopId, productId, payload }: {
       shopId: string;
       productId: string;
-      payload: { price?: number; available_stock?: number };
+      payload: { price?: number; available_stock?: number; low_stock_threshold?: number };
     }) => shopService.updateShopProduct(shopId, productId, payload),
     onSuccess: (_, { shopId }) => {
       qc.invalidateQueries({ queryKey: ['shop-products', shopId] });
@@ -43,16 +43,34 @@ export function useUpdateShopProduct() {
   });
 }
 
-export function useToggleShopProduct() {
+export function useMarkAvailable() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ shopId, productId, is_active }: {
-      shopId: string;
-      productId: string;
-      is_active: boolean;
-    }) => shopService.toggleShopProduct(shopId, productId, is_active),
+    mutationFn: ({ productId }: { shopId: string; productId: string }) =>
+      shopService.markAvailable(productId),
     onSuccess: (_, { shopId }) => {
       qc.invalidateQueries({ queryKey: ['shop-products', shopId] });
+    },
+  });
+}
+
+export function useMarkUnavailable() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ productId }: { shopId: string; productId: string }) =>
+      shopService.markUnavailable(productId),
+    onSuccess: (_, { shopId }) => {
+      qc.invalidateQueries({ queryKey: ['shop-products', shopId] });
+    },
+  });
+}
+
+export function useDeleteShopProduct() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (productId: string) => shopService.deleteShopProduct(productId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['shop-products'] });
     },
   });
 }
