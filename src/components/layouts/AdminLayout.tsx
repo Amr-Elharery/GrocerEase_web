@@ -12,13 +12,13 @@ import {
   Tag,
   ClipboardList,
   Users,
-  Bell,
   Store,
 } from "lucide-react";
 
 import { useLogout } from "@/features/auth/hooks/useAuth";
 import { useProfile } from "@/features/profile/hooks/useProfile";
 import { useSearch } from "@/Context/SearchContext";
+import NotificationsBell from "@/features/notifications/components/NotificationsBell";
 
 type NavItem = {
   icon: React.ElementType;
@@ -47,7 +47,7 @@ function ZadLogo({ collapsed }: { collapsed: boolean }) {
   );
 }
 
-export default function AppLayout() {
+export default function AdminLayout() {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const { search, setSearch } = useSearch();
@@ -107,7 +107,6 @@ export default function AppLayout() {
 
         {/* Bottom Navigation */}
         <div className="mt-auto space-y-2 border-t border-white/10 px-3 pt-4">
-        
           <button
             type="button"
             onClick={handleLogout}
@@ -159,17 +158,7 @@ export default function AppLayout() {
 
           {/* Right Side */}
           <div className="ml-auto flex shrink-0 items-center justify-end gap-4">
-            <button
-              type="button"
-              className="relative flex h-10 w-7 items-center justify-center rounded-full transition hover:bg-[#F3F6F2]"
-              aria-label="Notifications"
-            >
-              <Bell className="h-5 w-5 text-[#1a1f2e]" />
-
-              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[11px] font-bold leading-none text-white">
-                3
-              </span>
-            </button>
+            <NotificationsBell />
 
             <div className="h-8 w-px bg-[#DFE7E1]" />
 
@@ -190,17 +179,17 @@ export default function AppLayout() {
 
         {/* Main Content */}
         <main className="relative min-h-[calc(100vh-64px)] overflow-hidden bg-[#F7FBF8] p-5">
-  <div className="pointer-events-none absolute inset-0 overflow-hidden">
-    <div className="absolute -left-32 top-16 h-[420px] w-[420px] rounded-full bg-[#EEF8F2] opacity-80 blur-3xl" />
-    <div className="absolute right-[-180px] top-8 h-[520px] w-[520px] rounded-full bg-[#F1FAF5] opacity-80 blur-3xl" />
-    <div className="absolute bottom-[-220px] left-[12%] h-[380px] w-[780px] rounded-[50%] bg-[#E0EEE6] opacity-45 blur-3xl" />
-    <div className="absolute bottom-[-260px] right-[-120px] h-[360px] w-[720px] rounded-[50%] bg-[#D6E5DC] opacity-30 blur-3xl" />
-  </div>
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div className="absolute -left-32 top-16 h-[420px] w-[420px] rounded-full bg-[#EEF8F2] opacity-80 blur-3xl" />
+            <div className="absolute right-[-180px] top-8 h-[520px] w-[520px] rounded-full bg-[#F1FAF5] opacity-80 blur-3xl" />
+            <div className="absolute bottom-[-220px] left-[12%] h-[380px] w-[780px] rounded-[50%] bg-[#E0EEE6] opacity-45 blur-3xl" />
+            <div className="absolute bottom-[-260px] right-[-120px] h-[360px] w-[720px] rounded-[50%] bg-[#D6E5DC] opacity-30 blur-3xl" />
+          </div>
 
-  <div className="relative z-10">
-    <Outlet />
-  </div>
-</main>
+          <div className="relative z-10">
+            <Outlet />
+          </div>
+        </main>
       </div>
     </div>
   );

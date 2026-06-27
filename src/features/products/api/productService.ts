@@ -21,6 +21,17 @@ export const ProductSchema = z.object({
     is_primary: z.boolean(),
     variant: z.string().nullable(),
   })).optional(),
+  shops: z.array(z.object({
+    available_stock: z.number().optional(),
+    price: z.number().optional(),
+    is_active: z.boolean().optional(),
+    is_available: z.boolean().optional(),
+    shop: z.object({
+      id: z.number(),
+      shop_name: z.string(),
+      logo_url: z.string().nullable().optional(),
+    }).optional(),
+  })).optional(),
 });
 
 export const ProductsResponseSchema = z.array(ProductSchema);
