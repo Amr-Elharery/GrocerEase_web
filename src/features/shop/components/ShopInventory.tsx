@@ -296,9 +296,21 @@ onCheckedChange={() => handleToggleAvailability(product)}
 
         {/* Pagination */}
         <div className="px-6 py-3 border-t border-border flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Showing <span className="font-semibold text-foreground">{((page - 1) * 25) + 1}</span> to <span className="font-semibold text-foreground">{Math.min(page * 25, data?.total ?? 0)}</span> of <span className="font-semibold text-foreground">{data?.total}</span> products
-          </p>
+         <p className="text-sm text-muted-foreground">
+  {(data?.total ?? 0) === 0 ? (
+    <>
+      Showing <span className="font-semibold text-foreground">0</span> to{" "}
+      <span className="font-semibold text-foreground">0</span> of{" "}
+      <span className="font-semibold text-foreground">0</span> products
+    </>
+  ) : (
+    <>
+      Showing <span className="font-semibold text-foreground">{((page - 1) * 25) + 1}</span> to{" "}
+      <span className="font-semibold text-foreground">{Math.min(page * 25, data?.total ?? 0)}</span> of{" "}
+      <span className="font-semibold text-foreground">{data?.total}</span> products
+    </>
+  )}
+</p>
           <div className="flex items-center gap-1.5">
             <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
               className="px-3 h-7 flex items-center justify-center rounded border border-border text-xs font-medium text-muted-foreground disabled:opacity-40 hover:bg-muted/50">
@@ -321,10 +333,13 @@ onCheckedChange={() => handleToggleAvailability(product)}
                 {totalPages}
               </button>
             )}
-            <button onClick={() => setPage(p => p + 1)} disabled={page === totalPages}
-              className="px-3 h-7 flex items-center justify-center rounded border border-border text-xs font-medium text-muted-foreground disabled:opacity-40 hover:bg-muted/50">
-              Next
-            </button>
+           <button
+  onClick={() => setPage(p => p + 1)}
+  disabled={(data?.total ?? 0) === 0 || page >= totalPages}
+  className="px-3 h-7 flex items-center justify-center rounded border border-border text-xs font-medium text-muted-foreground disabled:opacity-40 hover:bg-muted/50"
+>
+  Next
+</button>
           </div>
         </div>
       </div>
