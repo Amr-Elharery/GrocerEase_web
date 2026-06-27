@@ -22,20 +22,6 @@ const categoryColors: Record<string, string> = {
   Baking: "bg-emerald-50 text-emerald-600",
 };
 
-function StatCard({ label, value, helper, danger = false }: {
-  label: string;
-  value: string | number | undefined;
-  helper?: string;
-  danger?: boolean;
-}) {
-  return (
-    <div className="rounded-xl border border-[#DDE7DF] bg-white px-3 py-2.5 shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-[#5F7168]">{label}</p>
-      <p className={`mt-0.5 text-[22px] font-bold ${danger ? "text-red-600" : "text-[#101828]"}`}>{value}</p>
-      {helper && <p className={`mt-0.5 text-xs font-medium ${danger ? "text-red-600" : "text-green-600"}`}>{helper}</p>}
-    </div>
-  );
-}
 
 export default function ProductList() {
   const [page, setPage] = useState(1);
@@ -135,19 +121,7 @@ export default function ProductList() {
         </Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Total Products" value={products.length.toLocaleString()} helper="↑ 12% from last month" />
-        <StatCard label="Active SKUs" value="8,912" helper="— Steady" />
-        <StatCard label="Out of Stock" value="142" helper="⚠ Requires attention" danger />
-        <div className="rounded-xl border border-[#DDE7DF] bg-white px-3 py-2.5 shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-[#5F7168]">Store Coverage</p>
-          <p className="mt-0.5 text-[22px] font-bold text-[#101828]">94%</p>
-          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#E8F0EA]">
-            <div className="h-full rounded-full bg-[#006B22]" style={{ width: "94%" }} />
-          </div>
-        </div>
-      </div>
+      
 
       {/* Table */}
       <div className="overflow-hidden rounded-xl border border-[#DDE7DF] bg-white shadow-[0_2px_10px_rgba(15,23,42,0.04)]">

@@ -555,32 +555,10 @@ export default function SubmissionList() {
                       />
                     </div>
 
-                    <div>
-                      <label className="text-[10px] font-semibold uppercase tracking-wide text-[#667085]">
-                        SKU Status
-                      </label>
-                      <p className="mt-1 flex h-8 items-center rounded-lg bg-[#F8FAF8] px-2 text-sm font-medium text-[#101828]">
-                        {selectedSubmission.sku_status ?? "-"}
-                      </p>
-                    </div>
+                   
                   </div>
 
-                  <div>
-                    <label className="text-[10px] font-semibold uppercase tracking-wide text-[#667085]">
-                      Barcode
-                    </label>
-                    <input
-                      value={editData.barcode ?? ""}
-                      onChange={(event) =>
-                        setEditData((prev) => ({
-                          ...prev,
-                          barcode: event.target.value,
-                        }))
-                      }
-                      className="mt-1 h-8 w-full rounded-lg border border-[#DDE7DF] bg-[#F8FAF8] px-2 font-mono text-sm outline-none focus:border-[#2D6A4F]"
-                    />
-                  </div>
-
+                  
     {/* Category */}
 <div>
   <label className="text-[10px] font-semibold uppercase tracking-wide text-[#667085]">

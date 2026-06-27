@@ -40,7 +40,7 @@ export default function ShopInventory() {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const toastIdRef = useRef(0);
   const [showAddModal, setShowAddModal] = useState(false);
-
+const [loadingProductId, setLoadingProductId] = useState<string | null>(null);
   const { data: myShop } = useMyShop();
   const SHOP_ID = myShop ? String(myShop.id) : "";
 
@@ -80,20 +80,39 @@ export default function ShopInventory() {
       },
     });
   };
+const handleToggleAvailability = (product: ShopProduct) => {
+  if (loadingProductId) return;
 
-  const handleToggleAvailability = (product: ShopProduct) => {
-    if (product.is_available) {
-      markUnavailable.mutate({ shopId: SHOP_ID, productId: product.product_id }, {
-        onSuccess: () => addToast(`"${product.product_name}" is now hidden from customers`, "warning"),
-        onError: (err) => addToast(readApiError(err, "Couldn't update product status."), "error"),
-      });
-    } else {
-      markAvailable.mutate({ shopId: SHOP_ID, productId: product.product_id }, {
-        onSuccess: () => addToast(`"${product.product_name}" is now visible to customers`),
-        onError: (err) => addToast(readApiError(err, "Couldn't update product status."), "error"),
-      });
-    }
-  };
+  setLoadingProductId(product.product_id);
+
+  if (product.is_available) {
+    markUnavailable.mutate(
+      { shopId: SHOP_ID, productId: product.product_id },
+      {
+        onSuccess: () =>
+          addToast(`"${product.product_name}" is now hidden from customers`, "warning"),
+
+        onError: (err) =>
+          addToast(readApiError(err, "Couldn't update product status."), "error"),
+
+        onSettled: () => setLoadingProductId(null),
+      }
+    );
+  } else {
+    markAvailable.mutate(
+      { shopId: SHOP_ID, productId: product.product_id },
+      {
+        onSuccess: () =>
+          addToast(`"${product.product_name}" is now visible to customers`),
+
+        onError: (err) =>
+          addToast(readApiError(err, "Couldn't update product status."), "error"),
+
+        onSettled: () => setLoadingProductId(null),
+      }
+    );
+  }
+};
 
   const totalPages = Math.ceil((data?.total ?? 0) / 25);
 
@@ -255,10 +274,11 @@ export default function ShopInventory() {
                       )}
                     </td>
                    <td className="px-4 py-2.5">
-  <Switch
-checked={product.is_available}
-onCheckedChange={() => handleToggleAvailability(product)}
-  />
+ <Switch
+  checked={product.is_available}
+  disabled={loadingProductId === product.product_id}
+  onCheckedChange={() => handleToggleAvailability(product)}
+/>
 </td>
                     <td className="px-4 py-2.5 text-right whitespace-nowrap">
                       {isEditing ? (
