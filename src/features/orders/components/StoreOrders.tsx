@@ -2,17 +2,24 @@ import { useState, useEffect, useRef } from "react";
 import { RefreshCw, Clock, ChevronDown, Check } from "lucide-react";
 import { useStoreOrders, useUpdateOrderStatus } from "../hooks/useStoreOrders";
 import { type StoreOrder } from "../api/storeOrderService";
+import StoreOrderDetailModal from "./StoreOrderDetailModal";
 
 const statusColors: Record<string, string> = {
-  pending: "bg-yellow-50 text-yellow-700 border border-yellow-200",
-  assigned: "bg-blue-50 text-blue-700 border border-blue-200",
-  delivered: "bg-green-50 text-green-700 border border-green-200",
-  cancelled: "bg-red-50 text-red-700 border border-red-200",
+  pending: "border border-[#FCD34D] bg-[#FFF4D8] text-[#D97706]",
+  processing: "border border-[#BFDBFE] bg-[#EAF1FF] text-[#2563EB]",
+  assigned: "border border-[#BFDBFE] bg-[#EAF1FF] text-[#2563EB]",
+  out_for_delivery: "border border-[#DDD6FE] bg-[#F3E8FF] text-[#7E22CE]",
+  picked_up: "border border-[#A7F3D0] bg-[#ECFDF5] text-[#059669]",
+  delivered: "border border-[#BBF7D0] bg-[#EAF7EE] text-[#16A34A]",
+  cancelled: "border border-[#FECACA] bg-[#FEE2E2] text-[#DC2626]",
 };
 
 const statusLabels: Record<string, string> = {
   pending: "Pending",
+  processing: "Processing",
   assigned: "Assigned",
+  out_for_delivery: "Out for Delivery",
+  picked_up: "Picked Up",
   delivered: "Delivered",
   cancelled: "Cancelled",
 };
@@ -35,13 +42,60 @@ function timeAgo(date: string) {
   return `${Math.floor(diff / 3600)}h ago`;
 }
 
-const tabs = [
-  { key: "all", label: "All" },
-  { key: "pending", label: "Pending" },
-  { key: "assigned", label: "Assigned" },
-  { key: "delivered", label: "Delivered" },
-  { key: "cancelled", label: "Cancelled" },
-];
+
+function StatusFilterDropdown({
+  value,
+  options,
+  onChange,
+}: {
+  value: string;
+  options: { key: string; label: string }[];
+  onChange: (v: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const selected = options.find((t) => t.key === value) ?? options[0];
+
+  useEffect(() => {
+    function onOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onOutside);
+    return () => document.removeEventListener("mousedown", onOutside);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative w-[190px]">
+      <button
+        type="button"
+        onClick={() => setOpen((p) => !p)}
+        className="flex h-9 w-full items-center justify-between rounded-lg border border-[#078A2D] bg-white px-3 text-sm font-semibold text-[#101828] shadow-sm transition hover:bg-[#F0FDF4]"
+      >
+        <span className={value === "all" ? "text-[#667085] font-medium" : ""}>
+          {value === "all" ? "Filter by status" : selected.label}
+        </span>
+        <ChevronDown className={`h-4 w-4 text-[#078A2D] transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="absolute left-0 top-[42px] z-50 w-full overflow-hidden rounded-lg border border-[#CDE8D5] bg-white shadow-[0_12px_30px_rgba(15,23,42,0.12)]">
+          {options.map((t) => (
+            <button
+              key={t.key}
+              type="button"
+              onClick={() => { onChange(t.key); setOpen(false); }}
+              className={`flex w-full items-center justify-between px-3 py-2.5 text-left text-sm transition ${
+                value === t.key ? "bg-[#EAF7EE] font-semibold text-[#078A2D]" : "text-[#101828] hover:bg-[#F0FDF4]"
+              }`}
+            >
+              <span>{t.label}</span>
+              {value === t.key && <Check className="h-4 w-4 text-[#078A2D]" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function OrderStatusDropdown({
   order,
@@ -130,17 +184,19 @@ function OrderStatusDropdown({
 }
 
 export default function StoreOrders() {
+  const [page, setPage] = useState(1);
   const {
     data: orders = [],
     isLoading,
     dataUpdatedAt,
     refetch,
     isFetching,
-  } = useStoreOrders();
+  } = useStoreOrders(page);
 
   const updateStatus = useUpdateOrderStatus();
 
   const [activeTab, setActiveTab] = useState("all");
+  const [selectedOrder, setSelectedOrder] = useState<StoreOrder | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [countdown, setCountdown] = useState(30);
 
@@ -166,11 +222,17 @@ export default function StoreOrders() {
 
   const filtered = orders.filter((o) => {
     if (activeTab === "all") return true;
-    return o.status === activeTab;
+    return o.status.toLowerCase() === activeTab.toLowerCase();
   });
 
-  const countByStatus = (status: string) =>
-    orders.filter((o) => o.status === status).length;
+  const statusKeys = [...new Set(orders.map((o) => o.status).filter(Boolean))];
+  const statusOptions = [
+    { key: "all", label: "All" },
+    ...statusKeys.map((s) => ({
+      key: s,
+      label: s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+    })),
+  ];
 
   if (isLoading) {
     return (
@@ -185,10 +247,10 @@ export default function StoreOrders() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Orders Dashboard</h1>
+          <h1 className="text-2xl font-bold">Orders</h1>
 
           <p className="mt-0.5 text-sm text-muted-foreground">
-            Real-time view of incoming orders. Auto-refreshes every 30s.
+            Real-time view of incoming orders.
           </p>
         </div>
 
@@ -214,62 +276,12 @@ export default function StoreOrders() {
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-4 gap-3">
-        {[
-          {
-            label: "Total",
-            value: orders.length,
-            color: "text-foreground",
-          },
-          {
-            label: "Pending",
-            value: countByStatus("pending"),
-            color: "text-yellow-600",
-          },
-          {
-            label: "Assigned",
-            value: countByStatus("assigned"),
-            color: "text-blue-600",
-          },
-          {
-            label: "Delivered",
-            value: countByStatus("delivered"),
-            color: "text-green-600",
-          },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            className="rounded-lg border border-border bg-white p-3"
-          >
-            <p className="text-xs text-muted-foreground">{stat.label}</p>
-
-            <p className={`mt-0.5 text-2xl font-bold ${stat.color}`}>
-              {stat.value}
-            </p>
-          </div>
-        ))}
-      </div>
-
       {/* Table */}
-      <div className="overflow-hidden rounded-lg border border-border bg-white">
-        {/* Tabs */}
-        <div className="flex items-center border-b border-border px-4">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`whitespace-nowrap border-b-2 px-4 py-3 text-xs font-semibold transition-colors ${
-                activeTab === tab.key
-                  ? "border-primary text-foreground"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-
-          <div className="ml-auto py-3 text-xs text-muted-foreground">
+      <div className="overflow-visible rounded-lg border border-border bg-white">
+        {/* Filter */}
+        <div className="flex items-center gap-3 border-b border-border px-4 py-3">
+          <StatusFilterDropdown value={activeTab} options={statusOptions} onChange={setActiveTab} />
+          <div className="ml-auto text-xs text-muted-foreground">
             Last updated:{" "}
             {lastUpdated.toLocaleTimeString("en-US", {
               hour: "2-digit",
@@ -317,7 +329,8 @@ export default function StoreOrders() {
               {filtered.map((order: StoreOrder) => (
                 <tr
                   key={order.id}
-                  className="transition-colors hover:bg-muted/20"
+                  onClick={() => setSelectedOrder(order)}
+                  className="cursor-pointer transition-colors hover:bg-muted/20"
                 >
                   <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-muted-foreground">
                     #{order.order_id}
@@ -345,9 +358,11 @@ export default function StoreOrders() {
 
                   <td className="px-4 py-3">
                     <span
-                      className={`rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider ${statusColors[order.status]}`}
+                      className={`inline-flex rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wide ${
+                        statusColors[order.status] ?? "border border-[#E5E7EB] bg-[#F3F4F6] text-[#667085]"
+                      }`}
                     >
-                      {statusLabels[order.status]}
+                      {statusLabels[order.status] ?? order.status.replace(/_/g, " ")}
                     </span>
                   </td>
 
@@ -355,7 +370,7 @@ export default function StoreOrders() {
                     {timeAgo(order.created_at)}
                   </td>
 
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                     <OrderStatusDropdown
                       order={order}
                       onChange={(status) =>
@@ -372,10 +387,35 @@ export default function StoreOrders() {
           </table>
         </div>
 
-        <div className="border-t border-border px-4 py-3 text-sm text-muted-foreground">
-          Showing {filtered.length} of {orders.length} orders
+        <div className="flex items-center justify-between border-t border-border px-4 py-3">
+          <p className="text-sm text-muted-foreground">
+            Showing {filtered.length} of {orders.length} orders
+          </p>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="flex h-8 items-center justify-center rounded-lg border border-border px-3 text-xs font-semibold text-muted-foreground transition hover:bg-muted/50 disabled:opacity-40"
+            >
+              Previous
+            </button>
+            <span className="px-2 text-xs font-semibold text-foreground">{page}</span>
+            <button
+              type="button"
+              onClick={() => setPage((p) => p + 1)}
+              disabled={orders.length < 10}
+              className="flex h-8 items-center justify-center rounded-lg border border-border px-3 text-xs font-semibold text-muted-foreground transition hover:bg-muted/50 disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
+
+      {selectedOrder && (
+        <StoreOrderDetailModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />
+      )}
     </section>
   );
 }

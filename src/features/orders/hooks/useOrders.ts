@@ -1,27 +1,18 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { orderService } from '../api/orderService';
 
-export function useOrders() {
+export function useOrders(page: number = 1) {
   return useQuery({
-    queryKey: ['orders'],
-    queryFn: () => orderService.getOrders(),
+    queryKey: ['orders', page],
+    queryFn: () => orderService.getOrders(page),
+    placeholderData: (prev) => prev,
   });
 }
 
-export function useDeliveryPersonnel() {
+export function useOrder(orderId: string | undefined) {
   return useQuery({
-    queryKey: ['delivery-personnel'],
-    queryFn: () => orderService.getDeliveryPersonnel(),
-  });
-}
-
-export function useAssignOrder() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ orderId, deliveryPersonnelId }: { orderId: string; deliveryPersonnelId: string }) =>
-      orderService.assignOrder(orderId, deliveryPersonnelId),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['orders'] });
-    },
+    queryKey: ['order', orderId],
+    queryFn: () => orderService.getOrder(orderId!),
+    enabled: orderId !== undefined,
   });
 }

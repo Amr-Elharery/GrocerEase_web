@@ -47,6 +47,7 @@ export function useUpdateShop() {
   });
 }
 
+
 export function useDeleteShop() {
   const qc = useQueryClient();
   return useMutation({
@@ -55,5 +56,12 @@ export function useDeleteShop() {
       qc.invalidateQueries({ queryKey: ["my-shop"] });
       qc.invalidateQueries({ queryKey: ["shops"] });
     },
+  });
+}
+
+export function useAreas() {
+  return useQuery({
+    queryKey: ["areas"],
+    queryFn: () => shopApi.getAreas(),
   });
 }

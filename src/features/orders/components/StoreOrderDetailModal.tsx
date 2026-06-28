@@ -1,32 +1,29 @@
-import { X, User, Store, Package, CreditCard, Clock } from "lucide-react";
-import { type Order } from "../api/orderService";
-import { useOrder } from "../hooks/useOrders";
+import { X, User, Package, CreditCard, Clock } from "lucide-react";
+import { type StoreOrder } from "../api/storeOrderService";
+import { useStoreOrder } from "../hooks/useStoreOrders";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-50 text-yellow-700 border border-yellow-200",
-  processing: "bg-blue-50 text-blue-700 border border-blue-200",
-  out_for_delivery: "bg-purple-50 text-purple-700 border border-purple-200",
-  picked_up: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+  assigned: "bg-blue-50 text-blue-700 border border-blue-200",
   delivered: "bg-green-50 text-green-700 border border-green-200",
   cancelled: "bg-red-50 text-red-700 border border-red-200",
 };
 
 const statusLabels: Record<string, string> = {
   pending: "Pending",
-  processing: "Processing",
-  out_for_delivery: "Out for Delivery",
-  picked_up: "Picked Up",
+  assigned: "Assigned",
   delivered: "Delivered",
   cancelled: "Cancelled",
 };
 
-type Props = {
-  order: Order;
+export default function StoreOrderDetailModal({
+  order,
+  onClose,
+}: {
+  order: StoreOrder;
   onClose: () => void;
-};
-
-export default function OrderDetailModal({ order, onClose }: Props) {
-  const { data: details } = useOrder(order.id);
+}) {
+  const { data: details } = useStoreOrder(order.id);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
@@ -35,11 +32,8 @@ export default function OrderDetailModal({ order, onClose }: Props) {
         <div className="flex shrink-0 items-center justify-between border-b border-border px-5 py-4">
           <div>
             <h2 className="text-base font-semibold">Order Details</h2>
-            <p className="mt-0.5 font-mono text-xs text-muted-foreground">
-              #{order.order_id}
-            </p>
+            <p className="mt-0.5 font-mono text-xs text-muted-foreground">#{order.order_id}</p>
           </div>
-
           <button
             onClick={onClose}
             className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/50"
@@ -55,7 +49,6 @@ export default function OrderDetailModal({ order, onClose }: Props) {
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Status
             </span>
-
             <span
               className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider ${
                 statusColors[order.status] ?? "bg-gray-100 text-gray-600 border border-gray-200"
@@ -74,15 +67,6 @@ export default function OrderDetailModal({ order, onClose }: Props) {
                 <p className="text-sm font-semibold">{order.customer_name}</p>
               </div>
             </div>
-
-            <div className="flex items-center gap-2.5">
-              <Store className="h-4 w-4 shrink-0 text-muted-foreground" />
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Store</p>
-                <p className="text-sm font-semibold">{order.store_name}</p>
-              </div>
-            </div>
-
             <div className="flex items-center gap-2.5">
               <Package className="h-4 w-4 shrink-0 text-muted-foreground" />
               <div>
@@ -90,20 +74,20 @@ export default function OrderDetailModal({ order, onClose }: Props) {
                 <p className="text-sm font-semibold">{order.items_count} items</p>
               </div>
             </div>
-
-            <div className="flex items-center gap-2.5">
-              <CreditCard className="h-4 w-4 shrink-0 text-muted-foreground" />
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Total / Payment</p>
-                <p className="text-sm font-semibold">
-                  EGP {order.total_price.toFixed(2)}{" "}
-                  <span className="text-xs font-normal capitalize text-muted-foreground">
-                    ({order.payment_method})
-                  </span>
-                </p>
+            {details && (
+              <div className="flex items-center gap-2.5">
+                <CreditCard className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Total / Payment</p>
+                  <p className="text-sm font-semibold">
+                    EGP {order.total.toFixed(2)}{" "}
+                    <span className="text-xs font-normal capitalize text-muted-foreground">
+                      ({details.payment_method})
+                    </span>
+                  </p>
+                </div>
               </div>
-            </div>
-
+            )}
             <div className="flex items-center gap-2.5">
               <Clock className="h-4 w-4 shrink-0 text-muted-foreground" />
               <div>

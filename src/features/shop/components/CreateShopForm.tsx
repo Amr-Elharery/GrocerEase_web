@@ -1,11 +1,76 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { useCreateShop } from "../hooks/useShop";
+import { useCreateShop, useAreas } from "../hooks/useShop";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Store, Upload, X, MapPin } from "lucide-react";
+import { Store, Upload, X, MapPin, ChevronDown, Check } from "lucide-react";
 import { z } from "zod";
+
+function AreaDropdown({
+  value,
+  areas,
+  onChange,
+  hasError,
+}: {
+  value: string;
+  areas: { id: number; area_name: string; city_name: string }[];
+  onChange: (value: string) => void;
+  hasError?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const selected = areas.find((a) => String(a.id) === value);
+
+  useEffect(() => {
+    function onOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onOutside);
+    return () => document.removeEventListener("mousedown", onOutside);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative w-full">
+      <button
+        type="button"
+        onClick={() => setOpen((p) => !p)}
+        className={`flex h-10 w-full items-center justify-between rounded-md border bg-white px-3 text-sm text-[#101828] shadow-sm transition hover:bg-[#F0FDF4] ${
+          hasError ? "border-destructive" : "border-[#078A2D]"
+        }`}
+      >
+        <span className={selected ? "" : "text-[#98A2B3]"}>
+          {selected ? `${selected.area_name} — ${selected.city_name}` : "Select an area..."}
+        </span>
+        <ChevronDown className={`h-4 w-4 shrink-0 text-[#078A2D] transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div className="absolute bottom-[48px] left-0 z-50 max-h-[240px] w-full overflow-y-auto rounded-lg border border-[#CDE8D5] bg-white shadow-[0_12px_30px_rgba(15,23,42,0.12)]">
+          {areas.length === 0 && (
+            <p className="px-3 py-2.5 text-sm text-[#98A2B3]">No areas available</p>
+          )}
+          {areas.map((a) => {
+            const isSelected = String(a.id) === value;
+            return (
+              <button
+                key={a.id}
+                type="button"
+                onClick={() => { onChange(String(a.id)); setOpen(false); }}
+                className={`flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left text-sm transition ${
+                  isSelected ? "bg-[#EAF7EE] font-semibold text-[#078A2D]" : "text-[#101828] hover:bg-[#F0FDF4]"
+                }`}
+              >
+                <span className="min-w-0 truncate">{a.area_name} — {a.city_name}</span>
+                {isSelected && <Check className="h-4 w-4 shrink-0 text-[#078A2D]" />}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const schema = z.object({
   shop_name: z.string().min(2, "Shop name is required"),
@@ -29,6 +94,7 @@ function readApiError(err: unknown): string {
 export default function CreateShopForm() {
   const navigate = useNavigate();
   const createShop = useCreateShop();
+  const { data: areas = [] } = useAreas();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
@@ -158,12 +224,18 @@ export default function CreateShopForm() {
               placeholder="e.g. 01012345678" className="h-10" />
           </div>
 
-          {/* Area ID */}
+          {/* Area */}
           <div className="space-y-1.5">
-            <Label htmlFor="area_id" className="text-xs font-semibold text-[#101828]">Area ID *</Label>
-            <Input id="area_id" name="area_id" type="number" value={form.area_id} onChange={handleChange}
-              placeholder="e.g. 1"
-              className={`h-10 ${errors.area_id ? "border-destructive" : ""}`} />
+            <Label className="text-xs font-semibold text-[#101828]">Area *</Label>
+            <AreaDropdown
+              value={form.area_id}
+              areas={areas}
+              hasError={!!errors.area_id}
+              onChange={(val) => {
+                setForm((prev) => ({ ...prev, area_id: val }));
+                setErrors((prev) => ({ ...prev, area_id: undefined }));
+              }}
+            />
             {errors.area_id && <p className="text-xs text-destructive">{errors.area_id}</p>}
           </div>
         </div>
