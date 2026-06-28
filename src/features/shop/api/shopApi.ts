@@ -74,6 +74,17 @@ export const shopApi = {
   async deleteShop(shopId: number): Promise<void> {
     await http.delete(`/shops/${shopId}`);
   },
+
+  async getAreas(): Promise<Area[]> {
+    const res = await http.get("/areas/");
+    return res.data;
+  },
 };
+
+export interface Area {
+  id: number;
+  area_name: string;
+  city_name: string;
+}
 
 export type CreateShopPayload = ShopPayload & { shop_name: string };

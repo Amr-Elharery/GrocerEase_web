@@ -31,15 +31,6 @@ const paymentColors: Record<string, string> = {
   card: "border border-[#BFDBFE] bg-[#EAF1FF] text-[#2563EB]",
 };
 
-const statusOptions = [
-  { value: "all", label: "All Statuses" },
-  { value: "pending", label: "Pending" },
-  { value: "processing", label: "Processing" },
-  { value: "out_for_delivery", label: "Out for Delivery" },
-  { value: "delivered", label: "Delivered" },
-  { value: "cancelled", label: "Cancelled" },
-];
-
 const paymentOptions = [
   { value: "all", label: "All Payments" },
   { value: "cash", label: "Cash" },
@@ -146,26 +137,36 @@ function GreenDropdown({
 }
 
 export default function OrderList() {
-  const { data: orders = [], isLoading } = useOrders();
+  const [page, setPage] = useState(1);
+  const { data: orders = [], isLoading } = useOrders(page);
+
+  const dynamicStatusOptions = useMemo(() => {
+    const set = new Set(orders.map((o) => o.status).filter(Boolean));
+    return [
+      { value: "all", label: "All Statuses" },
+      ...[...set].map((s) => ({
+        value: s,
+        label: s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+      })),
+    ];
+  }, [orders]);
 
   const [statusFilter, setStatusFilter] = useState("all");
   const [paymentFilter, setPaymentFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  const countByStatus = (status: string) =>
-    orders.filter((o) => o.status === status).length;
-
   const filtered = useMemo(() => {
     const searchValue = search.trim().toLowerCase();
 
     return orders.filter((order) => {
       const matchesStatus =
-        statusFilter === "all" || order.status === statusFilter;
+        statusFilter === "all" ||
+        order.status.toLowerCase() === statusFilter.toLowerCase();
 
       const matchesPayment =
         paymentFilter === "all" ||
-        order.payment_method === paymentFilter;
+        order.payment_method.toLowerCase() === paymentFilter.toLowerCase();
 
       const matchesSearch =
         !searchValue ||
@@ -206,52 +207,8 @@ export default function OrderList() {
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-        {[
-          {
-            label: "Total",
-            value: orders.length,
-            color: "text-[#101828]",
-          },
-          {
-            label: "Pending",
-            value: countByStatus("pending"),
-            color: "text-[#D97706]",
-          },
-          {
-            label: "Processing",
-            value: countByStatus("processing"),
-            color: "text-[#2563EB]",
-          },
-          {
-            label: "Delivered",
-            value: countByStatus("delivered"),
-            color: "text-[#16A34A]",
-          },
-          {
-            label: "Cancelled",
-            value: countByStatus("cancelled"),
-            color: "text-[#DC2626]",
-          },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            className="rounded-xl border border-[#DDE7DF] bg-white px-3 py-2.5 shadow-[0_2px_10px_rgba(15,23,42,0.04)]"
-          >
-            <p className="text-sm font-medium text-[#667085]">
-              {stat.label}
-            </p>
-
-            <p className={`mt-0.5 text-[22px] font-bold ${stat.color}`}>
-              {stat.value}
-            </p>
-          </div>
-        ))}
-      </div>
-
       {/* Table Card */}
-      <div className="overflow-hidden rounded-xl border border-[#DDE7DF] bg-white shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
+      <div className="overflow-visible rounded-xl border border-[#DDE7DF] bg-white shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
         {/* Filter Bar */}
         <div className="border-b border-[#DDE7DF] bg-white px-4 py-2.5">
           <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
@@ -274,7 +231,7 @@ export default function OrderList() {
             <div className="grid gap-3 md:grid-cols-2 xl:flex xl:items-center">
               <GreenDropdown
                 value={statusFilter}
-                options={statusOptions}
+                options={dynamicStatusOptions}
                 onChange={setStatusFilter}
               />
 
@@ -390,16 +347,33 @@ export default function OrderList() {
         </div>
 
         {/* Footer */}
-        <div className="border-t border-[#DDE7DF] px-5 py-2.5 text-sm text-[#667085]">
-          Showing{" "}
-          <span className="font-semibold text-[#101828]">
-            {filtered.length}
-          </span>{" "}
-          of{" "}
-          <span className="font-semibold text-[#101828]">
-            {orders.length}
-          </span>{" "}
-          orders
+        <div className="flex items-center justify-between border-t border-[#DDE7DF] px-5 py-2.5">
+          <p className="text-sm text-[#667085]">
+            Showing{" "}
+            <span className="font-semibold text-[#101828]">{filtered.length}</span>{" "}
+            of{" "}
+            <span className="font-semibold text-[#101828]">{orders.length}</span>{" "}
+            orders
+          </p>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="flex h-8 items-center justify-center rounded-lg border border-[#DDE7DF] px-3 text-xs font-semibold text-[#5F7168] transition hover:bg-[#F8FAF8] disabled:opacity-40"
+            >
+              Previous
+            </button>
+            <span className="px-2 text-xs font-semibold text-[#101828]">{page}</span>
+            <button
+              type="button"
+              onClick={() => setPage((p) => p + 1)}
+              disabled={orders.length < 10}
+              className="flex h-8 items-center justify-center rounded-lg border border-[#DDE7DF] px-3 text-xs font-semibold text-[#5F7168] transition hover:bg-[#F8FAF8] disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
 

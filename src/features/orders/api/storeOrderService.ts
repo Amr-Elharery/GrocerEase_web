@@ -1,4 +1,5 @@
 import { z } from "zod";
+import http from "@/shared/http";
 
 export const StoreOrderSchema = z.object({
   id: z.string(),
@@ -6,43 +7,78 @@ export const StoreOrderSchema = z.object({
   customer_name: z.string(),
   items_count: z.number(),
   total: z.number(),
-  status: z.enum(["pending", "assigned", "delivered", "cancelled"]),
+  status: z.string(),
   created_at: z.string(),
 });
 
 export type StoreOrder = z.infer<typeof StoreOrderSchema>;
 
-const mockStoreOrders: StoreOrder[] = [
-  { id: "1", order_id: "ORD-8451", customer_name: "Omar Ahmed", items_count: 8, total: 450.00, status: "pending", created_at: new Date(Date.now() - 2 * 60000).toISOString() },
-  { id: "2", order_id: "ORD-8450", customer_name: "Sara Mohamed", items_count: 5, total: 320.50, status: "assigned", created_at: new Date(Date.now() - 5 * 60000).toISOString() },
-  { id: "3", order_id: "ORD-8449", customer_name: "Ali Hassan", items_count: 3, total: 210.00, status: "delivered", created_at: new Date(Date.now() - 15 * 60000).toISOString() },
-  { id: "4", order_id: "ORD-8448", customer_name: "Nour Magdy", items_count: 10, total: 780.00, status: "pending", created_at: new Date(Date.now() - 1 * 60000).toISOString() },
-  { id: "5", order_id: "ORD-8447", customer_name: "Ahmed Tarek", items_count: 7, total: 610.00, status: "assigned", created_at: new Date(Date.now() - 8 * 60000).toISOString() },
-  { id: "6", order_id: "ORD-8446", customer_name: "Mona Khaled", items_count: 4, total: 195.00, status: "delivered", created_at: new Date(Date.now() - 20 * 60000).toISOString() },
-  { id: "7", order_id: "ORD-8445", customer_name: "Kareem Samir", items_count: 6, total: 380.00, status: "pending", created_at: new Date(Date.now() - 3 * 60000).toISOString() },
-  { id: "8", order_id: "ORD-8444", customer_name: "Layla Omar", items_count: 2, total: 95.00, status: "cancelled", created_at: new Date(Date.now() - 30 * 60000).toISOString() },
-];
+export interface StoreOrderItem {
+  id: number;
+  shop_product_id: number;
+  quantity: number;
+  total: number;
+}
+
+export interface StoreOrderDetail extends StoreOrder {
+  subtotal: number;
+  delivery_fee: number;
+  payment_method: string;
+  order_items: StoreOrderItem[];
+}
+
+interface ApiOrder {
+  id: number;
+  customer_id: string;
+  shop_id: number;
+  order_group_id: number;
+  status: string;
+  subtotal: number;
+  delivery_fee: number;
+  payment_method: string;
+  created_at: string;
+  customer_address_id: number;
+  order_items: { id: number; shop_product_id: number; quantity: number; total: number }[];
+}
+
+function mapOrder(o: ApiOrder): StoreOrder {
+  const itemsCount = (o.order_items ?? []).reduce((sum, it) => sum + (it.quantity ?? 0), 0);
+  return {
+    id: String(o.id),
+    order_id: String(o.id),
+    customer_name: o.customer_id ?? "Customer",
+    items_count: itemsCount,
+    total: (o.subtotal ?? 0) + (o.delivery_fee ?? 0),
+    status: o.status ?? "",
+    created_at: o.created_at,
+  };
+}
 
 export const storeOrderService = {
-async getOrders(_shopId: string): Promise<StoreOrder[]> {
-    // TODO: replace with real API call
-    // const res = await http.get(`/shop/${shopId}/orders`);
-    // return res.data;
-
-    // TODO: upgrade to WebSocket for real-time updates
-    // const ws = new WebSocket(`wss://api/shop/${shopId}/orders/live`);
-
-    return [...mockStoreOrders].sort((a, b) =>
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
+  async getOrders(page = 1): Promise<StoreOrder[]> {
+    const limit = 10;
+    const offset = (page - 1) * limit;
+    const res = await http.get("/orders/shop", { params: { limit, offset } });
+    const items: ApiOrder[] = res.data ?? [];
+    return items
+      .map(mapOrder)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   },
 
-async updateOrderStatus(_shopId: string, orderId: string, status: StoreOrder["status"]): Promise<StoreOrder> {    // TODO: replace with real API call
-    // const res = await http.patch(`/shop/${shopId}/orders/${orderId}`, { status });
-    // return res.data;
+  async updateOrderStatus(_shopId: string, orderId: string, status: StoreOrder["status"]): Promise<void> {
+    console.log("update order status", orderId, "to", status);
+  },
 
-    const index = mockStoreOrders.findIndex(o => o.id === orderId);
-    if (index !== -1) mockStoreOrders[index].status = status;
-    return mockStoreOrders[index];
+  async getOrder(orderId: string): Promise<StoreOrderDetail> {
+    const res = await http.get(`/orders/${orderId}`);
+    const o: ApiOrder = res.data;
+    const base = mapOrder(o);
+    return {
+      ...base,
+      subtotal: o.subtotal ?? 0,
+      delivery_fee: o.delivery_fee ?? 0,
+      payment_method: o.payment_method ?? "",
+      order_items: o.order_items ?? [],
+    };
   },
 };
