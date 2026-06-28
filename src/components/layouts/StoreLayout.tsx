@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Outlet, Link, useLocation } from "react-router";
 import { useLogout } from "@/features/auth/hooks/useAuth";
 import { useProfile } from "@/features/profile/hooks/useProfile";
-import { Leaf, LayoutDashboard, Package, ShoppingCart, LogOut, ChevronLeft, ChevronRight, Search, Settings } from "lucide-react";
+import { Leaf, LayoutDashboard, Package, ShoppingCart, LogOut, ChevronLeft, ChevronRight, Search, Settings, ClipboardList } from "lucide-react";
 import { useSearch } from "@/Context/SearchContext";
+import NotificationsBell from "@/features/notifications/components/NotificationsBell";
 
 export default function StoreLayout() {
   const location = useLocation();
@@ -18,7 +19,8 @@ export default function StoreLayout() {
     { icon: LayoutDashboard, label: "Dashboard", path: "/store/home" },
     { icon: Package, label: "Inventory", path: "/store/inventory" },
     { icon: ShoppingCart, label: "Orders", path: "/store/orders" },
-{ icon: Settings, label: "Shop Settings", path: "/store/shop-settings" },
+    { icon: ClipboardList, label: "My Requests", path: "/store/my-requests" },
+    { icon: Settings, label: "Shop Settings", path: "/store/shop-settings" },
   ];
 
   return (
@@ -103,6 +105,7 @@ export default function StoreLayout() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <NotificationsBell />
             <div className="h-6 w-px bg-border" />
             <Link to="/store/profile"
               className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-sm font-bold text-primary-foreground">

@@ -1,43 +1,36 @@
 import { useState } from "react";
 import { useAvailableProducts, useAddShopProduct } from "../hooks/useShopProducts";
+import { useCategories } from "@/features/categories/hooks/useCategories";
 import { type CatalogProduct } from "../api/shopService";
 import { X, Search, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import RequestProductModal from "./RequestProductModal";
+import FilterDropdown from "./FilterDropdown";
 
-const SHOP_ID = "shop-1";
-
-const categories = [
-  { id: "1", name: "Dairy" },
-  { id: "2", name: "Grains" },
-  { id: "3", name: "Beverages" },
-  { id: "4", name: "Snacks" },
-  { id: "5", name: "Meat" },
-  { id: "6", name: "Oils" },
-  { id: "7", name: "Bakery" },
-  { id: "8", name: "Canned Goods" },
-  { id: "9", name: "Frozen" },
-  { id: "10", name: "Spreads" },
-  { id: "11", name: "Condiments" },
-  { id: "12", name: "Baking" },
-];
 
 type Step = "pick" | "configure";
 
 type Props = {
+  shopId: string;
   onClose: () => void;
 };
 
-export default function AddProductModal({ onClose }: Props) {
+export default function AddProductModal({ shopId, onClose }: Props) {
+  const SHOP_ID = shopId;
+
+  const { data: flatCategories = [] } = useCategories();
+  const categories = flatCategories
+    .filter((c) => c.parent_id === null)
+    .map((c) => ({ id: c.id, name: c.name }));
   const [step, setStep] = useState<Step>("pick");
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<CatalogProduct | null>(null);
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("0");
-  const threshold = "5";
+  const [threshold, setThreshold] = useState("5");
   const [errors, setErrors] = useState<{ price?: string; stock?: string }>({});
   const [apiError, setApiError] = useState("");
   const [showRequestModal, setShowRequestModal] = useState(false);
@@ -78,7 +71,15 @@ export default function AddProductModal({ onClose }: Props) {
     }, {
       onSuccess: () => onClose(),
       onError: (err: unknown) => {
-        const message = err instanceof Error ? err.message : "Something went wrong";
+        const detail = (err as { data?: { detail?: unknown } })?.data?.detail;
+        let message = "Couldn't add the product. Please try again.";
+        if (typeof detail === "string") message = detail;
+        else if (Array.isArray(detail) && (detail[0] as { msg?: string })?.msg) {
+          message = (detail[0] as { msg: string }).msg;
+        } else if (err instanceof Error && err.message) {
+          message = err.message;
+        }
+        message = message.replace(/^\d{3}:\s*/, "");
         setApiError(message);
       },
     });
@@ -87,6 +88,7 @@ export default function AddProductModal({ onClose }: Props) {
   if (showRequestModal) {
     return (
       <RequestProductModal
+        shopId={SHOP_ID}
         onClose={onClose}
         onBack={() => setShowRequestModal(false)}
       />
@@ -128,11 +130,15 @@ export default function AddProductModal({ onClose }: Props) {
                   className="w-full h-8 bg-muted/50 rounded pl-9 pr-3 text-sm outline-none focus:ring-1 focus:ring-foreground"
                 />
               </div>
-              <select value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}
-                className="h-8 rounded border border-input bg-transparent px-2 text-sm outline-none focus:border-ring">
-                <option value="">All Categories</option>
-                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
+              <FilterDropdown
+                value={categoryFilter}
+                onChange={setCategoryFilter}
+                placeholder="All Categories"
+                options={[
+                  { value: "", label: "All Categories" },
+                  ...categories.map((c) => ({ value: c.id, label: c.name })),
+                ]}
+              />
             </div>
 
             {/* Product List */}
@@ -146,8 +152,12 @@ export default function AddProductModal({ onClose }: Props) {
                   <button key={product.product_id} type="button"
                     onClick={() => handleSelectProduct(product)}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border hover:bg-muted/30 hover:border-primary/30 transition-colors text-left">
-                    <div className="w-8 h-8 rounded bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground shrink-0">
-                      {product.product_name.charAt(0)}
+                    <div className="w-8 h-8 rounded bg-muted flex items-center justify-center overflow-hidden text-xs font-bold text-muted-foreground shrink-0">
+                      {product.image_url ? (
+                        <img src={product.image_url} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        product.product_name.charAt(0)
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{product.product_name}</p>
@@ -176,8 +186,12 @@ export default function AddProductModal({ onClose }: Props) {
 
             {/* Product Confirmation */}
             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border">
-              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center text-sm font-bold text-muted-foreground shrink-0">
-                {selectedProduct.product_name.charAt(0)}
+              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center overflow-hidden text-sm font-bold text-muted-foreground shrink-0">
+                {selectedProduct.image_url ? (
+                  <img src={selectedProduct.image_url} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  selectedProduct.product_name.charAt(0)
+                )}
               </div>
               <div>
                 <p className="text-sm font-semibold">{selectedProduct.product_name}</p>
@@ -210,6 +224,17 @@ export default function AddProductModal({ onClose }: Props) {
                 className={errors.stock ? "border-destructive" : ""}
               />
               {errors.stock && <p className="text-xs text-destructive">{errors.stock}</p>}
+            </div>
+
+            {/* Low Stock Threshold */}
+            <div className="space-y-1.5">
+              <Label className="text-xs">Low Stock Alert</Label>
+              <Input
+                type="number" value={threshold}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setThreshold(e.target.value)}
+                placeholder="5"
+              />
+              <p className="text-[11px] text-muted-foreground">You'll be warned when stock drops to this number.</p>
             </div>
 
             {/* Active Status */}

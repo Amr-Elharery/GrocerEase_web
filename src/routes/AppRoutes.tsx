@@ -11,6 +11,7 @@ import StoreLayout from "@/components/layouts/StoreLayout";
 import ShopInventory from "@/features/shop/components/ShopInventory";
 import CreateShopForm from "@/features/shop/components/CreateShopForm";
 import EditShopForm from "@/features/shop/components/EditShopForm";
+import MyRequests from "@/features/shop/components/MyRequests";
 import ShopsList from "@/features/shop/components/admin/ShopsList";
 import ShopDetails from "@/features/shop/components/admin/ShopDetails";
 import AuthGuard from "@/components/AuthGuard";
@@ -91,6 +92,7 @@ const router = createBrowserRouter([
       { path: "home", element: <ComingSoon page="Store Dashboard" /> },
       { path: "profile", element: <Profile /> },
       { path: "shop-settings", element: <EditShopForm /> },
+      { path: "my-requests", element: <MyRequests /> },
       { path: "inventory", element: <ShopInventory /> },
       { path: "orders", element: <StoreOrders /> },
       { path: "reports", element: <ComingSoon page="Reports" /> },

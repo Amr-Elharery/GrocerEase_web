@@ -6,6 +6,7 @@ import { useDeleteProduct } from "../hooks/useDeleteProduct";
 import { Button } from "@/components/ui/button";
 import type { Product } from "../api/productService";
 import { useSearch } from "@/Context/SearchContext";
+import StoreCoverageModal from "./StoreCoverageModal";
 
 const categoryColors: Record<string, string> = {
   Dairy: "bg-blue-50 text-blue-600",
@@ -22,20 +23,6 @@ const categoryColors: Record<string, string> = {
   Baking: "bg-emerald-50 text-emerald-600",
 };
 
-function StatCard({ label, value, helper, danger = false }: {
-  label: string;
-  value: string | number | undefined;
-  helper?: string;
-  danger?: boolean;
-}) {
-  return (
-    <div className="rounded-xl border border-[#DDE7DF] bg-white px-3 py-2.5 shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-[#5F7168]">{label}</p>
-      <p className={`mt-0.5 text-[22px] font-bold ${danger ? "text-red-600" : "text-[#101828]"}`}>{value}</p>
-      {helper && <p className={`mt-0.5 text-xs font-medium ${danger ? "text-red-600" : "text-green-600"}`}>{helper}</p>}
-    </div>
-  );
-}
 
 export default function ProductList() {
   const [page, setPage] = useState(1);
@@ -46,6 +33,7 @@ export default function ProductList() {
 
   const [menuId, setMenuId] = useState<number | null>(null);
   const [confirmTarget, setConfirmTarget] = useState<Product | null>(null);
+  const [coverageTarget, setCoverageTarget] = useState<Product | null>(null);
 
   const [prevSearch, setPrevSearch] = useState(search);
   if (search !== prevSearch) {
@@ -112,6 +100,14 @@ export default function ProductList() {
         </div>
       )}
 
+      {coverageTarget && (
+        <StoreCoverageModal
+          productId={coverageTarget.id}
+          productName={coverageTarget.product_name}
+          onClose={() => setCoverageTarget(null)}
+        />
+      )}
+
       {menuId !== null && (
         <div className="fixed inset-0 z-10" onClick={() => setMenuId(null)} />
       )}
@@ -135,19 +131,7 @@ export default function ProductList() {
         </Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Total Products" value={products.length.toLocaleString()} helper="↑ 12% from last month" />
-        <StatCard label="Active SKUs" value="8,912" helper="— Steady" />
-        <StatCard label="Out of Stock" value="142" helper="⚠ Requires attention" danger />
-        <div className="rounded-xl border border-[#DDE7DF] bg-white px-3 py-2.5 shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-[#5F7168]">Store Coverage</p>
-          <p className="mt-0.5 text-[22px] font-bold text-[#101828]">94%</p>
-          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#E8F0EA]">
-            <div className="h-full rounded-full bg-[#006B22]" style={{ width: "94%" }} />
-          </div>
-        </div>
-      </div>
+      
 
       {/* Table */}
       <div className="overflow-hidden rounded-xl border border-[#DDE7DF] bg-white shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
@@ -159,6 +143,7 @@ export default function ProductList() {
               <th className="w-[120px] px-3 py-3">Category</th>
               <th className="w-[130px] px-3 py-3">Sub-Category</th>
               <th className="w-[65px] px-2 py-3 text-center">Unit</th>
+              <th className="w-[80px] px-2 py-3 text-center">Stores</th>
               <th className="w-[36px] px-2 py-3"></th>
             </tr>
           </thead>
@@ -166,12 +151,14 @@ export default function ProductList() {
             {filtered.map((product: Product) => (
               <tr key={product.id} className="transition hover:bg-[#F8FAF8]">
                 <td className="px-4 py-2.5">
-                  <div className="flex min-w-0 items-center gap-2.5">
+                  <button type="button"
+                    onClick={() => setCoverageTarget(product)}
+                    className="flex min-w-0 items-center gap-2.5 text-left">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#E8F0EA] text-xs font-bold text-[#5F7168]">
                       {product.product_name.charAt(0)}
                     </div>
-                    <span className="truncate text-sm font-semibold text-[#101828]">{product.product_name}</span>
-                  </div>
+                    <span className="truncate text-sm font-semibold text-[#101828] hover:text-[#006B22] hover:underline">{product.product_name}</span>
+                  </button>
                 </td>
                 <td className="truncate px-3 py-2.5 text-sm text-[#5F7168]">{product.brand ?? "—"}</td>
                 <td className="px-3 py-2.5">
@@ -185,6 +172,13 @@ export default function ProductList() {
                   {product.sub_category?.category_name ?? "—"}
                 </td>
                 <td className="whitespace-nowrap px-2 py-2.5 text-center text-sm text-[#5F7168]">{product.unit ?? "—"}</td>
+                <td className="px-2 py-2.5 text-center">
+                  <button type="button"
+                    onClick={() => setCoverageTarget(product)}
+                    className="inline-flex items-center gap-1 rounded-full bg-[#EAF7EE] px-2.5 py-1 text-xs font-semibold text-[#006B22] transition hover:bg-[#d8f0df]">
+                    View
+                  </button>
+                </td>
                 <td className="relative px-2 py-2.5 text-right">
                   <button type="button"
                     onClick={() => setMenuId(menuId === product.id ? null : product.id)}
