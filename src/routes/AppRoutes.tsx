@@ -9,13 +9,7 @@ import UserManagement from "@/features/users/components/UserManagement";
 import AppLayout from "@/components/layouts/AdminLayout";
 import StoreLayout from "@/components/layouts/StoreLayout";
 import ShopInventory from "@/features/shop/components/ShopInventory";
-import CreateShopForm from "@/features/shop/components/CreateShopForm";
-import EditShopForm from "@/features/shop/components/EditShopForm";
-import MyRequests from "@/features/shop/components/MyRequests";
-import ShopsList from "@/features/shop/components/admin/ShopsList";
-import ShopDetails from "@/features/shop/components/admin/ShopDetails";
 import AuthGuard from "@/components/AuthGuard";
-import ShopGuard from "@/components/ShopGuard";
 import Login from "@/features/auth/components/Login";
 import SignUp from "@/features/auth/components/SignUp";
 import ForgotPassword from "@/features/auth/components/ForgotPassword";
@@ -24,6 +18,8 @@ import Home from "@/features/auth/components/Home";
 import Profile from "@/features/profile/components/Profile";
 import OrderList from "@/features/orders/components/OrderList";
 import StoreOrders from  "@/features/orders/components/StoreOrders";
+import StoreDashboard from "@/features/analytics/components/StoreDashboard";
+import AdminAnalyticsDashboard from "@/features/analytics/components/AdminAnalyticsDashboard";
 
 const ComingSoon = ({ page }: { page: string }) => (
   <div className="flex items-center justify-center min-h-[calc(100vh-64px)]">
@@ -32,10 +28,7 @@ const ComingSoon = ({ page }: { page: string }) => (
 );
 
 const router = createBrowserRouter([
-{
-  path: "/",
-  element: <Navigate to="/auth/login" replace />,
-},
+  { path: "/", element: <Home /> },
   {
     path: "/auth",
     element: <AuthLayout />,
@@ -44,7 +37,7 @@ const router = createBrowserRouter([
       { path: "login", element: <Login /> },
       { path: "signup", element: <SignUp /> },
       { path: "forgot-password", element: <ForgotPassword /> },
-      { path: "reset-password/:token", element: <ResetPassword /> },
+      { path: "reset-password", element: <ResetPassword /> },
     ],
   },
   {
@@ -56,7 +49,7 @@ const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Navigate to="/app/home" replace /> },
-      { path: "home", element: <Home /> },
+      { path: "home", element: <AdminAnalyticsDashboard /> },
       { path: "profile", element: <Profile /> },
       { path: "inventory", element: <ProductList /> },
       { path: "inventory/create", element: <CreateProductForm /> },
@@ -64,35 +57,20 @@ const router = createBrowserRouter([
       { path: "categories", element: <CategoryManagement /> },
       { path: "submissions", element: <SubmissionList /> },
       { path: "users", element: <UserManagement /> },
-      { path: "shops", element: <ShopsList /> },
-      { path: "shops/:id", element: <ShopDetails /> },
 
 { path: "orders", element: <OrderList /> },
-   ],
-  },
-  {
-    path: "/store/create-shop",
-    element: (
-      <AuthGuard>
-        <CreateShopForm />
-      </AuthGuard>
-    ),
+ ],
   },
   {
     path: "/store",
     element: (
       <AuthGuard>
-        <ShopGuard>
-          <StoreLayout />
-        </ShopGuard>
+        <StoreLayout />
       </AuthGuard>
     ),
     children: [
       { index: true, element: <Navigate to="/store/inventory" replace /> },
-      { path: "home", element: <ComingSoon page="Store Dashboard" /> },
-      { path: "profile", element: <Profile /> },
-      { path: "shop-settings", element: <EditShopForm /> },
-      { path: "my-requests", element: <MyRequests /> },
+      { path: "home", element: <StoreDashboard /> },
       { path: "inventory", element: <ShopInventory /> },
       { path: "orders", element: <StoreOrders /> },
       { path: "reports", element: <ComingSoon page="Reports" /> },
