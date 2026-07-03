@@ -94,9 +94,16 @@ export function useForgotPassword() {
 export function useResetPassword() {
   const navigate = useNavigate();
   return useMutation({
-    mutationFn: async (_: { token: string; newPassword: string; confirmPassword: string }) => {
-      return {};
-    },
+    mutationFn: (data: {
+      accessToken: string;
+      refreshToken: string;
+      newPassword: string;
+    }) =>
+      authService.resetPassword({
+        access_token: data.accessToken,
+        refresh_token: data.refreshToken,
+        new_password: data.newPassword,
+      }),
     onSuccess: () => navigate('/auth/login'),
   });
 }

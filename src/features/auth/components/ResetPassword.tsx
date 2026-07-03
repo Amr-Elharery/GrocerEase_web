@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { useParams } from "react-router";
 import { useResetPassword } from "../hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +20,21 @@ type ResetErrors = {
   confirmPassword?: string;
 };
 
+function readTokensFromUrl(): { accessToken: string | null; refreshToken: string | null } {
+  const hashRaw = window.location.hash.startsWith("#")
+    ? window.location.hash.slice(1)
+    : window.location.hash;
+  const hashParams = new URLSearchParams(hashRaw);
+  const queryParams = new URLSearchParams(window.location.search);
+
+  const accessToken =
+    hashParams.get("access_token") || queryParams.get("access_token");
+  const refreshToken =
+    hashParams.get("refresh_token") || queryParams.get("refresh_token");
+
+  return { accessToken, refreshToken };
+}
+
 const ZADLogo = () => (
   <div className="flex items-center justify-center gap-1 mb-4">
     <svg width="36" height="44" viewBox="0 0 32 38" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -37,13 +51,15 @@ const ZADLogo = () => (
 );
 
 export default function ResetPassword() {
-  const { token } = useParams();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [errors, setErrors] = useState<ResetErrors>({});
+  const [tokens] = useState(() => readTokensFromUrl());
   const resetPassword = useResetPassword();
+
+  const missingTokens = !tokens.accessToken || !tokens.refreshToken;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,7 +74,11 @@ export default function ResetPassword() {
       return;
     }
     setErrors({});
-    resetPassword.mutate({ token: token!, newPassword, confirmPassword });
+    resetPassword.mutate({
+      accessToken: tokens.accessToken!,
+      refreshToken: tokens.refreshToken!,
+      newPassword,
+    });
   };
 
   return (
@@ -68,6 +88,12 @@ export default function ResetPassword() {
         <h1 className="text-2xl font-bold text-foreground">Reset Password</h1>
         <p className="text-sm text-muted-foreground">Create a new password for your account.</p>
       </div>
+
+      {missingTokens && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+          This reset link is invalid or has expired. Please request a new reset link.
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
@@ -102,8 +128,14 @@ export default function ResetPassword() {
           {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword}</p>}
         </div>
 
+        {resetPassword.isError && (
+          <p className="text-xs text-destructive">
+            Something went wrong. The link may have expired — please request a new one.
+          </p>
+        )}
+
         <Button type="submit" className="w-full bg-[#1B4332] hover:bg-[#2D6A4F] text-white h-11 text-sm font-semibold"
-          disabled={resetPassword.isPending}>
+          disabled={resetPassword.isPending || missingTokens}>
           {resetPassword.isPending ? "Resetting..." : "Reset Password"}
         </Button>
       </form>
