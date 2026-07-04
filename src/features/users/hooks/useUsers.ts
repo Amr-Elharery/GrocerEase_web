@@ -9,16 +9,6 @@ export function useUsers() {
   });
 }
 
-export function useCreateUser() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (data: unknown) => userService.createUser(data),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['users'] });
-    },
-  });
-}
-
 export function useSuspendUser() {
   const qc = useQueryClient();
   return useMutation({

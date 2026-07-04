@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { Plus, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Plus, MoreVertical, Pencil, Trash2, ChevronDown, Check, Filter } from "lucide-react";
 import { useProducts } from "../hooks/useProducts";
 import { useDeleteProduct } from "../hooks/useDeleteProduct";
+import { useCategories } from "@/features/categories/hooks/useCategories";
 import { Button } from "@/components/ui/button";
 import type { Product } from "../api/productService";
 import { useSearch } from "@/Context/SearchContext";
@@ -23,11 +24,81 @@ const categoryColors: Record<string, string> = {
   Baking: "bg-emerald-50 text-emerald-600",
 };
 
+function getProductImage(product: Product): string | null {
+  const images = product.product_images ?? [];
+  if (images.length === 0) return null;
+  const primary = images.find((img) => img.is_primary && img.image_url);
+  return primary?.image_url ?? images.find((img) => img.image_url)?.image_url ?? null;
+}
+
+function CategoryFilterDropdown({
+  value,
+  options,
+  onChange,
+  placeholder = "Filter by category",
+}: {
+  value: string;
+  options: { value: string; label: string }[];
+  onChange: (value: string) => void;
+  placeholder?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const selected = options.find((o) => o.value === value) ?? options[0];
+
+  useEffect(() => {
+    function onOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onOutside);
+    return () => document.removeEventListener("mousedown", onOutside);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative w-[200px]">
+      <button
+        type="button"
+        onClick={() => setOpen((p) => !p)}
+        className="flex h-9 w-full items-center justify-between rounded-lg border border-[#078A2D] bg-white px-3 text-sm font-semibold text-[#101828] shadow-sm transition hover:bg-[#F0FDF4]"
+      >
+        <span className={value === "all" ? "text-[#667085] font-medium" : ""}>
+          {value === "all" ? placeholder : selected.label}
+        </span>
+        <ChevronDown className={`h-4 w-4 shrink-0 text-[#078A2D] transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="absolute left-0 top-[44px] z-30 max-h-[260px] w-full overflow-y-auto rounded-lg border border-[#CDE8D5] bg-white shadow-[0_12px_30px_rgba(15,23,42,0.12)]">
+          {options.map((o) => (
+            <button
+              key={o.value}
+              type="button"
+              onClick={() => { onChange(o.value); setOpen(false); }}
+              className={`flex w-full items-center justify-between px-3 py-2.5 text-left text-sm transition ${
+                value === o.value ? "bg-[#EAF7EE] font-semibold text-[#078A2D]" : "text-[#101828] hover:bg-[#F0FDF4]"
+              }`}
+            >
+              <span className="truncate">{o.label}</span>
+              {value === o.value && <Check className="h-4 w-4 shrink-0 text-[#078A2D]" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function ProductList() {
   const [page, setPage] = useState(1);
   const { search } = useSearch();
-  const { data: products = [], isLoading } = useProducts(page, search);
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [subFilter, setSubFilter] = useState("all");
+  const isFiltering = categoryFilter !== "all" || subFilter !== "all";
+  const { data: products = [], isLoading } = useProducts(
+    isFiltering ? 1 : page,
+    search,
+    isFiltering ? 100 : 10
+  );
+  const { data: categories = [] } = useCategories();
   const navigate = useNavigate();
   const deleteProduct = useDeleteProduct();
 
@@ -45,7 +116,38 @@ export default function ProductList() {
     setPage((p) => p - 1);
   }
 
-  const filtered = products;
+  const parents = categories.filter((c) => !c.parent_id);
+  const parentByName = new Map(parents.map((c) => [c.name, c.id]));
+  const selectedParentId = parentByName.get(categoryFilter);
+  const subsOfSelected = categories.filter(
+    (c) => c.parent_id && c.parent_id === selectedParentId
+  );
+  const subNamesOfSelected = subsOfSelected.map((s) => s.name);
+
+  const parentOptions = [
+    { value: "all", label: "All Categories" },
+    ...parents.map((c) => ({ value: c.name, label: c.name })),
+  ];
+  const subOptions = [
+    { value: "all", label: "All Sub-Categories" },
+    ...subsOfSelected.map((c) => ({ value: c.name, label: c.name })),
+  ];
+
+  const filtered = products.filter((p) => {
+    const catName = p.category?.category_name ?? "";
+    const subName = p.sub_category?.category_name ?? "";
+
+    const matchesParent =
+      categoryFilter === "all" ||
+      catName === categoryFilter ||
+      subNamesOfSelected.includes(subName) ||
+      subNamesOfSelected.includes(catName);
+
+    const matchesSub =
+      subFilter === "all" || subName === subFilter || catName === subFilter;
+
+    return matchesParent && matchesSub;
+  });
 
   const handleDelete = (product: Product) => {
     setMenuId(null);
@@ -133,6 +235,33 @@ export default function ProductList() {
 
       
 
+      {/* Filter bar */}
+      <div className="flex flex-wrap items-center gap-2.5 rounded-lg border border-[#DDE7DF] bg-white px-3 py-2 shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
+        <Filter className="h-4 w-4 shrink-0 text-[#5F7168]" />
+        <CategoryFilterDropdown
+          value={categoryFilter}
+          options={parentOptions}
+          onChange={(v) => { setCategoryFilter(v); setSubFilter("all"); }}
+        />
+        {categoryFilter !== "all" && subsOfSelected.length > 0 && (
+          <CategoryFilterDropdown
+            value={subFilter}
+            options={subOptions}
+            onChange={setSubFilter}
+            placeholder="Filter by sub-category"
+          />
+        )}
+        {isFiltering && (
+          <button
+            type="button"
+            onClick={() => { setCategoryFilter("all"); setSubFilter("all"); }}
+            className="text-xs font-semibold text-[#5F7168] underline"
+          >
+            Clear
+          </button>
+        )}
+      </div>
+
       {/* Table */}
       <div className="overflow-hidden rounded-xl border border-[#DDE7DF] bg-white shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
         <table className="w-full table-fixed border-collapse text-left">
@@ -148,15 +277,26 @@ export default function ProductList() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#DDE7DF]">
-            {filtered.map((product: Product) => (
+            {filtered.map((product: Product) => {
+              const imageUrl = getProductImage(product);
+              return (
               <tr key={product.id} className="transition hover:bg-[#F8FAF8]">
                 <td className="px-4 py-2.5">
                   <button type="button"
                     onClick={() => setCoverageTarget(product)}
                     className="flex min-w-0 items-center gap-2.5 text-left">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#E8F0EA] text-xs font-bold text-[#5F7168]">
-                      {product.product_name.charAt(0)}
-                    </div>
+                    {imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        alt={product.product_name}
+                        className="h-8 w-8 shrink-0 rounded-lg object-cover"
+                        onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                      />
+                    ) : (
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#E8F0EA] text-xs font-bold text-[#5F7168]">
+                        {product.product_name.charAt(0)}
+                      </div>
+                    )}
                     <span className="truncate text-sm font-semibold text-[#101828] hover:text-[#006B22] hover:underline">{product.product_name}</span>
                   </button>
                 </td>
@@ -204,7 +344,8 @@ export default function ProductList() {
                   )}
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
 
@@ -213,16 +354,18 @@ export default function ProductList() {
           <p className="text-xs text-[#667085]">
             Showing <span className="font-semibold text-[#101828]">{filtered.length}</span> products
           </p>
-          <div className="flex items-center gap-1.5">
-            <button type="button" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-              className="flex h-8 items-center justify-center rounded-lg border border-[#DDE7DF] px-3 text-xs font-semibold text-[#5F7168] transition hover:bg-[#F8FAF8] disabled:opacity-40">
-              Previous
-            </button>
-            <button type="button" onClick={() => setPage(p => p + 1)} disabled={products.length < 10}
-              className="flex h-8 items-center justify-center rounded-lg border border-[#DDE7DF] px-3 text-xs font-semibold text-[#5F7168] transition hover:bg-[#F8FAF8] disabled:opacity-40">
-              Next
-            </button>
-          </div>
+          {!isFiltering && (
+            <div className="flex items-center gap-1.5">
+              <button type="button" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+                className="flex h-8 items-center justify-center rounded-lg border border-[#DDE7DF] px-3 text-xs font-semibold text-[#5F7168] transition hover:bg-[#F8FAF8] disabled:opacity-40">
+                Previous
+              </button>
+              <button type="button" onClick={() => setPage(p => p + 1)} disabled={products.length < 10}
+                className="flex h-8 items-center justify-center rounded-lg border border-[#DDE7DF] px-3 text-xs font-semibold text-[#5F7168] transition hover:bg-[#F8FAF8] disabled:opacity-40">
+                Next
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </section>
