@@ -270,12 +270,12 @@ export default function OrderList() {
             <thead>
               <tr className="border-b border-[#DDE7DF] bg-[#F8FAF8] text-[11px] font-semibold uppercase tracking-wide text-[#5F7168]">
                 <th className="w-[105px] px-4 py-3">Order ID</th>
-                <th className="w-[185px] px-4 py-3">Customer</th>
-                <th className="w-[145px] px-4 py-3">Store</th>
+                <th className="w-[140px] px-4 py-3">Customer</th>
+                <th className="w-[120px] px-4 py-3">Store</th>
                 <th className="w-[78px] px-4 py-3">Items</th>
                 <th className="w-[120px] px-4 py-3">Total</th>
-                <th className="w-[105px] px-4 py-3">Payment</th>
-                <th className="w-[128px] px-4 py-3">Status</th>
+                <th className="w-[140px] px-4 py-3">Payment</th>
+                <th className="w-[158px] pl-6 pr-4 py-3">Status</th>
                 <th className="w-[100px] px-4 py-3">Date</th>
               </tr>
             </thead>
@@ -317,7 +317,7 @@ export default function OrderList() {
 
                   <td className="px-4 py-2.5">
                     <span
-                      className={`inline-flex rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wide ${
+                      className={`inline-flex whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wide ${
                         paymentColors[order.payment_method] ??
                         "border border-[#E5E7EB] bg-[#F3F4F6] text-[#667085]"
                       }`}
@@ -326,9 +326,9 @@ export default function OrderList() {
                     </span>
                   </td>
 
-                  <td className="px-4 py-2.5">
+                  <td className="py-2.5 pl-6 pr-4">
                     <span
-                      className={`inline-flex rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wide ${
+                      className={`inline-flex whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wide ${
                         statusColors[order.status] ??
                         "border border-[#E5E7EB] bg-[#F3F4F6] text-[#667085]"
                       }`}

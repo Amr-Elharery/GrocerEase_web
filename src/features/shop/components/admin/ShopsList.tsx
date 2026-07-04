@@ -10,10 +10,10 @@ export default function ShopsList() {
   const { data: shops = [], isLoading } = useShops({ search });
 
   return (
-    <section className="mx-auto max-w-[1420px] space-y-4">
+    <section className="mx-auto max-w-[1420px] space-y-2.5">
       <div>
         <h1 className="text-[24px] font-bold tracking-tight text-[#101828]">Shops</h1>
-        <p className="mt-1 text-[15px] text-[#667085]">All stores registered on the platform.</p>
+        <p className="mt-0.5 text-[15px] text-[#667085]">All stores registered on the platform.</p>
       </div>
 
       {/* Search */}
