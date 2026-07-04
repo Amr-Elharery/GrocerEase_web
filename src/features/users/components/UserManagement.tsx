@@ -172,10 +172,10 @@ const roleOptions = [
         <table className="min-w-full border-collapse text-left">
           <thead>
             <tr className="border-b border-[#DDE7DF] bg-[#F8FAF8] text-[11px] font-semibold uppercase tracking-wider text-[#5F7168]">
-              <th className="px-4 py-3">User</th>
+              <th className="px-6 py-3">User</th>
               <th className="px-4 py-3">Role</th>
               <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3 text-right">Action</th>
+              <th className="px-12 py-3 text-right">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#DDE7DF]">
