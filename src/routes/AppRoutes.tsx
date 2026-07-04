@@ -27,21 +27,29 @@ const ComingSoon = ({ page }: { page: string }) => (
   </div>
 );
 
+const NotFound = () => (
+  <div className="flex items-center justify-center min-h-[calc(100vh-64px)]">
+    <h1 className="text-2xl font-bold text-muted-foreground">
+      404 - Page Not Found
+    </h1>
+  </div>
+);
+
 const router = createBrowserRouter([
-  { path: "/", element: <Home /> },
+  { path: '/', element: <Home /> },
   {
-    path: "/auth",
+    path: '/auth',
     element: <AuthLayout />,
     children: [
       { index: true, element: <Navigate to="/auth/login" replace /> },
-      { path: "login", element: <Login /> },
-      { path: "signup", element: <SignUp /> },
-      { path: "forgot-password", element: <ForgotPassword /> },
-      { path: "reset-password", element: <ResetPassword /> },
+      { path: 'login', element: <Login /> },
+      { path: 'signup', element: <SignUp /> },
+      { path: 'forgot-password', element: <ForgotPassword /> },
+      { path: 'reset-password', element: <ResetPassword /> },
     ],
   },
   {
-    path: "/app",
+    path: '/app',
     element: (
       <AuthGuard>
         <AppLayout />
@@ -49,20 +57,20 @@ const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Navigate to="/app/home" replace /> },
-      { path: "home", element: <AdminAnalyticsDashboard /> },
-      { path: "profile", element: <Profile /> },
-      { path: "inventory", element: <ProductList /> },
-      { path: "inventory/create", element: <CreateProductForm /> },
-      { path: "inventory/:id/edit", element: <EditProductForm /> },
-      { path: "categories", element: <CategoryManagement /> },
-      { path: "submissions", element: <SubmissionList /> },
-      { path: "users", element: <UserManagement /> },
+      { path: 'home', element: <AdminAnalyticsDashboard /> },
+      { path: 'profile', element: <Profile /> },
+      { path: 'inventory', element: <ProductList /> },
+      { path: 'inventory/create', element: <CreateProductForm /> },
+      { path: 'inventory/:id/edit', element: <EditProductForm /> },
+      { path: 'categories', element: <CategoryManagement /> },
+      { path: 'submissions', element: <SubmissionList /> },
+      { path: 'users', element: <UserManagement /> },
 
-{ path: "orders", element: <OrderList /> },
- ],
+      { path: 'orders', element: <OrderList /> },
+    ],
   },
   {
-    path: "/store",
+    path: '/store',
     element: (
       <AuthGuard>
         <StoreLayout />
@@ -70,13 +78,13 @@ const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Navigate to="/store/inventory" replace /> },
-      { path: "home", element: <StoreDashboard /> },
-      { path: "inventory", element: <ShopInventory /> },
-      { path: "orders", element: <StoreOrders /> },
-      { path: "reports", element: <ComingSoon page="Reports" /> },
+      { path: 'home', element: <StoreDashboard /> },
+      { path: 'inventory', element: <ShopInventory /> },
+      { path: 'orders', element: <StoreOrders /> },
+      { path: 'reports', element: <ComingSoon page="Reports" /> },
     ],
   },
-  { path: "*", element: <Navigate to="/auth/login" replace /> },
+  { path: '*', element: <NotFound /> },
 ]);
 
 export function AppRoutes() {
