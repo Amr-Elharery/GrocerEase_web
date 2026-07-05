@@ -1,0 +1,115 @@
+{
+  "units": {
+    "piece": "Piece",
+    "kg": "Kg",
+    "litre": "Litre",
+    "pack": "Pack",
+    "box": "Box",
+    "bottle": "Bottle",
+    "can": "Can",
+    "bag": "Bag",
+    "tray": "Tray",
+    "jar": "Jar"
+  },
+  "form": {
+    "errors": {
+      "required": "Required field",
+      "categoryRequired": "Category is required"
+    },
+    "category": {
+      "sectionTitle": "Category Taxonomy",
+      "topLevelLabel": "Top-Level Category *",
+      "selectPlaceholder": "Select category",
+      "subCategoryLabel": "Sub-Category *"
+    },
+    "assets": {
+      "sectionTitle": "Product Assets",
+      "helpText": "Upload up to 5 product images. Click an image to make it primary.",
+      "dropText": "Drag and drop images",
+      "fileTypes": "JPG, PNG, WEBP",
+      "browseText": "Or browse files",
+      "primaryBadge": "Primary",
+      "primaryTitle": "Click to make primary"
+    },
+    "info": {
+      "sectionTitle": "Product Information",
+      "nameLabel": "Product Name *",
+      "namePlaceholder": "e.g. Full Cream Milk 1L",
+      "brandLabel": "Brand *",
+      "brandPlaceholder": "Enter brand name",
+      "unitLabel": "Unit *",
+      "unitPlaceholder": "Select unit",
+      "barcodeLabel": "Barcode / SKU *",
+      "barcodePlaceholder": "e.g. 745920381442",
+      "barcodeConflict": "Conflict: Barcode already exists in system",
+      "barcodeConflictTitle": "Barcode Conflict Warning",
+      "barcodeConflictMessage": "The barcode <1>{{barcode}}</1> is already assigned to another product.",
+      "descriptionLabel": "Product Description",
+      "descriptionPlaceholder": "Enter detailed technical specifications and marketing copy..."
+    },
+    "create": {
+      "title": "New Product Entry",
+      "subtitle": "Configure product details, category taxonomy, and product assets.",
+      "discard": "Discard",
+      "save": "Save Product",
+      "saving": "Saving...",
+      "imageRequired": "At least one product image is required."
+    },
+    "edit": {
+      "title": "Edit Product",
+      "loading": "Loading product...",
+      "unsavedChanges": "Unsaved changes",
+      "discard": "Discard",
+      "save": "Save Changes",
+      "saving": "Saving...",
+      "idLabel": "ID: {{id}}",
+      "leaveConfirm": "You have unsaved changes. Are you sure you want to leave?"
+    }
+  },
+  "list": {
+    "breadcrumb": {
+      "catalogue": "Catalogue",
+      "products": "Products"
+    },
+    "title": "Product Management",
+    "subtitle": "Manage product catalogue, inventory status, and store coverage.",
+    "createButton": "Create Product",
+    "loading": "Loading products...",
+    "filter": {
+      "allCategories": "All Categories",
+      "allSubCategories": "All Sub-Categories",
+      "categoryPlaceholder": "Filter by category",
+      "subCategoryPlaceholder": "Filter by sub-category"
+    },
+    "columns": {
+      "product": "Product",
+      "brand": "Brand",
+      "category": "Category",
+      "subCategory": "Sub-Category",
+      "unit": "Unit",
+      "stores": "Stores"
+    },
+    "footer": {
+      "showing": "Showing <1>{{count}}</1> products"
+    },
+    "deleteConfirm": {
+      "title": "Delete product",
+      "message": "Are you sure you want to delete <1>{{name}}</1>?"
+    }
+  },
+  "coverage": {
+    "loading": "Loading...",
+    "productDetailsFallback": "Product details",
+    "category": "Category",
+    "subCategory": "Sub-Category",
+    "unitSize": "Unit / Size",
+    "brand": "Brand",
+    "description": "Description",
+    "images": "Images ({{count}})",
+    "storeCoverage": "Store Coverage ({{count}})",
+    "noStores": "No store carries this product yet.",
+    "stockPrice": "{{stock}} in stock · EGP {{price}}",
+    "active": "Active",
+    "hidden": "Hidden"
+  }
+}

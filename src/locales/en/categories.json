@@ -1,0 +1,40 @@
+{
+  "breadcrumb": {
+    "catalogue": "Catalogue",
+    "categories": "Categories"
+  },
+  "title": "Category Management",
+  "subtitle": "Manage grocery categories, sub-categories, and product grouping.",
+  "loading": "Loading categories...",
+  "topLevel": {
+    "sectionTitle": "Top-Level Categories",
+    "countLabel": "{{count}} categories",
+    "addButton": "Add Category",
+    "addPlaceholder": "Category name..."
+  },
+  "subCategories": {
+    "sectionTitleWithParent": "{{parent}} Sub-Categories",
+    "sectionTitleDefault": "Sub-Categories",
+    "countLabel": "{{count}} sub-categories",
+    "selectPrompt": "Select a category",
+    "addButton": "Add Sub-Category",
+    "addPlaceholder": "Sub-category name...",
+    "productsCount": "{{count}} products"
+  },
+  "emptyState": {
+    "selectCategoryTitle": "Select a category",
+    "selectCategoryText": "Click a top-level category to view, edit, or add its sub-categories.",
+    "noSubCategoriesTitle": "No sub-categories yet",
+    "noSubCategoriesText": "Add the first sub-category under {{parent}}."
+  },
+  "errors": {
+    "nameRequired": "Name is required",
+    "nameExists": "Name already exists",
+    "deleteFallback": "Couldn't delete this category."
+  },
+  "deleteModal": {
+    "title": "Delete Category",
+    "cannotDelete": "Cannot delete <1>\"{{name}}\"</1> because it has <2>{{count}} products</2> assigned. Reassign them first.",
+    "confirmMessage": "Are you sure you want to delete <1>\"{{name}}\"</1>"
+  }
+}

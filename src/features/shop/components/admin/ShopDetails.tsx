@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { useShop } from "../../hooks/useShop";
 import { Button } from "@/components/ui/button";
 import { Store, ArrowLeft } from "lucide-react";
@@ -15,6 +16,7 @@ function Row({ label, value }: { label: string; value: string }) {
 }
 
 export default function ShopDetails() {
+  const { t } = useTranslation(["common", "shop"]);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: shop, isLoading, isError } = useShop(id ? Number(id) : undefined);
@@ -22,7 +24,7 @@ export default function ShopDetails() {
   if (isLoading) {
     return (
       <section className="flex min-h-[300px] items-center justify-center">
-        <p className="text-sm text-[#667085]">Loading shop...</p>
+        <p className="text-sm text-[#667085]">{t("shop:shopDetails.loading")}</p>
       </section>
     );
   }
@@ -32,10 +34,10 @@ export default function ShopDetails() {
       <section className="mx-auto max-w-2xl">
         <Button type="button" variant="outline" onClick={() => navigate("/app/shops")}
           className="mb-4 h-9 gap-2 text-sm font-semibold">
-          <ArrowLeft className="h-4 w-4" /> Back
+          <ArrowLeft className="h-4 w-4" /> {t("common:actions.back")}
         </Button>
         <p className="rounded-xl border border-[#DDE7DF] bg-white p-6 text-center text-sm text-[#667085]">
-          Shop not found.
+          {t("shop:shopDetails.notFound")}
         </p>
       </section>
     );
@@ -45,7 +47,7 @@ export default function ShopDetails() {
     <section className="mx-auto max-w-2xl space-y-4">
       <Button type="button" variant="outline" onClick={() => navigate("/app/shops")}
         className="h-9 gap-2 text-sm font-semibold">
-        <ArrowLeft className="h-4 w-4" /> Back to Shops
+        <ArrowLeft className="h-4 w-4" /> {t("shop:shopDetails.backToShops")}
       </Button>
 
       <div className="rounded-2xl border border-[#DDE7DF] bg-white p-5 shadow-sm">
@@ -63,23 +65,23 @@ export default function ShopDetails() {
             <span className={`mt-1 inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
               shop.is_active ? "bg-[#EAF7EE] text-[#16A34A]" : "bg-[#FEE2E2] text-[#DC2626]"
             }`}>
-              {shop.is_active ? "Active" : "Inactive"}
+              {shop.is_active ? t("shop:shopDetails.active") : t("shop:shopDetails.inactive")}
             </span>
           </div>
         </div>
 
         <div className="space-y-4">
-          <Row label="Description" value={shop.description ?? ""} />
-          <Row label="Address" value={shop.address ?? ""} />
+          <Row label={t("shop:shopDetails.fields.description")} value={shop.description ?? ""} />
+          <Row label={t("shop:shopDetails.fields.address")} value={shop.address ?? ""} />
           <div className="grid gap-4 md:grid-cols-2">
-            <Row label="Phone Number" value={shop.phone_number ?? ""} />
-            <Row label="Area ID" value={shop.area_id != null ? String(shop.area_id) : ""} />
+            <Row label={t("shop:shopDetails.fields.phoneNumber")} value={shop.phone_number ?? ""} />
+            <Row label={t("shop:shopDetails.fields.areaId")} value={shop.area_id != null ? String(shop.area_id) : ""} />
           </div>
           <div className="grid gap-4 md:grid-cols-2">
-            <Row label="Latitude" value={shop.latitude != null ? String(shop.latitude) : ""} />
-            <Row label="Longitude" value={shop.longitude != null ? String(shop.longitude) : ""} />
+            <Row label={t("shop:shopDetails.fields.latitude")} value={shop.latitude != null ? String(shop.latitude) : ""} />
+            <Row label={t("shop:shopDetails.fields.longitude")} value={shop.longitude != null ? String(shop.longitude) : ""} />
           </div>
-          <Row label="Owner ID" value={shop.owner_id ?? ""} />
+          <Row label={t("shop:shopDetails.fields.ownerId")} value={shop.owner_id ?? ""} />
         </div>
       </div>
     </section>

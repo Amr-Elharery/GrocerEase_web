@@ -1,19 +1,11 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { useMyShop, useUpdateShop, useDeleteShop } from "../hooks/useShop";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Store, Upload, X, MapPin, Trash2, AlertTriangle, Pencil, Save } from "lucide-react";
-
-function readApiError(err: unknown): string {
-  const detail = (err as { data?: { detail?: unknown } })?.data?.detail;
-  if (typeof detail === "string") return detail;
-  if (Array.isArray(detail) && (detail[0] as { msg?: string })?.msg) {
-    return (detail[0] as { msg: string }).msg;
-  }
-  return "Something went wrong. Please try again.";
-}
 
 function ViewRow({ label, value }: { label: string; value: string }) {
   return (
@@ -27,11 +19,21 @@ function ViewRow({ label, value }: { label: string; value: string }) {
 }
 
 export default function EditShopForm() {
+  const { t } = useTranslation(["common", "shop"]);
   const navigate = useNavigate();
   const { data: shop, isLoading } = useMyShop();
   const updateShop = useUpdateShop();
   const deleteShop = useDeleteShop();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const readApiError = (err: unknown): string => {
+    const detail = (err as { data?: { detail?: unknown } })?.data?.detail;
+    if (typeof detail === "string") return detail;
+    if (Array.isArray(detail) && (detail[0] as { msg?: string })?.msg) {
+      return (detail[0] as { msg: string }).msg;
+    }
+    return t("shop:editShopForm.genericError");
+  };
 
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState({
@@ -96,7 +98,7 @@ export default function EditShopForm() {
     e.preventDefault();
     if (!shop) return;
     if (!form.shop_name || form.shop_name.length < 2) {
-      setServerError("Shop name is required.");
+      setServerError(t("shop:editShopForm.shopNameRequired"));
       return;
     }
     setServerError("");
@@ -133,7 +135,7 @@ export default function EditShopForm() {
   if (isLoading) {
     return (
       <section className="flex min-h-[300px] items-center justify-center">
-        <p className="text-sm text-[#667085]">Loading shop...</p>
+        <p className="text-sm text-[#667085]">{t("shop:editShopForm.loading")}</p>
       </section>
     );
   }
@@ -147,15 +149,15 @@ export default function EditShopForm() {
             <Store className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-[#101828]">Shop Settings</h1>
-            <p className="text-sm text-[#667085]">View, edit, or delete your shop.</p>
+            <h1 className="text-xl font-black text-[#101828]">{t("shop:editShopForm.title")}</h1>
+            <p className="text-sm text-[#667085]">{t("shop:editShopForm.subtitle")}</p>
           </div>
         </div>
 
         {!editMode && (
           <Button type="button" onClick={startEdit}
             className="h-10 gap-2 bg-[#1B4332] px-4 text-sm font-semibold text-white hover:bg-[#2D6A4F]">
-            <Pencil className="h-4 w-4" /> Edit
+            <Pencil className="h-4 w-4" /> {t("shop:editShopForm.edit")}
           </Button>
         )}
       </div>
@@ -169,19 +171,19 @@ export default function EditShopForm() {
         )}
         {savedMsg && (
           <div className="rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-[#2D6A4F]">
-            Shop updated successfully.
+            {t("shop:editShopForm.updateSuccess")}
           </div>
         )}
 
         {/* Logo */}
         <div className="space-y-1.5">
-          <Label className="text-xs font-semibold text-[#101828]">Shop Logo</Label>
+          <Label className="text-xs font-semibold text-[#101828]">{t("shop:editShopForm.logoLabel")}</Label>
           {editMode ? (
             logo ? (
               <div className="relative h-28 w-28 overflow-hidden rounded-xl border border-[#DDE7DF]">
                 <img src={URL.createObjectURL(logo)} alt="" className="h-full w-full object-cover" />
                 <button type="button" onClick={() => setLogo(null)}
-                  className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-white">
+                  className="absolute end-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-white">
                   <X className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -189,7 +191,7 @@ export default function EditShopForm() {
               <div onClick={() => fileInputRef.current?.click()}
                 className="flex h-28 w-28 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#C9D8CE] bg-[#F8FAF8] text-center transition hover:border-[#1B4332]">
                 <Upload className="mb-1 h-5 w-5 text-[#5F7168]" />
-                <span className="text-[10px] font-medium text-[#5F7168]">Upload logo</span>
+                <span className="text-[10px] font-medium text-[#5F7168]">{t("shop:editShopForm.uploadLogo")}</span>
                 <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
                   onChange={(e) => setLogo(e.target.files?.[0] ?? null)} />
               </div>
@@ -210,28 +212,28 @@ export default function EditShopForm() {
         {editMode ? (
           <form onSubmit={handleSave} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="shop_name" className="text-xs font-semibold text-[#101828]">Shop Name *</Label>
+              <Label htmlFor="shop_name" className="text-xs font-semibold text-[#101828]">{t("shop:editShopForm.shopNameLabel")}</Label>
               <Input id="shop_name" name="shop_name" value={form.shop_name} onChange={handleChange} className="h-10" />
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="description" className="text-xs font-semibold text-[#101828]">Description</Label>
+              <Label htmlFor="description" className="text-xs font-semibold text-[#101828]">{t("shop:editShopForm.descriptionLabel")}</Label>
               <textarea id="description" name="description" value={form.description} onChange={handleChange} rows={2}
                 className="w-full resize-none rounded-lg border border-[#DDE7DF] bg-[#F8FAF8] px-3 py-2 text-sm outline-none focus:border-[#2D6A4F]" />
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="address" className="text-xs font-semibold text-[#101828]">Address</Label>
+              <Label htmlFor="address" className="text-xs font-semibold text-[#101828]">{t("shop:editShopForm.addressLabel")}</Label>
               <Input id="address" name="address" value={form.address} onChange={handleChange} className="h-10" />
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="phone_number" className="text-xs font-semibold text-[#101828]">Phone Number</Label>
+                <Label htmlFor="phone_number" className="text-xs font-semibold text-[#101828]">{t("shop:editShopForm.phoneNumberLabel")}</Label>
                 <Input id="phone_number" name="phone_number" value={form.phone_number} onChange={handleChange} className="h-10" />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="area_id" className="text-xs font-semibold text-[#101828]">Area ID *</Label>
+                <Label htmlFor="area_id" className="text-xs font-semibold text-[#101828]">{t("shop:editShopForm.areaIdLabel")}</Label>
                 <Input id="area_id" name="area_id" type="number" value={form.area_id} onChange={handleChange} className="h-10" />
               </div>
             </div>
@@ -239,13 +241,13 @@ export default function EditShopForm() {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="latitude" className="flex items-center gap-1 text-xs font-semibold text-[#101828]">
-                  <MapPin className="h-3.5 w-3.5" /> Latitude
+                  <MapPin className="h-3.5 w-3.5" /> {t("shop:editShopForm.latitudeLabel")}
                 </Label>
                 <Input id="latitude" name="latitude" type="number" step="any" value={form.latitude} onChange={handleChange} className="h-10" />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="longitude" className="flex items-center gap-1 text-xs font-semibold text-[#101828]">
-                  <MapPin className="h-3.5 w-3.5" /> Longitude
+                  <MapPin className="h-3.5 w-3.5" /> {t("shop:editShopForm.longitudeLabel")}
                 </Label>
                 <Input id="longitude" name="longitude" type="number" step="any" value={form.longitude} onChange={handleChange} className="h-10" />
               </div>
@@ -254,33 +256,33 @@ export default function EditShopForm() {
             <div className="flex gap-2 pt-1">
               <Button type="submit" disabled={updateShop.isPending}
                 className="h-11 flex-1 gap-2 bg-[#1B4332] text-sm font-semibold text-white hover:bg-[#2D6A4F]">
-                <Save className="h-4 w-4" /> {updateShop.isPending ? "Saving..." : "Save Changes"}
+                <Save className="h-4 w-4" /> {updateShop.isPending ? t("common:status.saving") : t("shop:editShopForm.saveChanges")}
               </Button>
               <Button type="button" variant="outline" onClick={cancelEdit}
                 className="h-11 px-4 text-sm font-semibold">
-                Cancel
+                {t("common:actions.cancel")}
               </Button>
             </div>
           </form>
         ) : (
           <>
-            <ViewRow label="Shop Name" value={shop?.shop_name ?? ""} />
-            <ViewRow label="Description" value={shop?.description ?? ""} />
-            <ViewRow label="Address" value={shop?.address ?? ""} />
+            <ViewRow label={t("shop:editShopForm.fields.shopName")} value={shop?.shop_name ?? ""} />
+            <ViewRow label={t("shop:editShopForm.fields.description")} value={shop?.description ?? ""} />
+            <ViewRow label={t("shop:editShopForm.fields.address")} value={shop?.address ?? ""} />
             <div className="grid gap-4 md:grid-cols-2">
-              <ViewRow label="Phone Number" value={shop?.phone_number ?? ""} />
-              <ViewRow label="Area ID" value={shop?.area_id != null ? String(shop.area_id) : ""} />
+              <ViewRow label={t("shop:editShopForm.fields.phoneNumber")} value={shop?.phone_number ?? ""} />
+              <ViewRow label={t("shop:editShopForm.fields.areaId")} value={shop?.area_id != null ? String(shop.area_id) : ""} />
             </div>
             <div className="grid gap-4 md:grid-cols-2">
-              <ViewRow label="Latitude" value={shop?.latitude != null ? String(shop.latitude) : ""} />
-              <ViewRow label="Longitude" value={shop?.longitude != null ? String(shop.longitude) : ""} />
+              <ViewRow label={t("shop:editShopForm.fields.latitude")} value={shop?.latitude != null ? String(shop.latitude) : ""} />
+              <ViewRow label={t("shop:editShopForm.fields.longitude")} value={shop?.longitude != null ? String(shop.longitude) : ""} />
             </div>
 
             {/* Delete */}
             <div className="mt-2 flex justify-end border-t border-[#EEF2EF] pt-4">
               <Button type="button" variant="outline" onClick={() => setConfirmDelete(true)}
                 className="h-10 gap-2 border-red-200 px-4 text-sm font-semibold text-red-600 hover:bg-red-50">
-                <Trash2 className="h-4 w-4" /> Delete Shop
+                <Trash2 className="h-4 w-4" /> {t("shop:editShopForm.deleteShop")}
               </Button>
             </div>
           </>
@@ -298,20 +300,20 @@ export default function EditShopForm() {
                 <AlertTriangle className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-base font-bold text-[#101828]">Delete Shop?</h2>
+                <h2 className="text-base font-bold text-[#101828]">{t("shop:editShopForm.deleteConfirmTitle")}</h2>
                 <p className="mt-1 text-sm text-[#667085]">
-                  This will permanently delete "{shop?.shop_name}". You'll need to create a new shop to continue.
+                  {t("shop:editShopForm.deleteConfirmMessage", { name: shop?.shop_name })}
                 </p>
               </div>
             </div>
             <div className="mt-5 flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => setConfirmDelete(false)}
                 className="h-10 px-4 text-sm font-semibold">
-                Cancel
+                {t("common:actions.cancel")}
               </Button>
               <Button type="button" onClick={handleDelete} disabled={deleteShop.isPending}
                 className="h-10 bg-red-600 px-4 text-sm font-semibold text-white hover:bg-red-700">
-                {deleteShop.isPending ? "Deleting..." : "Delete"}
+                {deleteShop.isPending ? t("common:status.deleting") : t("common:actions.delete")}
               </Button>
             </div>
           </div>

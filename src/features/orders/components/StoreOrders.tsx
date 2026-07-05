@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { RefreshCw, Clock, ChevronDown, Check } from "lucide-react";
 import { useStoreOrders, useUpdateOrderStatus } from "../hooks/useStoreOrders";
 import { type StoreOrder } from "../api/storeOrderService";
@@ -14,14 +15,14 @@ const statusColors: Record<string, string> = {
   cancelled: "border border-[#FECACA] bg-[#FEE2E2] text-[#DC2626]",
 };
 
-const statusLabels: Record<string, string> = {
-  pending: "Pending",
-  processing: "Processing",
-  assigned: "Assigned",
-  out_for_delivery: "Out for Delivery",
-  picked_up: "Picked Up",
-  delivered: "Delivered",
-  cancelled: "Cancelled",
+const statusKeys: Record<string, string> = {
+  pending: "pending",
+  processing: "processing",
+  assigned: "assigned",
+  out_for_delivery: "outForDelivery",
+  picked_up: "pickedUp",
+  delivered: "delivered",
+  cancelled: "cancelled",
 };
 
 function getInitials(name: string) {
@@ -52,9 +53,10 @@ function StatusFilterDropdown({
   options: { key: string; label: string }[];
   onChange: (v: string) => void;
 }) {
+  const { t } = useTranslation(["orders"]);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const selected = options.find((t) => t.key === value) ?? options[0];
+  const selected = options.find((opt) => opt.key === value) ?? options[0];
 
   useEffect(() => {
     function onOutside(e: MouseEvent) {
@@ -72,23 +74,23 @@ function StatusFilterDropdown({
         className="flex h-9 w-full items-center justify-between rounded-lg border border-[#078A2D] bg-white px-3 text-sm font-semibold text-[#101828] shadow-sm transition hover:bg-[#F0FDF4]"
       >
         <span className={value === "all" ? "text-[#667085] font-medium" : ""}>
-          {value === "all" ? "Filter by status" : selected.label}
+          {value === "all" ? t("orders:storeOrders.filterByStatus") : selected.label}
         </span>
         <ChevronDown className={`h-4 w-4 text-[#078A2D] transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
-        <div className="absolute left-0 top-[42px] z-50 w-full overflow-hidden rounded-lg border border-[#CDE8D5] bg-white shadow-[0_12px_30px_rgba(15,23,42,0.12)]">
-          {options.map((t) => (
+        <div className="absolute start-0 top-[42px] z-50 w-full overflow-hidden rounded-lg border border-[#CDE8D5] bg-white shadow-[0_12px_30px_rgba(15,23,42,0.12)]">
+          {options.map((opt) => (
             <button
-              key={t.key}
+              key={opt.key}
               type="button"
-              onClick={() => { onChange(t.key); setOpen(false); }}
-              className={`flex w-full items-center justify-between px-3 py-2.5 text-left text-sm transition ${
-                value === t.key ? "bg-[#EAF7EE] font-semibold text-[#078A2D]" : "text-[#101828] hover:bg-[#F0FDF4]"
+              onClick={() => { onChange(opt.key); setOpen(false); }}
+              className={`flex w-full items-center justify-between px-3 py-2.5 text-start text-sm transition ${
+                value === opt.key ? "bg-[#EAF7EE] font-semibold text-[#078A2D]" : "text-[#101828] hover:bg-[#F0FDF4]"
               }`}
             >
-              <span>{t.label}</span>
-              {value === t.key && <Check className="h-4 w-4 text-[#078A2D]" />}
+              <span>{opt.label}</span>
+              {value === opt.key && <Check className="h-4 w-4 text-[#078A2D]" />}
             </button>
           ))}
         </div>
@@ -104,14 +106,15 @@ function OrderStatusDropdown({
   order: StoreOrder;
   onChange: (status: StoreOrder["status"]) => void;
 }) {
+  const { t } = useTranslation(["orders"]);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const options: { value: StoreOrder["status"]; label: string }[] = [
-    { value: "pending", label: "Pending" },
-    { value: "assigned", label: "Assigned" },
-    { value: "delivered", label: "Delivered" },
-    { value: "cancelled", label: "Cancelled" },
+    { value: "pending", label: t("orders:statuses.pending") },
+    { value: "assigned", label: t("orders:statuses.assigned") },
+    { value: "delivered", label: t("orders:statuses.delivered") },
+    { value: "cancelled", label: t("orders:statuses.cancelled") },
   ];
 
   useEffect(() => {
@@ -151,7 +154,7 @@ function OrderStatusDropdown({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-[38px] z-40 w-[155px] overflow-hidden rounded-lg border border-emerald-100 bg-white shadow-lg">
+        <div className="absolute end-0 top-[38px] z-40 w-[155px] overflow-hidden rounded-lg border border-emerald-100 bg-white shadow-lg">
           {options.map((option) => {
             const isSelected = option.value === order.status;
 
@@ -163,7 +166,7 @@ function OrderStatusDropdown({
                   onChange(option.value);
                   setIsOpen(false);
                 }}
-                className={`flex w-full items-center justify-between px-3 py-2.5 text-left text-xs transition-colors ${
+                className={`flex w-full items-center justify-between px-3 py-2.5 text-start text-xs transition-colors ${
                   isSelected
                     ? "bg-emerald-50 font-semibold text-emerald-700"
                     : "text-foreground hover:bg-emerald-50/60"
@@ -184,6 +187,7 @@ function OrderStatusDropdown({
 }
 
 export default function StoreOrders() {
+  const { t } = useTranslation(["common", "orders"]);
   const [page, setPage] = useState(1);
   const {
     data: orders = [],
@@ -194,6 +198,13 @@ export default function StoreOrders() {
   } = useStoreOrders(page);
 
   const updateStatus = useUpdateOrderStatus();
+
+  const getStatusLabel = (status: string) => {
+    const key = statusKeys[status];
+    return key
+      ? t(`orders:statuses.${key}`)
+      : status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  };
 
   const [activeTab, setActiveTab] = useState("all");
   const [selectedOrder, setSelectedOrder] = useState<StoreOrder | null>(null);
@@ -225,19 +236,19 @@ export default function StoreOrders() {
     return o.status.toLowerCase() === activeTab.toLowerCase();
   });
 
-  const statusKeys = [...new Set(orders.map((o) => o.status).filter(Boolean))];
+  const uniqueStatuses = [...new Set(orders.map((o) => o.status).filter(Boolean))];
   const statusOptions = [
-    { key: "all", label: "All" },
-    ...statusKeys.map((s) => ({
+    { key: "all", label: t("orders:storeOrders.all") },
+    ...uniqueStatuses.map((s) => ({
       key: s,
-      label: s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+      label: getStatusLabel(s),
     })),
   ];
 
   if (isLoading) {
     return (
       <div className="flex min-h-[calc(100vh-80px)] items-center justify-center">
-        <p className="text-sm text-muted-foreground">Loading orders...</p>
+        <p className="text-sm text-muted-foreground">{t("orders:storeOrders.loading")}</p>
       </div>
     );
   }
@@ -247,17 +258,17 @@ export default function StoreOrders() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Orders</h1>
+          <h1 className="text-2xl font-bold">{t("orders:storeOrders.title")}</h1>
 
           <p className="mt-0.5 text-sm text-muted-foreground">
-            Real-time view of incoming orders.
+            {t("orders:storeOrders.subtitle")}
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-xs text-muted-foreground">
             <Clock className="h-3.5 w-3.5" />
-            <span>Refreshing in {countdown}s</span>
+            <span>{t("orders:storeOrders.refreshingIn", { n: countdown })}</span>
           </div>
 
           <button
@@ -271,7 +282,7 @@ export default function StoreOrders() {
                 isFetching ? "animate-spin" : ""
               }`}
             />
-            Refresh
+            {t("orders:storeOrders.refresh")}
           </button>
         </div>
       </div>
@@ -281,8 +292,8 @@ export default function StoreOrders() {
         {/* Filter */}
         <div className="flex items-center gap-3 border-b border-border px-4 py-3">
           <StatusFilterDropdown value={activeTab} options={statusOptions} onChange={setActiveTab} />
-          <div className="ml-auto text-xs text-muted-foreground">
-            Last updated:{" "}
+          <div className="ms-auto text-xs text-muted-foreground">
+            {t("orders:storeOrders.lastUpdated")}{" "}
             {lastUpdated.toLocaleTimeString("en-US", {
               hour: "2-digit",
               minute: "2-digit",
@@ -292,35 +303,35 @@ export default function StoreOrders() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-full border-collapse text-left">
+          <table className="min-w-full border-collapse text-start">
             <thead>
               <tr className="border-b border-border bg-muted/20">
                 <th className="whitespace-nowrap px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Order ID
+                  {t("orders:storeOrders.columns.orderId")}
                 </th>
 
                 <th className="whitespace-nowrap px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Customer
+                  {t("orders:storeOrders.columns.customer")}
                 </th>
 
                 <th className="whitespace-nowrap px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Items
+                  {t("orders:storeOrders.columns.items")}
                 </th>
 
                 <th className="whitespace-nowrap px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Total
+                  {t("orders:storeOrders.columns.total")}
                 </th>
 
                 <th className="whitespace-nowrap px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Status
+                  {t("orders:storeOrders.columns.status")}
                 </th>
 
                 <th className="whitespace-nowrap px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Time
+                  {t("orders:storeOrders.columns.time")}
                 </th>
 
                 <th className="whitespace-nowrap px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Actions
+                  {t("orders:storeOrders.columns.actions")}
                 </th>
               </tr>
             </thead>
@@ -349,7 +360,7 @@ export default function StoreOrders() {
                   </td>
 
                   <td className="whitespace-nowrap px-4 py-3 text-sm">
-                    {order.items_count} items
+                    {t("orders:storeOrders.itemsCount", { n: order.items_count })}
                   </td>
 
                   <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold">
@@ -362,7 +373,7 @@ export default function StoreOrders() {
                         statusColors[order.status] ?? "border border-[#E5E7EB] bg-[#F3F4F6] text-[#667085]"
                       }`}
                     >
-                      {statusLabels[order.status] ?? order.status.replace(/_/g, " ")}
+                      {getStatusLabel(order.status)}
                     </span>
                   </td>
 
@@ -389,7 +400,7 @@ export default function StoreOrders() {
 
         <div className="flex items-center justify-between border-t border-border px-4 py-3">
           <p className="text-sm text-muted-foreground">
-            Showing {filtered.length} of {orders.length} orders
+            {t("orders:storeOrders.showing", { filtered: filtered.length, total: orders.length })}
           </p>
           <div className="flex items-center gap-1.5">
             <button
@@ -398,7 +409,7 @@ export default function StoreOrders() {
               disabled={page === 1}
               className="flex h-8 items-center justify-center rounded-lg border border-border px-3 text-xs font-semibold text-muted-foreground transition hover:bg-muted/50 disabled:opacity-40"
             >
-              Previous
+              {t("common:actions.previous")}
             </button>
             <span className="px-2 text-xs font-semibold text-foreground">{page}</span>
             <button
@@ -407,7 +418,7 @@ export default function StoreOrders() {
               disabled={orders.length < 10}
               className="flex h-8 items-center justify-center rounded-lg border border-border px-3 text-xs font-semibold text-muted-foreground transition hover:bg-muted/50 disabled:opacity-40"
             >
-              Next
+              {t("common:actions.next")}
             </button>
           </div>
         </div>

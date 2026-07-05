@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 
 import {
   Search,
@@ -19,6 +20,8 @@ import { useLogout } from "@/features/auth/hooks/useAuth";
 import { useProfile } from "@/features/profile/hooks/useProfile";
 import { useSearch } from "@/Context/SearchContext";
 import NotificationsBell from "@/features/notifications/components/NotificationsBell";
+import { LanguageSwitcher } from "@/components/domain/LanguageSwitcher";
+import { ZadLogo } from "@/components/domain/ZadLogo";
 
 type NavItem = {
   icon: React.ElementType;
@@ -26,28 +29,8 @@ type NavItem = {
   path: string;
 };
 
-function ZadLogo({ collapsed }: { collapsed: boolean }) {
-  return (
-    <Link
-      to="/app/home"
-      className={`flex items-center ${
-        collapsed ? "justify-center" : "gap-1"
-      }`}
-    >
-      <span className="text-[42px] leading-none font-black tracking-[-0.12em] text-[#52B788]">
-        Z
-      </span>
-
-      {!collapsed && (
-        <span className="ml-1 text-[27px] leading-none font-black tracking-[-0.04em] text-white">
-          AD
-        </span>
-      )}
-    </Link>
-  );
-}
-
 export default function AdminLayout() {
+  const { t } = useTranslation("layout");
   const location = useLocation();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
@@ -55,8 +38,8 @@ export default function AdminLayout() {
   const handleLogout = useLogout();
   const { data: user } = useProfile();
 
-  const displayName = user?.full_name || "Admin";
-  const initial = (user?.full_name || "A").charAt(0).toUpperCase();
+  const displayName = user?.full_name || t("defaultAdminName");
+  const initial = (user?.full_name || t("defaultAdminName")).charAt(0).toUpperCase();
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
@@ -66,26 +49,26 @@ export default function AdminLayout() {
   };
 
   const navItems: NavItem[] = [
-    { icon: LayoutDashboard, label: "Dashboard", path: "/app/home" },
-    { icon: Package, label: "Products", path: "/app/inventory" },
-    { icon: Tag, label: "Categories", path: "/app/categories" },
-    { icon: ClipboardList, label: "Requests", path: "/app/submissions" },
-    { icon: Users, label: "Users", path: "/app/users" },
-    { icon: Store, label: "Shops", path: "/app/shops" },
-    { icon: Warehouse, label: "Orders", path: "/app/orders" },
+    { icon: LayoutDashboard, label: t("admin.nav.dashboard"), path: "/app/home" },
+    { icon: Package, label: t("admin.nav.products"), path: "/app/inventory" },
+    { icon: Tag, label: t("admin.nav.categories"), path: "/app/categories" },
+    { icon: ClipboardList, label: t("admin.nav.requests"), path: "/app/submissions" },
+    { icon: Users, label: t("admin.nav.users"), path: "/app/users" },
+    { icon: Store, label: t("admin.nav.shops"), path: "/app/shops" },
+    { icon: Warehouse, label: t("admin.nav.orders"), path: "/app/orders" },
   ];
 
   return (
     <div className="min-h-screen bg-[#F3F8F5]">
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 z-40 flex h-screen flex-col bg-gradient-to-b from-[#1B4332] via-[#2D6A4F] to-[#1B4332] py-4 shadow-xl transition-all duration-300 ${
+        className={`fixed start-0 top-0 z-40 flex h-screen flex-col bg-gradient-to-b from-[#1B4332] via-[#2D6A4F] to-[#1B4332] py-4 shadow-xl transition-all duration-300 ${
           collapsed ? "w-20" : "w-60"
         }`}
       >
         {/* Logo */}
         <div className="mb-5 px-6">
-          <ZadLogo collapsed={collapsed} />
+          <ZadLogo collapsed={collapsed} to="/app/home" />
         </div>
 
         {/* Main Navigation */}
@@ -118,13 +101,13 @@ export default function AdminLayout() {
           <button
             type="button"
             onClick={handleLogout}
-            title={collapsed ? "Sign Out" : undefined}
+            title={collapsed ? t("signOut") : undefined}
             className={`flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-[#D8F3DC] transition-all hover:bg-white/10 hover:text-white ${
               collapsed ? "justify-center" : ""
             }`}
           >
             <LogOut className="h-5 w-5 shrink-0" />
-            {!collapsed && <span>Sign Out</span>}
+            {!collapsed && <span>{t("signOut")}</span>}
           </button>
         </div>
 
@@ -132,13 +115,13 @@ export default function AdminLayout() {
         <button
           type="button"
           onClick={() => setCollapsed((prev) => !prev)}
-          className="absolute -right-4 top-7 flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-[#1B4332] text-white shadow-lg transition hover:bg-[#2D6A4F]"
-          aria-label="Toggle sidebar"
+          className="absolute -end-4 top-7 flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-[#1B4332] text-white shadow-lg transition hover:bg-[#2D6A4F]"
+          aria-label={t("toggleSidebar")}
         >
           {collapsed ? (
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4 rtl:-scale-x-100" />
           ) : (
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4 rtl:-scale-x-100" />
           )}
         </button>
       </aside>
@@ -146,33 +129,35 @@ export default function AdminLayout() {
       {/* Page Wrapper */}
       <div
         className={`min-h-screen transition-all duration-300 ${
-          collapsed ? "ml-20" : "ml-60"
+          collapsed ? "ms-20" : "ms-60"
         }`}
       >
         {/* Top Navbar */}
         <header className="sticky top-0 z-30 flex h-14 w-full items-center border-b border-[#E2E8E3] bg-white/90 px-6 shadow-[0_1px_0_rgba(16,24,40,0.02)] backdrop-blur-md">
           {/* Search */}
           <div className="relative w-full max-w-[720px]">
-            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#5F7268]" />
+            <Search className="absolute start-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#5F7268]" />
 
             <input
               value={search}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="h-11 w-full rounded-xl border border-[#DFE7E1] bg-[#F3F6F2] pl-11 pr-4 text-sm text-[#1a1f2e] outline-none transition placeholder:text-[#718278] focus:border-[#52B788] focus:bg-white focus:ring-2 focus:ring-[#52B788]/25"
-              placeholder="Search products, barcodes, or brands..."
+              className="h-11 w-full rounded-xl border border-[#DFE7E1] bg-[#F3F6F2] ps-11 pe-4 text-sm text-[#1a1f2e] outline-none transition placeholder:text-[#718278] focus:border-[#52B788] focus:bg-white focus:ring-2 focus:ring-[#52B788]/25"
+              placeholder={t("search.placeholder")}
               type="text"
             />
           </div>
 
           {/* Right Side */}
-          <div className="ml-auto flex shrink-0 items-center justify-end gap-4">
+          <div className="ms-auto flex shrink-0 items-center justify-end gap-4">
+            <LanguageSwitcher />
+
             <NotificationsBell />
 
             <div className="h-8 w-px bg-[#DFE7E1]" />
 
             <Link
               to="/app/profile"
-              className="flex h-9 items-center gap-2 rounded-full px-2 pr-3 transition hover:bg-[#F3F6F2]"
+              className="flex h-9 items-center gap-2 rounded-full ps-2 pe-3 transition hover:bg-[#F3F6F2]"
             >
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#2D6A4F] text-sm font-bold text-white">
                 {initial}

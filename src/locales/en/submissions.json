@@ -1,0 +1,62 @@
+{
+  "loading": "Loading submissions...",
+  "title": "Product Requests",
+  "subtitle": "{{count}} pending requests requiring your review.",
+  "rejectReasons": {
+    "duplicateProduct": "Duplicate product",
+    "invalidCategory": "Invalid category",
+    "insufficientInformation": "Insufficient information",
+    "notGroceryProduct": "Not a grocery product",
+    "other": "Other"
+  },
+  "statuses": {
+    "all": "All Statuses",
+    "pending": "Pending",
+    "flagged": "Flagged",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  },
+  "filter": {
+    "heading": "Filter Submissions",
+    "subtitle": "Refine submissions by status or search.",
+    "searchPlaceholder": "Search submissions...",
+    "reset": "Reset"
+  },
+  "table": {
+    "submissionId": "Submission ID",
+    "productName": "Product Name",
+    "category": "Category",
+    "submitter": "Submitter",
+    "date": "Date",
+    "status": "Status",
+    "actions": "Actions",
+    "empty": "No submissions match your filters."
+  },
+  "actions": {
+    "view": "View",
+    "approve": "Approve",
+    "approving": "Approving...",
+    "reject": "Reject",
+    "rejecting": "Rejecting..."
+  },
+  "footer": {
+    "showing": "Showing",
+    "of": "of",
+    "submissions": "submissions"
+  },
+  "errors": {
+    "approveFailed": "Couldn't approve this request.",
+    "rejectFailed": "Couldn't reject this request."
+  },
+  "panel": {
+    "title": "Quick Review",
+    "openFullView": "Open full view",
+    "noImage": "No image submitted",
+    "brand": "Brand",
+    "subCategory": "Sub-Category",
+    "description": "Product Description",
+    "attachedAssets": "Attached Assets ({{count}})",
+    "selectRejectionReason": "Select Rejection Reason",
+    "internalLog": "Internal Log"
+  }
+}

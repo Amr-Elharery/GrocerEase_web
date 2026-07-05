@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useOrders } from "../hooks/useOrders";
 import { type Order } from "../api/orderService";
 import {
@@ -18,24 +19,18 @@ const statusColors: Record<string, string> = {
   cancelled: "border border-[#FECACA] bg-[#FEE2E2] text-[#DC2626]",
 };
 
-const statusLabels: Record<string, string> = {
-  pending: "Pending",
-  processing: "Processing",
-  out_for_delivery: "Out for Delivery",
-  delivered: "Delivered",
-  cancelled: "Cancelled",
+const statusKeys: Record<string, string> = {
+  pending: "pending",
+  processing: "processing",
+  out_for_delivery: "outForDelivery",
+  delivered: "delivered",
+  cancelled: "cancelled",
 };
 
 const paymentColors: Record<string, string> = {
   cash: "border border-[#FDBA74] bg-[#FFF7ED] text-[#EA580C]",
   card: "border border-[#BFDBFE] bg-[#EAF1FF] text-[#2563EB]",
 };
-
-const paymentOptions = [
-  { value: "all", label: "All Payments" },
-  { value: "cash", label: "Cash" },
-  { value: "card", label: "Card" },
-];
 
 function getInitials(name: string) {
   return name
@@ -104,7 +99,7 @@ function GreenDropdown({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 top-[46px] z-50 w-full overflow-hidden rounded-lg border border-[#CDE8D5] bg-white shadow-[0_12px_30px_rgba(15,23,42,0.12)]">
+        <div className="absolute start-0 top-[46px] z-50 w-full overflow-hidden rounded-lg border border-[#CDE8D5] bg-white shadow-[0_12px_30px_rgba(15,23,42,0.12)]">
           {options.map((option) => {
             const isSelected = option.value === value;
 
@@ -116,7 +111,7 @@ function GreenDropdown({
                   onChange(option.value);
                   setIsOpen(false);
                 }}
-                className={`flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left text-sm transition ${
+                className={`flex w-full items-center justify-between gap-3 px-3 py-2.5 text-start text-sm transition ${
                   isSelected
                     ? "bg-[#EAF7EE] font-semibold text-[#078A2D]"
                     : "text-[#101828] hover:bg-[#F0FDF4]"
@@ -137,19 +132,37 @@ function GreenDropdown({
 }
 
 export default function OrderList() {
+  const { t } = useTranslation(["common", "orders"]);
   const [page, setPage] = useState(1);
   const { data: orders = [], isLoading } = useOrders(page);
+
+  const getStatusLabel = (status: string) => {
+    const key = statusKeys[status];
+    return key
+      ? t(`orders:statuses.${key}`)
+      : status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  };
+
+  const getPaymentLabel = (method: string) =>
+    t(`orders:paymentMethods.${method.toLowerCase()}`, { defaultValue: method });
+
+  const paymentOptions = [
+    { value: "all", label: t("orders:list.allPayments") },
+    { value: "cash", label: t("orders:paymentMethods.cash") },
+    { value: "card", label: t("orders:paymentMethods.card") },
+  ];
 
   const dynamicStatusOptions = useMemo(() => {
     const set = new Set(orders.map((o) => o.status).filter(Boolean));
     return [
-      { value: "all", label: "All Statuses" },
+      { value: "all", label: t("orders:list.allStatuses") },
       ...[...set].map((s) => ({
         value: s,
-        label: s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+        label: getStatusLabel(s),
       })),
     ];
-  }, [orders]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orders, t]);
 
   const [statusFilter, setStatusFilter] = useState("all");
   const [paymentFilter, setPaymentFilter] = useState("all");
@@ -187,7 +200,7 @@ export default function OrderList() {
   if (isLoading) {
     return (
       <div className="flex min-h-[calc(100vh-64px)] items-center justify-center">
-        <p className="text-sm text-[#667085]">Loading orders...</p>
+        <p className="text-sm text-[#667085]">{t("orders:list.loading")}</p>
       </div>
     );
   }
@@ -198,11 +211,11 @@ export default function OrderList() {
       <div className="flex flex-col justify-between gap-3 lg:flex-row lg:items-center">
         <div>
           <h1 className="text-[38px] font-bold tracking-tight text-[#101828]">
-            Orders
+            {t("orders:list.title")}
           </h1>
 
           <p className="mt-1 text-sm text-[#667085]">
-            Track and manage all customer orders.
+            {t("orders:list.subtitle")}
           </p>
         </div>
       </div>
@@ -219,11 +232,11 @@ export default function OrderList() {
 
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-[#101828]">
-                  Filter Orders
+                  {t("orders:list.filterOrders")}
                 </p>
 
                 <p className="text-[11px] text-[#667085]">
-                  Refine orders by status, payment, or search.
+                  {t("orders:list.filterOrdersDescription")}
                 </p>
               </div>
             </div>
@@ -242,13 +255,13 @@ export default function OrderList() {
               />
 
               <div className="relative md:col-span-2 xl:w-[220px]">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#667085]" />
+                <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#667085]" />
 
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search orders..."
-                  className="h-10 w-full rounded-lg border border-[#DDE7DF] bg-[#F8FAF8] pl-9 pr-3 text-sm text-[#101828] outline-none transition placeholder:text-[#98A2B3] focus:border-[#2D6A4F] focus:ring-2 focus:ring-[#2D6A4F]/10"
+                  placeholder={t("orders:list.searchPlaceholder")}
+                  className="h-10 w-full rounded-lg border border-[#DDE7DF] bg-[#F8FAF8] ps-9 pe-3 text-sm text-[#101828] outline-none transition placeholder:text-[#98A2B3] focus:border-[#2D6A4F] focus:ring-2 focus:ring-[#2D6A4F]/10"
                 />
               </div>
 
@@ -258,7 +271,7 @@ export default function OrderList() {
                 className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[#DDE7DF] bg-white px-3 text-sm font-semibold text-[#5F7168] transition hover:bg-[#F8FAF8]"
               >
                 <RotateCcw className="h-4 w-4" />
-                Reset
+                {t("orders:list.reset")}
               </button>
             </div>
           </div>
@@ -266,17 +279,17 @@ export default function OrderList() {
 
         {/* Table */}
         <div className="overflow-hidden">
-          <table className="w-full table-fixed border-collapse text-left">
+          <table className="w-full table-fixed border-collapse text-start">
             <thead>
               <tr className="border-b border-[#DDE7DF] bg-[#F8FAF8] text-[11px] font-semibold uppercase tracking-wide text-[#5F7168]">
-                <th className="w-[105px] px-4 py-3">Order ID</th>
-                <th className="w-[140px] px-4 py-3">Customer</th>
-                <th className="w-[120px] px-4 py-3">Store</th>
-                <th className="w-[78px] px-4 py-3">Items</th>
-                <th className="w-[120px] px-4 py-3">Total</th>
-                <th className="w-[140px] px-4 py-3">Payment</th>
-                <th className="w-[158px] pl-6 pr-4 py-3">Status</th>
-                <th className="w-[100px] px-4 py-3">Date</th>
+                <th className="w-[105px] px-4 py-3">{t("orders:list.columns.orderId")}</th>
+                <th className="w-[140px] px-4 py-3">{t("orders:list.columns.customer")}</th>
+                <th className="w-[120px] px-4 py-3">{t("orders:list.columns.store")}</th>
+                <th className="w-[78px] px-4 py-3">{t("orders:list.columns.items")}</th>
+                <th className="w-[120px] px-4 py-3">{t("orders:list.columns.total")}</th>
+                <th className="w-[140px] px-4 py-3">{t("orders:list.columns.payment")}</th>
+                <th className="w-[158px] ps-6 pe-4 py-3">{t("orders:list.columns.status")}</th>
+                <th className="w-[100px] px-4 py-3">{t("orders:list.columns.date")}</th>
               </tr>
             </thead>
 
@@ -308,7 +321,7 @@ export default function OrderList() {
                   </td>
 
                   <td className="whitespace-nowrap px-4 py-2.5 text-sm text-[#101828]">
-                    {order.items_count} items
+                    {t("orders:list.itemsCount", { n: order.items_count })}
                   </td>
 
                   <td className="whitespace-nowrap px-4 py-2.5 text-sm font-semibold text-[#101828]">
@@ -322,18 +335,18 @@ export default function OrderList() {
                         "border border-[#E5E7EB] bg-[#F3F4F6] text-[#667085]"
                       }`}
                     >
-                      {order.payment_method}
+                      {getPaymentLabel(order.payment_method)}
                     </span>
                   </td>
 
-                  <td className="py-2.5 pl-6 pr-4">
+                  <td className="py-2.5 ps-6 pe-4">
                     <span
                       className={`inline-flex whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wide ${
                         statusColors[order.status] ??
                         "border border-[#E5E7EB] bg-[#F3F4F6] text-[#667085]"
                       }`}
                     >
-                      {statusLabels[order.status] ?? order.status}
+                      {getStatusLabel(order.status)}
                     </span>
                   </td>
 
@@ -349,10 +362,8 @@ export default function OrderList() {
         {/* Footer */}
         <div className="flex items-center justify-between border-t border-[#DDE7DF] px-5 py-2.5">
           <p className="text-sm text-[#667085]">
-            Showing{" "}
-            <span className="font-semibold text-[#101828]">{filtered.length}</span>{" "}
-            orders
-            <span className="ml-2 text-[#98A2B3]">• Page {page}</span>
+            {t("orders:list.showing", { n: filtered.length })}
+            <span className="ms-2 text-[#98A2B3]">• {t("orders:list.page", { n: page })}</span>
           </p>
           <div className="flex items-center gap-1.5">
             <button
@@ -361,7 +372,7 @@ export default function OrderList() {
               disabled={page === 1}
               className="flex h-8 items-center justify-center rounded-lg border border-[#DDE7DF] px-3 text-xs font-semibold text-[#5F7168] transition hover:bg-[#F8FAF8] disabled:opacity-40"
             >
-              Previous
+              {t("common:actions.previous")}
             </button>
             <span className="px-2 text-xs font-semibold text-[#101828]">{page}</span>
             <button
@@ -370,7 +381,7 @@ export default function OrderList() {
               disabled={orders.length < 10}
               className="flex h-8 items-center justify-center rounded-lg border border-[#DDE7DF] px-3 text-xs font-semibold text-[#5F7168] transition hover:bg-[#F8FAF8] disabled:opacity-40"
             >
-              Next
+              {t("common:actions.next")}
             </button>
           </div>
         </div>

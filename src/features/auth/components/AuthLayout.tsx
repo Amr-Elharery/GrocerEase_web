@@ -1,6 +1,9 @@
 import { Outlet } from "react-router";
+import { useTranslation } from "react-i18next";
 
 export default function AuthLayout() {
+  const { t } = useTranslation("auth");
+
   return (
     <div className="min-h-screen flex relative overflow-hidden"
       style={{ background: "linear-gradient(160deg, #ffffff 0%, #e6f3eb 50%, #f8faf8 100%)" }}>
@@ -21,7 +24,7 @@ export default function AuthLayout() {
       <div className="hidden lg:flex flex-col w-[45%] relative z-10 p-12 gap-8">
 
         {/* Logo */}
-        <div className="flex items-center gap-2">
+        <div dir="ltr" className="flex items-center gap-2 self-start">
     <svg width="36" height="44" viewBox="0 0 32 38" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="zGrad" x1="0" y1="0" x2="1" y2="1">
@@ -37,11 +40,11 @@ export default function AuthLayout() {
         {/* Tagline */}
         <div className="space-y-4">
           <h1 className="text-4xl font-bold text-[#1B4332] leading-tight">
-  Built for Grocery.<br />Designed for Growth.
+  {t("auth:brand.taglineLine1")}<br />{t("auth:brand.taglineLine2")}
 </h1>
 <div className="w-12 h-1 bg-[#2D6A4F] rounded-full" />
 <p className="text-[#2D6A4F] text-sm leading-relaxed max-w-xs">
-  ZAD brings your entire store online — manage inventory, track orders, and grow your business from one powerful platform.
+  {t("auth:brand.description")}
 </p>
         </div>
       </div>

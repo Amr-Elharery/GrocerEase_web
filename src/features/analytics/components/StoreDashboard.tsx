@@ -1,4 +1,6 @@
 import type { ElementType } from "react";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { DollarSign, ShoppingCart, Users, UserCheck, AlertTriangle, Package } from "lucide-react";
 import { useShopDashboard } from "../hooks/useAnalytics";
 import { useStoreOrders } from "@/features/orders/hooks/useStoreOrders";
@@ -24,8 +26,19 @@ const STATUS_PALETTE: Record<string, string> = {
 };
 const FALLBACK_COLORS = ["#16A34A", "#2563EB", "#D97706", "#7E22CE", "#DC2626", "#0EA5E9", "#F97316"];
 
-function formatStatus(s: string) {
-  return s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+const STATUS_LABEL_KEYS: Record<string, string> = {
+  pending: "pending",
+  processing: "processing",
+  assigned: "assigned",
+  out_for_delivery: "outForDelivery",
+  picked_up: "pickedUp",
+  delivered: "delivered",
+  cancelled: "cancelled",
+};
+
+function formatStatus(t: TFunction, s: string) {
+  const key = STATUS_LABEL_KEYS[s];
+  return key ? t(`analytics:shared.statusLabels.${key}`) : s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 /* ---------- Cards ---------- */
@@ -127,7 +140,7 @@ function RevenueChart({ values, labels }: { values: number[]; labels: string[] }
 }
 
 /* ---------- Donut ---------- */
-function StatusDonut({ data }: { data: { status: string; total: number }[] }) {
+function StatusDonut({ data, t }: { data: { status: string; total: number }[]; t: TFunction }) {
   const total = data.reduce((s, d) => s + d.total, 0);
   const size = 168;
   const stroke = 26;
@@ -170,7 +183,7 @@ function StatusDonut({ data }: { data: { status: string; total: number }[] }) {
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-2xl font-bold text-[#101828]">{total}</span>
-          <span className="text-[11px] text-[#667085]">Orders</span>
+          <span className="text-[11px] text-[#667085]">{t("analytics:shared.ordersByStatus.centerLabel")}</span>
         </div>
       </div>
 
@@ -182,7 +195,7 @@ function StatusDonut({ data }: { data: { status: string; total: number }[] }) {
                 className="h-2.5 w-2.5 shrink-0 rounded-full"
                 style={{ background: STATUS_PALETTE[d.status] ?? FALLBACK_COLORS[i % FALLBACK_COLORS.length] }}
               />
-              <span className="truncate text-sm text-[#475467]">{formatStatus(d.status)}</span>
+              <span className="truncate text-sm text-[#475467]">{formatStatus(t, d.status)}</span>
             </span>
             <span className="text-sm font-semibold text-[#101828]">{d.total}</span>
           </div>
@@ -194,13 +207,14 @@ function StatusDonut({ data }: { data: { status: string; total: number }[] }) {
 
 /* ---------- Page ---------- */
 export default function StoreDashboard() {
+  const { t } = useTranslation("analytics");
   const { data, isLoading } = useShopDashboard();
   const { data: recentOrders = [] } = useStoreOrders(1);
 
   if (isLoading) {
     return (
       <div className="flex min-h-[calc(100vh-80px)] items-center justify-center">
-        <p className="text-sm text-muted-foreground">Loading dashboard...</p>
+        <p className="text-sm text-muted-foreground">{t("shared.loading")}</p>
       </div>
     );
   }
@@ -226,38 +240,38 @@ export default function StoreDashboard() {
     <section className="mx-auto max-w-[1420px] space-y-4">
       {/* Header */}
       <div>
-        <h1 className="text-[30px] font-bold tracking-tight text-[#101828]">Dashboard</h1>
-        <p className="mt-1 text-sm text-[#667085]">Overview of your store's performance.</p>
+        <h1 className="text-[30px] font-bold tracking-tight text-[#101828]">{t("store.title")}</h1>
+        <p className="mt-1 text-sm text-[#667085]">{t("store.subtitle")}</p>
       </div>
 
       {/* Metric cards */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <MetricCard
-          title="Total Revenue"
+          title={t("shared.metrics.totalRevenue")}
           value={`EGP ${totalRevenue.toFixed(2)}`}
           icon={DollarSign}
           tone="bg-[#EAF7EE] text-[#16A34A]"
         />
         <MetricCard
-          title="Total Orders"
+          title={t("shared.metrics.totalOrders")}
           value={String(totalOrders)}
           icon={ShoppingCart}
           tone="bg-[#EAF1FF] text-[#2563EB]"
         />
         <MetricCard
-          title="Unique Customers"
+          title={t("store.metrics.uniqueCustomers")}
           value={String(customers.unique_customers)}
           icon={Users}
           tone="bg-[#F3E8FF] text-[#7E22CE]"
         />
         <MetricCard
-          title="Repeat Customers"
+          title={t("store.metrics.repeatCustomers")}
           value={String(customers.repeat_customers)}
           icon={UserCheck}
           tone="bg-[#EAF7EE] text-[#16A34A]"
         />
         <MetricCard
-          title="Low Stock"
+          title={t("store.metrics.lowStock")}
           value={String(lowStock.length)}
           icon={AlertTriangle}
           tone="bg-[#FFF4D8] text-[#D97706]"
@@ -269,15 +283,15 @@ export default function StoreDashboard() {
         <SectionCard className="lg:col-span-2">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-semibold text-[#101828]">Revenue Overview</h2>
+              <h2 className="text-sm font-semibold text-[#101828]">{t("shared.revenueOverview.title")}</h2>
               <p className="text-[22px] font-bold text-[#101828]">EGP {totalRevenue.toFixed(2)}</p>
             </div>
             <span className="rounded-lg border border-[#E7EBF0] px-2.5 py-1 text-xs text-[#667085]">
-              Last {daily.length} days
+              {t("shared.revenueOverview.lastDays", { count: daily.length })}
             </span>
           </div>
           {daily.length === 0 ? (
-            <p className="mt-8 text-sm text-[#98A2B3]">No revenue data yet.</p>
+            <p className="mt-8 text-sm text-[#98A2B3]">{t("shared.revenueOverview.empty")}</p>
           ) : (
             <div className="mt-3">
               <RevenueChart values={revValues} labels={revLabels} />
@@ -286,12 +300,12 @@ export default function StoreDashboard() {
         </SectionCard>
 
         <SectionCard>
-          <h2 className="text-sm font-semibold text-[#101828]">Orders by Status</h2>
+          <h2 className="text-sm font-semibold text-[#101828]">{t("shared.ordersByStatus.title")}</h2>
           {byStatus.length === 0 ? (
-            <p className="mt-8 text-sm text-[#98A2B3]">No orders yet.</p>
+            <p className="mt-8 text-sm text-[#98A2B3]">{t("shared.ordersByStatus.empty")}</p>
           ) : (
             <div className="mt-4">
-              <StatusDonut data={byStatus} />
+              <StatusDonut data={byStatus} t={t} />
             </div>
           )}
         </SectionCard>
@@ -302,20 +316,20 @@ export default function StoreDashboard() {
         {/* Best selling */}
         <div className="overflow-hidden rounded-xl border border-[#E7EBF0] bg-white shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
           <div className="flex items-center justify-between border-b border-[#E7EBF0] px-5 py-3.5">
-            <h2 className="text-sm font-semibold text-[#101828]">Best Selling Products</h2>
+            <h2 className="text-sm font-semibold text-[#101828]">{t("store.bestSelling.title")}</h2>
             <span className="rounded-full bg-[#EAF7EE] px-2.5 py-1 text-[11px] font-semibold text-[#16A34A]">
-              {totalSold} sold
+              {t("store.bestSelling.soldBadge", { count: totalSold })}
             </span>
           </div>
           {bestSelling.length === 0 ? (
-            <p className="px-5 py-6 text-sm text-[#98A2B3]">No sales data yet.</p>
+            <p className="px-5 py-6 text-sm text-[#98A2B3]">{t("store.bestSelling.empty")}</p>
           ) : (
-            <table className="w-full text-left">
+            <table className="w-full text-start">
               <thead>
                 <tr className="border-b border-[#E7EBF0] bg-[#F9FAFB] text-[11px] font-semibold uppercase tracking-wide text-[#667085]">
-                  <th className="px-5 py-2.5">Product</th>
-                  <th className="px-5 py-2.5">Sold</th>
-                  <th className="px-5 py-2.5">Revenue</th>
+                  <th className="px-5 py-2.5">{t("shared.tableHeaders.product")}</th>
+                  <th className="px-5 py-2.5">{t("shared.tableHeaders.sold")}</th>
+                  <th className="px-5 py-2.5">{t("shared.tableHeaders.revenue")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#F1F3F5]">
@@ -337,16 +351,16 @@ export default function StoreDashboard() {
         <div className="overflow-hidden rounded-xl border border-[#E7EBF0] bg-white shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
           <div className="flex items-center gap-2 border-b border-[#E7EBF0] px-5 py-3.5">
             <Package className="h-4 w-4 text-[#D97706]" />
-            <h2 className="text-sm font-semibold text-[#101828]">Low Stock Products</h2>
+            <h2 className="text-sm font-semibold text-[#101828]">{t("store.lowStock.title")}</h2>
           </div>
           {lowStock.length === 0 ? (
-            <p className="px-5 py-6 text-sm text-[#98A2B3]">Everything is well stocked. 🎉</p>
+            <p className="px-5 py-6 text-sm text-[#98A2B3]">{t("store.lowStock.empty")}</p>
           ) : (
-            <table className="w-full text-left">
+            <table className="w-full text-start">
               <thead>
                 <tr className="border-b border-[#E7EBF0] bg-[#F9FAFB] text-[11px] font-semibold uppercase tracking-wide text-[#667085]">
-                  <th className="px-5 py-2.5">Product</th>
-                  <th className="px-5 py-2.5">Available</th>
+                  <th className="px-5 py-2.5">{t("shared.tableHeaders.product")}</th>
+                  <th className="px-5 py-2.5">{t("shared.tableHeaders.available")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#F1F3F5]">
@@ -361,7 +375,7 @@ export default function StoreDashboard() {
                             : "border border-[#FCD34D] bg-[#FFF4D8] text-[#D97706]"
                         }`}
                       >
-                        {p.available_stock} left
+                        {t("store.lowStock.leftBadge", { count: p.available_stock })}
                       </span>
                     </td>
                   </tr>
@@ -374,20 +388,20 @@ export default function StoreDashboard() {
       {/* Recent Orders */}
       <div className="overflow-hidden rounded-xl border border-[#E7EBF0] bg-white shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
         <div className="border-b border-[#E7EBF0] px-5 py-3.5">
-          <h2 className="text-sm font-semibold text-[#101828]">Recent Orders</h2>
+          <h2 className="text-sm font-semibold text-[#101828]">{t("store.recentOrders.title")}</h2>
         </div>
         {recentOrders.length === 0 ? (
-          <p className="px-5 py-6 text-sm text-[#98A2B3]">No orders yet.</p>
+          <p className="px-5 py-6 text-sm text-[#98A2B3]">{t("store.recentOrders.empty")}</p>
         ) : (
-          <table className="w-full text-left">
+          <table className="w-full text-start">
             <thead>
               <tr className="border-b border-[#E7EBF0] bg-[#F9FAFB] text-[11px] font-semibold uppercase tracking-wide text-[#667085]">
-                <th className="px-5 py-2.5">Order ID</th>
-                <th className="px-5 py-2.5">Customer</th>
-                <th className="px-5 py-2.5">Items</th>
-                <th className="px-5 py-2.5">Total</th>
-                <th className="px-5 py-2.5">Status</th>
-                <th className="px-5 py-2.5">Date</th>
+                <th className="px-5 py-2.5">{t("shared.tableHeaders.orderId")}</th>
+                <th className="px-5 py-2.5">{t("shared.tableHeaders.customer")}</th>
+                <th className="px-5 py-2.5">{t("shared.tableHeaders.items")}</th>
+                <th className="px-5 py-2.5">{t("shared.tableHeaders.total")}</th>
+                <th className="px-5 py-2.5">{t("shared.tableHeaders.status")}</th>
+                <th className="px-5 py-2.5">{t("shared.tableHeaders.date")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#F1F3F5]">
@@ -407,7 +421,7 @@ export default function StoreDashboard() {
                         STATUS_BADGE[o.status] ?? "border border-[#E5E7EB] bg-[#F3F4F6] text-[#667085]"
                       }`}
                     >
-                      {o.status.replace(/_/g, " ")}
+                      {formatStatus(t, o.status)}
                     </span>
                   </td>
                   <td className="px-5 py-3 text-xs text-[#667085]">

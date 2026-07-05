@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation, Trans } from "react-i18next";
 import {
   useCategories,
   useCreateCategory,
@@ -19,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 export default function CategoryManagement() {
+  const { t } = useTranslation(["common", "categories"]);
   const { data: categories = [], isLoading } = useCategories();
   const createCategory = useCreateCategory();
   const updateCategory = useUpdateCategory();
@@ -48,7 +50,7 @@ export default function CategoryManagement() {
 
   const handleSaveEdit = (category: Category) => {
     if (!editingName.trim()) {
-      setError("Name is required");
+      setError(t("categories:errors.nameRequired"));
       return;
     }
 
@@ -61,7 +63,7 @@ export default function CategoryManagement() {
     );
 
     if (isDuplicate) {
-      setError("Name already exists");
+      setError(t("categories:errors.nameExists"));
       return;
     }
 
@@ -76,7 +78,7 @@ export default function CategoryManagement() {
 
   const handleAddCategory = (parentId: string | null) => {
     if (!newName.trim()) {
-      setError("Name is required");
+      setError(t("categories:errors.nameRequired"));
       return;
     }
 
@@ -90,7 +92,7 @@ export default function CategoryManagement() {
     );
 
     if (isDuplicate) {
-      setError("Name already exists");
+      setError(t("categories:errors.nameExists"));
       return;
     }
 
@@ -128,7 +130,7 @@ export default function CategoryManagement() {
         }
       },
       onError: (err: unknown) => {
-        const message = err instanceof Error ? err.message : "Couldn't delete this category.";
+        const message = err instanceof Error ? err.message : t("categories:errors.deleteFallback");
         setDeleteError(message);
       },
     });
@@ -137,7 +139,7 @@ export default function CategoryManagement() {
   if (isLoading) {
     return (
       <div className="flex min-h-[calc(100vh-64px)] items-center justify-center">
-        <p className="text-sm text-[#667085]">Loading categories...</p>
+        <p className="text-sm text-[#667085]">{t("categories:loading")}</p>
       </div>
     );
   }
@@ -147,17 +149,17 @@ export default function CategoryManagement() {
       {/* Header */}
       <div>
         <div className="mb-2 flex items-center gap-2 text-xs text-[#667085]">
-          <span>Catalogue</span>
+          <span>{t("categories:breadcrumb.catalogue")}</span>
           <span>›</span>
-          <span className="font-semibold text-[#101828]">Categories</span>
+          <span className="font-semibold text-[#101828]">{t("categories:breadcrumb.categories")}</span>
         </div>
 
         <h1 className="text-[23px] font-bold tracking-tight text-[#101828]">
-          Category Management
+          {t("categories:title")}
         </h1>
 
         <p className="mt-1 text-sm text-[#667085]">
-          Manage grocery categories, sub-categories, and product grouping.
+          {t("categories:subtitle")}
         </p>
       </div>
 
@@ -173,10 +175,10 @@ export default function CategoryManagement() {
 
               <div>
                 <h2 className="text-sm font-bold text-[#101828]">
-                  Top-Level Categories
+                  {t("categories:topLevel.sectionTitle")}
                 </h2>
                 <p className="text-xs text-[#667085]">
-                  {topLevel.length} categories
+                  {t("categories:topLevel.countLabel", { count: topLevel.length })}
                 </p>
               </div>
             </div>
@@ -192,7 +194,7 @@ export default function CategoryManagement() {
               className="h-9 gap-1.5 rounded-lg bg-[#006B22] px-3 text-xs font-semibold text-white hover:bg-[#00571C]"
             >
               <Plus className="h-3.5 w-3.5" />
-              Add Category
+              {t("categories:topLevel.addButton")}
             </Button>
           </div>
 
@@ -213,7 +215,7 @@ export default function CategoryManagement() {
                       setError("");
                     }
                   }}
-                  placeholder="Category name..."
+                  placeholder={t("categories:topLevel.addPlaceholder")}
                   className="h-8 flex-1 rounded-lg border border-[#DDE7DF] bg-white px-3 text-sm outline-none transition focus:border-[#2D6A4F] focus:ring-2 focus:ring-[#2D6A4F]/10"
                 />
 
@@ -369,14 +371,14 @@ export default function CategoryManagement() {
               <div>
                 <h2 className="text-sm font-bold text-[#101828]">
                   {selectedParent
-                    ? `${selectedParent.name} Sub-Categories`
-                    : "Sub-Categories"}
+                    ? t("categories:subCategories.sectionTitleWithParent", { parent: selectedParent.name })
+                    : t("categories:subCategories.sectionTitleDefault")}
                 </h2>
 
                 <p className="text-xs text-[#667085]">
                   {selectedParent
-                    ? `${subCategories.length} sub-categories`
-                    : "Select a category"}
+                    ? t("categories:subCategories.countLabel", { count: subCategories.length })
+                    : t("categories:subCategories.selectPrompt")}
                 </p>
               </div>
             </div>
@@ -393,7 +395,7 @@ export default function CategoryManagement() {
                 className="h-9 gap-1.5 rounded-lg bg-[#006B22] px-3 text-xs font-semibold text-white hover:bg-[#00571C]"
               >
                 <Plus className="h-3.5 w-3.5" />
-                Add Sub-Category
+                {t("categories:subCategories.addButton")}
               </Button>
             )}
           </div>
@@ -415,7 +417,7 @@ export default function CategoryManagement() {
                       setError("");
                     }
                   }}
-                  placeholder="Sub-category name..."
+                  placeholder={t("categories:subCategories.addPlaceholder")}
                   className="h-8 flex-1 rounded-lg border border-[#DDE7DF] bg-white px-3 text-sm outline-none transition focus:border-[#2D6A4F] focus:ring-2 focus:ring-[#2D6A4F]/10"
                 />
 
@@ -450,12 +452,11 @@ export default function CategoryManagement() {
               </div>
 
               <p className="text-sm font-bold text-[#101828]">
-                Select a category
+                {t("categories:emptyState.selectCategoryTitle")}
               </p>
 
               <p className="mt-1 max-w-[320px] text-xs leading-5 text-[#667085]">
-                Click a top-level category to view, edit, or add its
-                sub-categories.
+                {t("categories:emptyState.selectCategoryText")}
               </p>
             </div>
           ) : subCategories.length === 0 && !addingChild ? (
@@ -465,11 +466,11 @@ export default function CategoryManagement() {
               </div>
 
               <p className="text-sm font-bold text-[#101828]">
-                No sub-categories yet
+                {t("categories:emptyState.noSubCategoriesTitle")}
               </p>
 
               <p className="mt-1 max-w-[320px] text-xs leading-5 text-[#667085]">
-                Add the first sub-category under {selectedParent.name}.
+                {t("categories:emptyState.noSubCategoriesText", { parent: selectedParent.name })}
               </p>
             </div>
           ) : (
@@ -537,7 +538,7 @@ export default function CategoryManagement() {
                   {editingId !== category.id && (
                     <div className="flex shrink-0 items-center gap-2">
                       <span className="rounded-full bg-[#F2F4F7] px-2.5 py-1 text-xs font-semibold text-[#667085]">
-                        {category.product_count} products
+                        {t("categories:subCategories.productsCount", { count: category.product_count })}
                       </span>
 
                       <button
@@ -573,21 +574,20 @@ export default function CategoryManagement() {
             </div>
 
             <h3 className="text-base font-bold text-[#101828]">
-              Delete Category
+              {t("categories:deleteModal.title")}
             </h3>
 
             {deleteConfirm.product_count > 0 ? (
               <>
                 <p className="mt-2 text-sm leading-6 text-[#667085]">
-                  Cannot delete{" "}
-                  <span className="font-semibold text-[#101828]">
-                    "{deleteConfirm.name}"
-                  </span>{" "}
-                  because it has{" "}
-                  <span className="font-semibold text-red-600">
-                    {deleteConfirm.product_count} products
-                  </span>{" "}
-                  assigned. Reassign them first.
+                  <Trans
+                    i18nKey="categories:deleteModal.cannotDelete"
+                    values={{ name: deleteConfirm.name, count: deleteConfirm.product_count }}
+                    components={{
+                      1: <span className="font-semibold text-[#101828]" />,
+                      2: <span className="font-semibold text-red-600" />,
+                    }}
+                  />
                 </p>
 
                 <div className="mt-5 flex justify-end">
@@ -597,17 +597,18 @@ export default function CategoryManagement() {
                     onClick={() => setDeleteConfirm(null)}
                     className="h-9 rounded-lg border-[#DDE7DF] px-4 text-sm font-semibold"
                   >
-                    Close
+                    {t("common:actions.close")}
                   </Button>
                 </div>
               </>
             ) : (
               <>
                 <p className="mt-2 text-sm leading-6 text-[#667085]">
-                  Are you sure you want to delete{" "}
-                  <span className="font-semibold text-[#101828]">
-                    "{deleteConfirm.name}"
-                  </span>
+                  <Trans
+                    i18nKey="categories:deleteModal.confirmMessage"
+                    values={{ name: deleteConfirm.name }}
+                    components={{ 1: <span className="font-semibold text-[#101828]" /> }}
+                  />
                 </p>
 
                 {deleteError && (
@@ -623,7 +624,7 @@ export default function CategoryManagement() {
                     onClick={() => setDeleteConfirm(null)}
                     className="h-9 rounded-lg border-[#DDE7DF] px-4 text-sm font-semibold"
                   >
-                    Cancel
+                    {t("common:actions.cancel")}
                   </Button>
 
                   <Button
@@ -633,7 +634,7 @@ export default function CategoryManagement() {
                     disabled={deleteCategory.isPending}
                     className="h-9 rounded-lg px-4 text-sm font-semibold"
                   >
-                    {deleteCategory.isPending ? "Deleting..." : "Delete"}
+                    {deleteCategory.isPending ? t("common:status.deleting") : t("common:actions.delete")}
                   </Button>
                 </div>
               </>
