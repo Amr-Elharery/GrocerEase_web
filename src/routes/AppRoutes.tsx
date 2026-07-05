@@ -9,12 +9,17 @@ import UserManagement from "@/features/users/components/UserManagement";
 import AppLayout from "@/components/layouts/AdminLayout";
 import StoreLayout from "@/components/layouts/StoreLayout";
 import ShopInventory from "@/features/shop/components/ShopInventory";
+import CreateShopForm from "@/features/shop/components/CreateShopForm";
+import EditShopForm from "@/features/shop/components/EditShopForm";
+import MyRequests from "@/features/shop/components/MyRequests";
+import ShopsList from "@/features/shop/components/admin/ShopsList";
+import ShopDetails from "@/features/shop/components/admin/ShopDetails";
 import AuthGuard from "@/components/AuthGuard";
+import ShopGuard from "@/components/ShopGuard";
 import Login from "@/features/auth/components/Login";
 import SignUp from "@/features/auth/components/SignUp";
 import ForgotPassword from "@/features/auth/components/ForgotPassword";
 import ResetPassword from "@/features/auth/components/ResetPassword";
-import Home from "@/features/auth/components/Home";
 import Profile from "@/features/profile/components/Profile";
 import OrderList from "@/features/orders/components/OrderList";
 import StoreOrders from  "@/features/orders/components/StoreOrders";
@@ -36,7 +41,10 @@ const NotFound = () => (
 );
 
 const router = createBrowserRouter([
-  { path: '/', element: <Home /> },
+{
+  path: "/",
+  element: <Navigate to="/auth/login" replace />,
+},
   {
     path: '/auth',
     element: <AuthLayout />,
@@ -57,31 +65,46 @@ const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Navigate to="/app/home" replace /> },
-      { path: 'home', element: <AdminAnalyticsDashboard /> },
-      { path: 'profile', element: <Profile /> },
-      { path: 'inventory', element: <ProductList /> },
-      { path: 'inventory/create', element: <CreateProductForm /> },
-      { path: 'inventory/:id/edit', element: <EditProductForm /> },
-      { path: 'categories', element: <CategoryManagement /> },
-      { path: 'submissions', element: <SubmissionList /> },
-      { path: 'users', element: <UserManagement /> },
+      { path: "home", element: <AdminAnalyticsDashboard /> },
+      { path: "profile", element: <Profile /> },
+      { path: "inventory", element: <ProductList /> },
+      { path: "inventory/create", element: <CreateProductForm /> },
+      { path: "inventory/:id/edit", element: <EditProductForm /> },
+      { path: "categories", element: <CategoryManagement /> },
+      { path: "submissions", element: <SubmissionList /> },
+      { path: "users", element: <UserManagement /> },
+      { path: "shops", element: <ShopsList /> },
+      { path: "shops/:id", element: <ShopDetails /> },
 
-      { path: 'orders', element: <OrderList /> },
-    ],
+{ path: "orders", element: <OrderList /> },
+   ],
+  },
+  {
+    path: "/store/create-shop",
+    element: (
+      <AuthGuard>
+        <CreateShopForm />
+      </AuthGuard>
+    ),
   },
   {
     path: '/store',
     element: (
       <AuthGuard>
-        <StoreLayout />
+        <ShopGuard>
+          <StoreLayout />
+        </ShopGuard>
       </AuthGuard>
     ),
     children: [
       { index: true, element: <Navigate to="/store/inventory" replace /> },
-      { path: 'home', element: <StoreDashboard /> },
-      { path: 'inventory', element: <ShopInventory /> },
-      { path: 'orders', element: <StoreOrders /> },
-      { path: 'reports', element: <ComingSoon page="Reports" /> },
+      { path: "home", element: <StoreDashboard /> },
+      { path: "profile", element: <Profile /> },
+      { path: "shop-settings", element: <EditShopForm /> },
+      { path: "my-requests", element: <MyRequests /> },
+      { path: "inventory", element: <ShopInventory /> },
+      { path: "orders", element: <StoreOrders /> },
+      { path: "reports", element: <ComingSoon page="Reports" /> },
     ],
   },
   { path: '*', element: <NotFound /> },

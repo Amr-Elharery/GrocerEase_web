@@ -20,9 +20,9 @@ function getInitials(name: string) {
   return name.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
 }
 
-function formatRole(role?: string) {
-  if (!role || role === "-") return "-";
-  if (role === "Store Manager") return "Store Manager";
+function formatRole(role: string) {
+  if (role === "store_manager") return "Store Manager";
+  if (role === "none" || role === "-") return "No Role";
   return role.charAt(0).toUpperCase() + role.slice(1);
 }
 
@@ -79,21 +79,21 @@ function FilterDropdown({
 }
 
 export default function UserManagement() {
-  const { data: users = [], isLoading } = useUsers();
-  const suspendUser = useSuspendUser();
-  const reactivateUser = useReactivateUser();
-
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-const roleOptions = [
-  { value: "", label: "All Roles" },
-  { value: "customer", label: "Customer" },
-  { value: "store_manager", label: "Store Manager" },
-  { value: "delivery", label: "Delivery" },
-];
+  const { data: users = [], isLoading } = useUsers(roleFilter, statusFilter);
+  const suspendUser = useSuspendUser();
+  const reactivateUser = useReactivateUser();
+
+  const roleOptions = [
+    { value: "", label: "All Roles" },
+    { value: "store_manager", label: "Store Manager" },
+    { value: "customer", label: "Customer" },
+    { value: "delivery", label: "Delivery" },
+  ];
   const statusOptions = [
     { value: "", label: "All Statuses" },
     { value: "active", label: "Active" },
@@ -101,12 +101,12 @@ const roleOptions = [
   ];
 
   const filtered = users.filter((user) => {
-    if (roleFilter && user.role !== roleFilter) return false;
-    if (statusFilter && user.status !== statusFilter) return false;
     const s = search.trim().toLowerCase();
     if (s && !user.name.toLowerCase().includes(s) && !user.email.toLowerCase().includes(s)) return false;
     return true;
   });
+
+  const displayRole = (user: User): string => user.role;
 
   const activeCount = users.filter((u) => u.status === "active").length;
 
@@ -128,7 +128,7 @@ const roleOptions = [
       {/* Header */}
       <div>
         <h1 className="text-[24px] font-bold tracking-tight text-[#101828]">User Directory</h1>
-        <p className="mt-1 text-sm text-[#667085]">View and manage all registered users.</p>
+        <p className="mt-1 text-sm text-[#667085]">View and manage all registered platform users.</p>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-[#DDE7DF] bg-white shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
@@ -195,8 +195,8 @@ const roleOptions = [
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`rounded-md px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider ${roleColors[user.role] ?? "bg-[#F3F4F6] text-[#667085]"}`}>
-                      {formatRole(user.role)}
+                    <span className={`rounded-md px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider ${roleColors[displayRole(user)] ?? "bg-[#F3F4F6] text-[#667085]"}`}>
+                      {formatRole(displayRole(user))}
                     </span>
                   </td>
                   <td className="px-4 py-3">
@@ -281,8 +281,8 @@ const roleOptions = [
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-semibold uppercase tracking-wider text-[#667085]">Role</span>
-                  <span className={`rounded-md px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider ${roleColors[selectedUser.role] ?? "bg-[#F3F4F6] text-[#667085]"}`}>
-                    {formatRole(selectedUser.role)}
+                  <span className={`rounded-md px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider ${roleColors[displayRole(selectedUser)] ?? "bg-[#F3F4F6] text-[#667085]"}`}>
+                    {formatRole(displayRole(selectedUser))}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">

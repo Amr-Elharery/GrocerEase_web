@@ -40,28 +40,25 @@ function SectionCard({ children, className = "" }: { children: React.ReactNode; 
 function MetricCard({
   title,
   value,
-  subtitle,
   icon: Icon,
   tone,
 }: {
   title: string;
   value: string;
-  subtitle: string;
   icon: ElementType;
   tone: string;
 }) {
   return (
-    <SectionCard className="min-h-[118px] p-4">
-      <div className="flex items-start justify-between gap-3">
+    <SectionCard className="p-3">
+      <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
-          <p className="text-sm font-medium text-[#667085]">{title}</p>
-          <h3 className="mt-1.5 text-[24px] font-bold tracking-tight text-[#101828]">{value}</h3>
+          <p className="text-xs font-medium text-[#667085]">{title}</p>
+          <h3 className="mt-1 text-lg font-bold tracking-tight text-[#101828]">{value}</h3>
         </div>
-        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${tone}`}>
-          <Icon className="h-5 w-5" />
+        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${tone}`}>
+          <Icon className="h-4 w-4" />
         </div>
       </div>
-      <p className="mt-2.5 text-xs text-[#98A2B3]">{subtitle}</p>
     </SectionCard>
   );
 }
@@ -217,7 +214,7 @@ export default function StoreDashboard() {
   const customers = data?.customer_stats ?? { unique_customers: 0, repeat_customers: 0 };
 
   const totalRevenue = daily.reduce((s, d) => s + (d.revenue ?? 0), 0);
-  const totalOrders = daily.reduce((s, d) => s + (d.total_orders ?? 0), 0);
+  const totalOrders = byStatus.reduce((s, d) => s + (d.total ?? 0), 0);
   const totalSold = bestSelling.reduce((s, p) => s + (p.total_sold ?? 0), 0);
 
   const revValues = daily.map((d) => d.revenue ?? 0);
@@ -238,35 +235,30 @@ export default function StoreDashboard() {
         <MetricCard
           title="Total Revenue"
           value={`EGP ${totalRevenue.toFixed(2)}`}
-          subtitle={`From ${totalOrders} orders`}
           icon={DollarSign}
           tone="bg-[#EAF7EE] text-[#16A34A]"
         />
         <MetricCard
           title="Total Orders"
           value={String(totalOrders)}
-          subtitle={`${byStatus.length} status types`}
           icon={ShoppingCart}
           tone="bg-[#EAF1FF] text-[#2563EB]"
         />
         <MetricCard
           title="Unique Customers"
           value={String(customers.unique_customers)}
-          subtitle="Distinct buyers"
           icon={Users}
           tone="bg-[#F3E8FF] text-[#7E22CE]"
         />
         <MetricCard
           title="Repeat Customers"
           value={String(customers.repeat_customers)}
-          subtitle="Ordered more than once"
           icon={UserCheck}
           tone="bg-[#EAF7EE] text-[#16A34A]"
         />
         <MetricCard
           title="Low Stock"
           value={String(lowStock.length)}
-          subtitle="Needs restocking"
           icon={AlertTriangle}
           tone="bg-[#FFF4D8] text-[#D97706]"
         />

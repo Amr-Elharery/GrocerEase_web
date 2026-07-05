@@ -34,28 +34,25 @@ function SectionCard({ children, className = "" }: { children: React.ReactNode; 
 function MetricCard({
   title,
   value,
-  subtitle,
   icon: Icon,
   tone,
 }: {
   title: string;
   value: string;
-  subtitle: string;
   icon: ElementType;
   tone: string;
 }) {
   return (
-    <SectionCard className="min-h-[118px] p-4">
-      <div className="flex items-start justify-between gap-3">
+    <SectionCard className="p-3">
+      <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
-          <p className="text-sm font-medium text-[#667085]">{title}</p>
-          <h3 className="mt-1.5 text-[24px] font-bold tracking-tight text-[#101828]">{value}</h3>
+          <p className="text-xs font-medium text-[#667085]">{title}</p>
+          <h3 className="mt-1 text-lg font-bold tracking-tight text-[#101828]">{value}</h3>
         </div>
-        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${tone}`}>
-          <Icon className="h-5 w-5" />
+        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${tone}`}>
+          <Icon className="h-4 w-4" />
         </div>
       </div>
-      <p className="mt-2.5 text-xs text-[#98A2B3]">{subtitle}</p>
     </SectionCard>
   );
 }
@@ -193,6 +190,7 @@ export default function AdminAnalyticsDashboard() {
     revenue_this_month: 0,
   };
   const byStatus = data?.orders_by_status ?? [];
+  const totalOrders = byStatus.reduce((s, d) => s + (d.total ?? 0), 0);
   const daily = [...(data?.daily_orders ?? [])].sort(
     (a, b) => new Date(a.day).getTime() - new Date(b.day).getTime()
   );
@@ -215,34 +213,30 @@ export default function AdminAnalyticsDashboard() {
         <p className="mt-1 text-sm text-[#667085]">Platform-wide performance overview.</p>
       </div>
 
-      {/* ---- ALL CARDS TOGETHER ---- */}
+      {/* ---- */}
  
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           title="Total Revenue"
           value={`EGP ${overview.total_revenue.toFixed(2)}`}
-          subtitle="All time"
           icon={DollarSign}
           tone="bg-[#EAF7EE] text-[#16A34A]"
         />
         <MetricCard
           title="Total Orders"
-          value={String(overview.total_orders)}
-          subtitle="All time"
+          value={String(totalOrders)}
           icon={ShoppingCart}
           tone="bg-[#EAF1FF] text-[#2563EB]"
         />
         <MetricCard
           title="Revenue This Month"
           value={`EGP ${overview.revenue_this_month.toFixed(2)}`}
-          subtitle="Current month"
           icon={TrendingUp}
           tone="bg-[#F3E8FF] text-[#7E22CE]"
         />
         <MetricCard
           title="Orders This Month"
           value={String(overview.orders_this_month)}
-          subtitle="Current month"
           icon={CalendarDays}
           tone="bg-[#FFF4D8] text-[#D97706]"
         />
@@ -253,21 +247,18 @@ export default function AdminAnalyticsDashboard() {
         <MetricCard
           title="Active Drivers"
           value={String(delivery.active_drivers)}
-          subtitle="Currently delivering"
           icon={Truck}
           tone="bg-[#EAF1FF] text-[#2563EB]"
         />
         <MetricCard
           title="Total Deliveries"
           value={String(delivery.total_deliveries)}
-          subtitle="All time"
           icon={ShoppingCart}
           tone="bg-[#EAF7EE] text-[#16A34A]"
         />
         <MetricCard
           title="Avg Orders / Driver"
           value={delivery.avg_orders_per_driver.toFixed(1)}
-          subtitle="Per driver"
           icon={TrendingUp}
           tone="bg-[#F3E8FF] text-[#7E22CE]"
         />
@@ -306,7 +297,7 @@ export default function AdminAnalyticsDashboard() {
         </SectionCard>
       </div>
 
-      {/* ---- ALL TABLES TOGETHER (equal heights per row) ---- */}
+      {/*  */}
       <div className="grid gap-4 lg:grid-cols-2 lg:items-stretch">
         <TableCard title="Top Shops" icon={Store} empty="No shop data yet." rows={topShops}
           head={["Shop", "Orders", "Revenue"]}
