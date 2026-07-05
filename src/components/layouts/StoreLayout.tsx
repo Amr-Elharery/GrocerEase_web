@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Outlet, Link, useLocation } from "react-router";
+import { Outlet, Link, useLocation, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { useLogout } from "@/features/auth/hooks/useAuth";
 import { useProfile } from "@/features/profile/hooks/useProfile";
@@ -12,12 +12,21 @@ import { ZadLogo } from "@/components/domain/ZadLogo";
 export default function StoreLayout() {
   const { t } = useTranslation("layout");
   const location = useLocation();
+  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const { search, setSearch } = useSearch();
   const handleLogout = useLogout();
   const { data: user } = useProfile();
 
   const initial = (user?.full_name || t("defaultStoreName")).charAt(0).toUpperCase();
+
+  // لما تكتبي في السيرش، حط الكلمة وروح لصفحة المخزون لو مش عليها
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    if (value && location.pathname !== "/store/inventory") {
+      navigate("/store/inventory");
+    }
+  };
 
   const navItems = [
     { icon: LayoutDashboard, label: t("store.nav.dashboard"), path: "/store/home" },
@@ -94,7 +103,7 @@ export default function StoreLayout() {
             <div className="relative w-full">
               <input
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="w-full bg-muted/50 border-none rounded py-2 ps-10 pe-4 text-sm focus:ring-1 focus:ring-primary outline-none"
                 placeholder={t("search.placeholder")}
                 type="text"

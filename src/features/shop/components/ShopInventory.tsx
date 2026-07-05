@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useShopProducts, useUpdateShopProduct, useDeleteShopProduct, useMarkAvailable, useMarkUnavailable } from "../hooks/useShopProducts";
 import { useMyShop } from "../hooks/useShop";
 import { useCategories } from "@/features/categories/hooks/useCategories";
+import { useSearch } from "@/Context/SearchContext";
 import { type ShopProduct } from "../api/shopService";
 import { Pencil, Check, X, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ function readApiError(err: unknown, fallback: string): string {
 
 export default function ShopInventory() {
   const { t } = useTranslation(["common", "shop"]);
+  const { search } = useSearch();
   const [page, setPage] = useState(1);
   const [categoryFilter, setCategoryFilter] = useState("");
   const [subCategoryFilter, setSubCategoryFilter] = useState("");
@@ -57,7 +59,9 @@ const [loadingProductId, setLoadingProductId] = useState<string | null>(null);
         .map((s) => ({ id: s.id, name: s.name })),
     }));
 
-  const { data, isLoading } = useShopProducts(SHOP_ID, page);
+  const searchTerm = search.trim().toLowerCase();
+  const isFiltering = Boolean(categoryFilter || subCategoryFilter || searchTerm);
+  const { data, isLoading } = useShopProducts(SHOP_ID, isFiltering ? 1 : page, isFiltering ? 100 : undefined);
   const updateProduct = useUpdateShopProduct();
   const deleteProduct = useDeleteShopProduct();
   const markAvailable = useMarkAvailable();
@@ -116,11 +120,14 @@ const handleToggleAvailability = (product: ShopProduct) => {
   }
 };
 
-  const totalPages = Math.ceil((data?.total ?? 0) / 25);
+  const totalPages = Math.ceil((data?.total ?? 0) / (data?.limit ?? 25));
 
   const filtered = data?.data.filter(p => {
     if (categoryFilter && p.category_id !== categoryFilter) return false;
     if (subCategoryFilter && p.sub_category_id !== subCategoryFilter) return false;
+    if (searchTerm &&
+        !p.product_name.toLowerCase().includes(searchTerm) &&
+        !(p.brand ?? "").toLowerCase().includes(searchTerm)) return false;
     return true;
   });
 
@@ -224,11 +231,13 @@ const handleToggleAvailability = (product: ShopProduct) => {
           <table className="min-w-full text-start border-collapse">
             <thead>
               <tr className="border-b border-border bg-muted/20">
-                <th className="px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{t("shop:inventory.columns.productName")}</th>
+                 <th className="px-10 py-3 text-right text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
+  {t("shop:inventory.columns.productName")}
+</th>
                 <th className="px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{t("shop:inventory.columns.category")}</th>
                 <th className="px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{t("shop:inventory.columns.price")}</th>
                 <th className="px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{t("shop:inventory.columns.stock")}</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
+                <th className="px-4 py-2.5 text-center text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
   {t("shop:inventory.columns.availability")}
 </th>
                 <th className="px-4 py-2.5"></th>
@@ -275,12 +284,14 @@ const handleToggleAvailability = (product: ShopProduct) => {
                         </span>
                       )}
                     </td>
-                   <td className="px-4 py-2.5">
- <Switch
-  checked={product.is_available}
-  disabled={loadingProductId === product.product_id}
-  onCheckedChange={() => handleToggleAvailability(product)}
-/>
+                 <td className="px-4 py-3 text-center">
+  <div className="flex items-center justify-center">
+  <Switch
+   checked={product.is_available}
+   disabled={loadingProductId === product.product_id}
+   onCheckedChange={() => handleToggleAvailability(product)}
+  />
+ </div>
 </td>
                     <td className="px-4 py-2.5 text-end whitespace-nowrap">
                       {isEditing ? (
@@ -296,8 +307,6 @@ const handleToggleAvailability = (product: ShopProduct) => {
                         </div>
                       ) : (
                         <div className="flex items-center justify-end gap-1.5">
-                          {/* Toggle available/unavailable */}
-                          
                           <button onClick={() => handleStartEdit(product)}
                             className="w-7 h-7 flex items-center justify-center rounded border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
                             <Pencil className="w-3.5 h-3.5" />

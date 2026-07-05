@@ -175,6 +175,7 @@
     "loading": "Loading...",
     "showingZero": "Showing 0 to 0 of 0 products",
     "showing": "Showing {{from}} to {{to}} of {{total}} products",
+    "showingFiltered": "Showing {{count}} products",
     "removeProductTitle": "Remove Product",
     "removeProductMessage": "This will remove \"{{name}}\" from your shop.",
     "removing": "Removing...",

@@ -175,6 +175,7 @@
     "loading": "جارٍ التحميل...",
     "showingZero": "عرض 0 إلى 0 من 0 منتج",
     "showing": "عرض {{from}} إلى {{to}} من {{total}} منتج",
+    "showingFiltered": "عرض {{count}} منتج",
     "removeProductTitle": "إزالة المنتج",
     "removeProductMessage": "سيؤدي هذا إلى إزالة \"{{name}}\" من متجرك.",
     "removing": "جارٍ الإزالة...",
