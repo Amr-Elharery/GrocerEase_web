@@ -25,13 +25,18 @@ export function useLogin() {
     onSuccess: async (res) => {
       qc.clear();
 
+      const roles = res.user_data?.roles ?? [];
+      const lower = roles.map((r) => r.toLowerCase());
+
+      const isStore = lower.some((r) => r.includes('vendor'));
+      const isAdmin = lower.some((r) => r.includes('admin'));
+
+      if (!isStore && !isAdmin) {
+        throw new Error("This account isn't allowed to access the dashboard.");
+      }
+
       login(res.access_token, getJwtExpiry(res.access_token));
       localStorage.setItem('refresh_token', res.refresh_token);
-
-      const roles = res.user_data?.roles ?? [];
-      const isStore = roles.some(
-        (r) => r.toLowerCase().includes('store') || r.toLowerCase().includes('vendor')
-      );
 
       if (!isStore) {
         navigate('/app/home');
