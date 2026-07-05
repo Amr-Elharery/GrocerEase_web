@@ -351,9 +351,8 @@ export default function OrderList() {
           <p className="text-sm text-[#667085]">
             Showing{" "}
             <span className="font-semibold text-[#101828]">{filtered.length}</span>{" "}
-            of{" "}
-            <span className="font-semibold text-[#101828]">{orders.length}</span>{" "}
             orders
+            <span className="ml-2 text-[#98A2B3]">• Page {page}</span>
           </p>
           <div className="flex items-center gap-1.5">
             <button

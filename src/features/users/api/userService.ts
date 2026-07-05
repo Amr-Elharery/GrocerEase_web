@@ -23,6 +23,14 @@ export const CreateUserSchema = z.object({
 export type User = z.infer<typeof UserSchema>;
 export type CreateUserInput = z.infer<typeof CreateUserSchema>;
 
+// نتيجة فيها الصفحات
+export interface UsersPage {
+  users: User[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
 interface ApiUser {
   id: string;
   email: string;
@@ -32,20 +40,22 @@ interface ApiUser {
   is_active: boolean;
 }
 
+interface ApiUsersResponse {
+  items: ApiUser[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+}
+
 function mapRole(roles: string[]): string {
   const set = (roles ?? []).map((r) => r.toLowerCase());
-
   if (set.length === 0) return "-";
-
+  if (set.some((r) => r.includes("admin"))) return "admin";
   if (set.some((r) => r.includes("store") || r.includes("vendor") || r.includes("manager")))
     return "store_manager";
-
-  if (set.some((r) => r.includes("delivery") || r.includes("driver")))
-    return "delivery";
-
-  if (set.some((r) => r.includes("customer")))
-    return "customer";
-
+  if (set.some((r) => r.includes("delivery") || r.includes("driver"))) return "delivery";
+  if (set.some((r) => r.includes("customer"))) return "customer";
   return "-";
 }
 
@@ -62,23 +72,34 @@ function mapUser(u: ApiUser): User {
 
 // ترجمة دور الواجهة → اسم الدور اللي الباك بيفهمه
 const roleToApi: Record<string, string> = {
+  admin: "admin",
   store_manager: "vendor",
   customer: "customer",
   delivery: "delivery",
 };
 
 export const userService = {
-  async getUsers(opts: { role?: string; status?: string } = {}): Promise<User[]> {
-    const params: Record<string, string> = {};
-    if (opts.role && roleToApi[opts.role]) {
-      params.role = roleToApi[opts.role];
-    }
-    if (opts.status) {
-      params.status = opts.status; // active / suspended
-    }
+  async getUsers(opts: {
+    role?: string;
+    status?: string;
+    page?: number;
+    pageSize?: number;
+  } = {}): Promise<UsersPage> {
+    const params: Record<string, string | number> = {
+      page: opts.page ?? 1,
+      page_size: opts.pageSize ?? 10,
+    };
+    if (opts.role && roleToApi[opts.role]) params.role = roleToApi[opts.role];
+    if (opts.status) params.status = opts.status; // active / suspended
+
     const res = await http.get("/auth/users", { params });
-    const items: ApiUser[] = res.data ?? [];
-    return items.map(mapUser);
+    const data: ApiUsersResponse = res.data ?? {};
+    return {
+      users: (data.items ?? []).map(mapUser),
+      total: data.total ?? 0,
+      page: data.page ?? 1,
+      totalPages: data.total_pages ?? 1,
+    };
   },
 
   async suspendUser(id: string): Promise<void> {

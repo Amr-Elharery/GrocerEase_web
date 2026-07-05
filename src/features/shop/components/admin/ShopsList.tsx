@@ -7,7 +7,7 @@ import { Store, Search, ChevronRight, MapPin } from "lucide-react";
 export default function ShopsList() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
-  const { data: shops = [], isLoading } = useShops({ search });
+  const { data: shops = [], isLoading } = useShops({ search, limit: 100 });
 
   return (
     <section className="mx-auto max-w-[1420px] space-y-2.5">
