@@ -32,24 +32,32 @@ const ComingSoon = ({ page }: { page: string }) => (
   </div>
 );
 
+const NotFound = () => (
+  <div className="flex items-center justify-center min-h-[calc(100vh-64px)]">
+    <h1 className="text-2xl font-bold text-muted-foreground">
+      404 - Page Not Found
+    </h1>
+  </div>
+);
+
 const router = createBrowserRouter([
 {
   path: "/",
   element: <Navigate to="/auth/login" replace />,
 },
   {
-    path: "/auth",
+    path: '/auth',
     element: <AuthLayout />,
     children: [
       { index: true, element: <Navigate to="/auth/login" replace /> },
-      { path: "login", element: <Login /> },
-      { path: "signup", element: <SignUp /> },
-      { path: "forgot-password", element: <ForgotPassword /> },
-      { path: "reset-password", element: <ResetPassword /> },
+      { path: 'login', element: <Login /> },
+      { path: 'signup', element: <SignUp /> },
+      { path: 'forgot-password', element: <ForgotPassword /> },
+      { path: 'reset-password', element: <ResetPassword /> },
     ],
   },
   {
-    path: "/app",
+    path: '/app',
     element: (
       <AuthGuard>
         <AppLayout />
@@ -80,7 +88,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/store",
+    path: '/store',
     element: (
       <AuthGuard>
         <ShopGuard>
@@ -99,7 +107,7 @@ const router = createBrowserRouter([
       { path: "reports", element: <ComingSoon page="Reports" /> },
     ],
   },
-  { path: "*", element: <Navigate to="/auth/login" replace /> },
+  { path: '*', element: <NotFound /> },
 ]);
 
 export function AppRoutes() {
