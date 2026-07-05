@@ -83,13 +83,21 @@ export default function UserManagement() {
   const [roleFilter, setRoleFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [page, setPage] = useState(1);
 
-  const { data: users = [], isLoading } = useUsers(roleFilter, statusFilter);
+  const { data, isLoading } = useUsers(roleFilter, statusFilter, page);
+  const users = data?.users ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = data?.totalPages ?? 1;
   const suspendUser = useSuspendUser();
   const reactivateUser = useReactivateUser();
 
+  const setRole = (v: string) => { setRoleFilter(v); setPage(1); };
+  const setStatus = (v: string) => { setStatusFilter(v); setPage(1); };
+
   const roleOptions = [
     { value: "", label: "All Roles" },
+    { value: "admin", label: "Admin" },
     { value: "store_manager", label: "Store Manager" },
     { value: "customer", label: "Customer" },
     { value: "delivery", label: "Delivery" },
@@ -106,9 +114,8 @@ export default function UserManagement() {
     return true;
   });
 
-  const displayRole = (user: User): string => user.role;
-
-  const activeCount = users.filter((u) => u.status === "active").length;
+  const displayRole = (user: User): string =>
+    user.role === "-" && roleFilter ? roleFilter : user.role;
 
   const toggleStatus = (user: User) => {
     if (user.status === "active") suspendUser.mutate(user.id);
@@ -146,8 +153,8 @@ export default function UserManagement() {
             </div>
 
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <FilterDropdown value={roleFilter} options={roleOptions} onChange={setRoleFilter} />
-              <FilterDropdown value={statusFilter} options={statusOptions} onChange={setStatusFilter} />
+              <FilterDropdown value={roleFilter} options={roleOptions} onChange={setRole} />
+              <FilterDropdown value={statusFilter} options={statusOptions} onChange={setStatus} />
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#667085]" />
                 <input
@@ -159,7 +166,7 @@ export default function UserManagement() {
               </div>
               <button
                 type="button"
-                onClick={() => { setRoleFilter(""); setStatusFilter(""); setSearch(""); }}
+                onClick={() => { setRoleFilter(""); setStatusFilter(""); setSearch(""); setPage(1); }}
                 className="h-9 rounded-lg border border-[#DDE7DF] bg-white px-3 text-sm font-semibold text-[#5F7168] transition hover:bg-[#F8FAF8]"
               >
                 Reset
@@ -242,8 +249,30 @@ export default function UserManagement() {
         </table>
 
         {/* Footer */}
-        <div className="border-t border-[#DDE7DF] px-4 py-3 text-sm text-[#667085]">
-          Showing {filtered.length} of {users.length} users • {activeCount} active
+        <div className="flex items-center justify-between border-t border-[#DDE7DF] px-4 py-3">
+          <p className="text-sm text-[#667085]">
+            Showing <span className="font-semibold text-[#101828]">{filtered.length}</span> of{" "}
+            <span className="font-semibold text-[#101828]">{total}</span> users
+            <span className="ml-2 text-[#98A2B3]">• Page {page} of {totalPages}</span>
+          </p>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1}
+              className="flex h-8 items-center justify-center rounded-lg border border-[#DDE7DF] px-3 text-xs font-semibold text-[#5F7168] transition hover:bg-[#F8FAF8] disabled:opacity-40"
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+              className="flex h-8 items-center justify-center rounded-lg border border-[#DDE7DF] px-3 text-xs font-semibold text-[#5F7168] transition hover:bg-[#F8FAF8] disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
 

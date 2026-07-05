@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Outlet, Link, useLocation } from "react-router";
+import { Outlet, Link, useLocation, useNavigate } from "react-router";
 
 import {
   Search,
@@ -49,6 +49,7 @@ function ZadLogo({ collapsed }: { collapsed: boolean }) {
 
 export default function AdminLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const { search, setSearch } = useSearch();
   const handleLogout = useLogout();
@@ -56,6 +57,13 @@ export default function AdminLayout() {
 
   const displayName = user?.full_name || "Admin";
   const initial = (user?.full_name || "A").charAt(0).toUpperCase();
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    if (value && location.pathname !== "/app/inventory") {
+      navigate("/app/inventory");
+    }
+  };
 
   const navItems: NavItem[] = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/app/home" },
@@ -149,7 +157,7 @@ export default function AdminLayout() {
 
             <input
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="h-11 w-full rounded-xl border border-[#DFE7E1] bg-[#F3F6F2] pl-11 pr-4 text-sm text-[#1a1f2e] outline-none transition placeholder:text-[#718278] focus:border-[#52B788] focus:bg-white focus:ring-2 focus:ring-[#52B788]/25"
               placeholder="Search products, barcodes, or brands..."
               type="text"
