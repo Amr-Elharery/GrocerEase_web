@@ -26,6 +26,7 @@ function readApiError(err: unknown): string {
   if (Array.isArray(detail) && (detail[0] as { msg?: string })?.msg) {
     return (detail[0] as { msg: string }).msg;
   }
+  if (err) return `${err}`;
   return "Something went wrong. Please try again.";
 }
 
