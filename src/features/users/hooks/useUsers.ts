@@ -1,11 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userService } from '../api/userService';
-import type { User } from '../api/userService';
 
-export function useUsers() {
+export function useUsers(role: string = "", status: string = "") {
   return useQuery({
-    queryKey: ['users'],
-    queryFn: () => userService.getUsers(),
+    queryKey: ['users', role, status],
+    queryFn: () => userService.getUsers({ role, status }),
+    placeholderData: (prev) => prev,
   });
 }
 
@@ -23,17 +23,6 @@ export function useReactivateUser() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => userService.reactivateUser(id),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['users'] });
-    },
-  });
-}
-
-export function useChangeRole() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, role, shop_ids }: { id: string; role: User["role"]; shop_ids?: string[] }) =>
-      userService.changeRole(id, role, shop_ids),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['users'] });
     },

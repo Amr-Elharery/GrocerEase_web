@@ -48,6 +48,7 @@ function mapRole(roles: string[]): string {
 
   return "-";
 }
+
 function mapUser(u: ApiUser): User {
   return {
     id: u.id,
@@ -59,9 +60,23 @@ function mapUser(u: ApiUser): User {
   };
 }
 
+// ترجمة دور الواجهة → اسم الدور اللي الباك بيفهمه
+const roleToApi: Record<string, string> = {
+  store_manager: "vendor",
+  customer: "customer",
+  delivery: "delivery",
+};
+
 export const userService = {
-  async getUsers(): Promise<User[]> {
-    const res = await http.get("/auth/users");
+  async getUsers(opts: { role?: string; status?: string } = {}): Promise<User[]> {
+    const params: Record<string, string> = {};
+    if (opts.role && roleToApi[opts.role]) {
+      params.role = roleToApi[opts.role];
+    }
+    if (opts.status) {
+      params.status = opts.status; // active / suspended
+    }
+    const res = await http.get("/auth/users", { params });
     const items: ApiUser[] = res.data ?? [];
     return items.map(mapUser);
   },
