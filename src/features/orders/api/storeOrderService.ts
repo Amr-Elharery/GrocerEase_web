@@ -29,7 +29,7 @@ export interface StoreOrderDetail extends StoreOrder {
 
 interface ApiOrder {
   id: number;
-  customer_id: string;
+  customer_name: { full_name: string };
   shop_id: number;
   order_group_id: number;
   status: string;
@@ -38,18 +38,26 @@ interface ApiOrder {
   payment_method: string;
   created_at: string;
   customer_address_id: number;
-  order_items: { id: number; shop_product_id: number; quantity: number; total: number }[];
+  order_items: {
+    id: number;
+    shop_product_id: number;
+    quantity: number;
+    total: number;
+  }[];
 }
 
 function mapOrder(o: ApiOrder): StoreOrder {
-  const itemsCount = (o.order_items ?? []).reduce((sum, it) => sum + (it.quantity ?? 0), 0);
+  const itemsCount = (o.order_items ?? []).reduce(
+    (sum, it) => sum + (it.quantity ?? 0),
+    0,
+  );
   return {
     id: String(o.id),
     order_id: String(o.id),
-    customer_name: o.customer_id ?? "Customer",
+    customer_name: o.customer_name.full_name ?? 'Customer',
     items_count: itemsCount,
     total: (o.subtotal ?? 0) + (o.delivery_fee ?? 0),
-    status: o.status ?? "",
+    status: o.status ?? '',
     created_at: o.created_at,
   };
 }

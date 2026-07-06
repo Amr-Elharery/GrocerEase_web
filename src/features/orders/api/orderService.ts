@@ -31,7 +31,7 @@ export interface OrderDetail extends Order {
 
 interface ApiOrder {
   id: number;
-  customer_id: string;
+  customer_name: { full_name: string };
   shop_id: number;
   order_group_id: number;
   status: string;
@@ -40,7 +40,12 @@ interface ApiOrder {
   payment_method: string;
   created_at: string;
   customer_address_id: number;
-  order_items: { id: number; shop_product_id: number; quantity: number; total: number }[];
+  order_items: {
+    id: number;
+    shop_product_id: number;
+    quantity: number;
+    total: number;
+  }[];
 }
 
 async function buildShopNames(): Promise<Map<number, string>> {
@@ -49,22 +54,25 @@ async function buildShopNames(): Promise<Map<number, string>> {
     const shops = await shopApi.getAllShops({ limit: 100, offset: 0 });
     for (const s of shops) map.set(Number(s.id), s.shop_name);
   } catch {
-    //   
+    //
   }
   return map;
 }
 
 function mapOrder(o: ApiOrder, shopNames: Map<number, string>): Order {
-  const itemsCount = (o.order_items ?? []).reduce((sum, it) => sum + (it.quantity ?? 0), 0);
+  const itemsCount = (o.order_items ?? []).reduce(
+    (sum, it) => sum + (it.quantity ?? 0),
+    0,
+  );
   return {
     id: String(o.id),
     order_id: String(o.id),
-    customer_name: o.customer_id ?? "Customer",
+    customer_name: o.customer_name.full_name ?? 'Customer',
     store_name: shopNames.get(o.shop_id) ?? `Shop #${o.shop_id}`,
     items_count: itemsCount,
     total_price: (o.subtotal ?? 0) + (o.delivery_fee ?? 0),
-    status: o.status ?? "",
-    payment_method: o.payment_method ?? "",
+    status: o.status ?? '',
+    payment_method: o.payment_method ?? '',
     created_at: o.created_at,
   };
 }
