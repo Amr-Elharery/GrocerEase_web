@@ -1,0 +1,20 @@
+{
+  "bell": {
+    "ariaLabel": "الإشعارات"
+  },
+  "panel": {
+    "title": "الإشعارات",
+    "newCount": "{{count}} جديد",
+    "empty": "لا توجد إشعارات بعد."
+  },
+  "item": {
+    "defaultTitle": "إشعار",
+    "markAsRead": "وضع علامة كمقروء"
+  },
+  "time": {
+    "justNow": "الآن",
+    "minutesAgo": "منذ {{count}} دقيقة",
+    "hoursAgo": "منذ {{count}} ساعة",
+    "daysAgo": "منذ {{count}} يوم"
+  }
+}

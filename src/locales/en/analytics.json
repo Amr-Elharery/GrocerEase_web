@@ -1,0 +1,95 @@
+{
+  "shared": {
+    "loading": "Loading dashboard...",
+    "metrics": {
+      "totalRevenue": "Total Revenue",
+      "totalOrders": "Total Orders"
+    },
+    "revenueOverview": {
+      "title": "Revenue Overview",
+      "lastDays": "Last {{count}} days",
+      "empty": "No revenue data yet."
+    },
+    "ordersByStatus": {
+      "title": "Orders by Status",
+      "empty": "No orders yet.",
+      "centerLabel": "Orders"
+    },
+    "statusLabels": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "assigned": "Assigned",
+      "outForDelivery": "Out For Delivery",
+      "pickedUp": "Picked Up",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled"
+    },
+    "tableHeaders": {
+      "shop": "Shop",
+      "orders": "Orders",
+      "revenue": "Revenue",
+      "product": "Product",
+      "sold": "Sold",
+      "area": "Area",
+      "shops": "Shops",
+      "active": "Active",
+      "orderId": "Order ID",
+      "customer": "Customer",
+      "items": "Items",
+      "total": "Total",
+      "status": "Status",
+      "date": "Date",
+      "available": "Available"
+    }
+  },
+  "admin": {
+    "title": "Admin Dashboard",
+    "subtitle": "Platform-wide performance overview.",
+    "metrics": {
+      "revenueThisMonth": "Revenue This Month",
+      "ordersThisMonth": "Orders This Month",
+      "activeDrivers": "Active Drivers",
+      "totalDeliveries": "Total Deliveries",
+      "avgOrdersPerDriver": "Avg Orders / Driver"
+    },
+    "topShops": {
+      "title": "Top Shops",
+      "empty": "No shop data yet."
+    },
+    "topProducts": {
+      "title": "Top Products",
+      "empty": "No product data yet."
+    },
+    "ordersByArea": {
+      "title": "Orders by Area",
+      "empty": "No area data yet."
+    },
+    "shopsByArea": {
+      "title": "Shops by Area",
+      "empty": "No area data yet."
+    }
+  },
+  "store": {
+    "title": "Dashboard",
+    "subtitle": "Overview of your store's performance.",
+    "metrics": {
+      "uniqueCustomers": "Unique Customers",
+      "repeatCustomers": "Repeat Customers",
+      "lowStock": "Low Stock"
+    },
+    "bestSelling": {
+      "title": "Best Selling Products",
+      "soldBadge": "{{count}} sold",
+      "empty": "No sales data yet."
+    },
+    "lowStock": {
+      "title": "Low Stock Products",
+      "empty": "Everything is well stocked. 🎉",
+      "leftBadge": "{{count}} left"
+    },
+    "recentOrders": {
+      "title": "Recent Orders",
+      "empty": "No orders yet."
+    }
+  }
+}

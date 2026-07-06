@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { shopService } from '../api/shopService';
 
-export function useShopProducts(shopId: string, page: number = 1) {
+export function useShopProducts(shopId: string, page: number = 1, limit?: number) {
   return useQuery({
-    queryKey: ['shop-products', shopId, page],
-    queryFn: () => shopService.getShopProducts(shopId, page),
+    queryKey: ['shop-products', shopId, page, limit],
+    queryFn: () => shopService.getShopProducts(shopId, page, limit),
   });
 }
 

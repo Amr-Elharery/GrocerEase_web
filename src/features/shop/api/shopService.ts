@@ -104,22 +104,22 @@ async function buildCategoryLookup(): Promise<Map<number, CatInfo>> {
 }
 
 export const shopService = {
-  async getShopProducts(shopId: string, page: number = 1): Promise<ShopProductsResponse> {
+  async getShopProducts(shopId: string, page: number = 1, limit: number = PAGE_SIZE): Promise<ShopProductsResponse> {
     if (!shopId) {
-      return { data: [], total: 0, page, limit: PAGE_SIZE };
+      return { data: [], total: 0, page, limit };
     }
     const res = await http.get("/shop-products/manage", {
       params: {
         shop_id: Number(shopId),
-        limit: PAGE_SIZE,
-        offset: (page - 1) * PAGE_SIZE,
+        limit,
+        offset: (page - 1) * limit,
       },
     });
     const items: ApiShopProduct[] = res.data ?? [];
     const catLookup = await buildCategoryLookup();
     const data = items.map((item) => mapShopProduct(item, catLookup));
-    const total = (page - 1) * PAGE_SIZE + data.length + (data.length === PAGE_SIZE ? PAGE_SIZE : 0);
-    return { data, total, page, limit: PAGE_SIZE };
+    const total = (page - 1) * limit + data.length + (data.length === limit ? limit : 0);
+    return { data, total, page, limit };
   },
 
   async getAvailableProducts(_shopId: string, search: string = "", categoryId: string = ""): Promise<CatalogProduct[]> {

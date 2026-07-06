@@ -1,47 +1,53 @@
 import { useState } from "react";
-import { Outlet, Link, useLocation } from "react-router";
+import { Outlet, Link, useLocation, useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { useLogout } from "@/features/auth/hooks/useAuth";
 import { useProfile } from "@/features/profile/hooks/useProfile";
-import { Leaf, LayoutDashboard, Package, ShoppingCart, LogOut, ChevronLeft, ChevronRight, Search, Settings, ClipboardList } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, LogOut, ChevronLeft, ChevronRight, Search, Settings, ClipboardList } from "lucide-react";
 import { useSearch } from "@/Context/SearchContext";
 import NotificationsBell from "@/features/notifications/components/NotificationsBell";
+import { LanguageSwitcher } from "@/components/domain/LanguageSwitcher";
+import { ZadLogo } from "@/components/domain/ZadLogo";
 
 export default function StoreLayout() {
+  const { t } = useTranslation("layout");
   const location = useLocation();
+  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const { search, setSearch } = useSearch();
   const handleLogout = useLogout();
   const { data: user } = useProfile();
 
-  const initial = (user?.full_name || "S").charAt(0).toUpperCase();
+  const initial = (user?.full_name || t("defaultStoreName")).charAt(0).toUpperCase();
+
+  // لما تكتبي في السيرش، حط الكلمة وروح لصفحة المخزون لو مش عليها
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    if (value && location.pathname !== "/store/inventory") {
+      navigate("/store/inventory");
+    }
+  };
 
   const navItems = [
-    { icon: LayoutDashboard, label: "Dashboard", path: "/store/home" },
-    { icon: Package, label: "Inventory", path: "/store/inventory" },
-    { icon: ShoppingCart, label: "Orders", path: "/store/orders" },
-    { icon: ClipboardList, label: "My Requests", path: "/store/my-requests" },
-    { icon: Settings, label: "Shop Settings", path: "/store/shop-settings" },
+    { icon: LayoutDashboard, label: t("store.nav.dashboard"), path: "/store/home" },
+    { icon: Package, label: t("store.nav.inventory"), path: "/store/inventory" },
+    { icon: ShoppingCart, label: t("store.nav.orders"), path: "/store/orders" },
+    { icon: ClipboardList, label: t("store.nav.myRequests"), path: "/store/my-requests" },
+    { icon: Settings, label: t("store.nav.shopSettings"), path: "/store/shop-settings" },
   ];
 
   return (
     <div className="flex min-h-screen bg-background">
 
       {/* Sidebar */}
-      <aside className={`flex flex-col h-screen fixed left-0 top-0 pt-4 pb-8 bg-[#1B4332] z-40 transition-all duration-300 ${collapsed ? "w-16" : "w-60"}`}>
+      <aside className={`flex flex-col h-screen fixed start-0 top-0 pt-4 pb-8 bg-[#1B4332] z-40 transition-all duration-300 ${collapsed ? "w-16" : "w-60"}`}>
 
         {/* Logo */}
-        <div className={`mb-8 flex items-center ${collapsed ? "justify-center px-2" : "px-6 gap-3"}`}>
-          <Link to="/store/home" className="flex items-center gap-2 no-underline">
-            <div className="w-8 h-8 bg-[#2D6A4F] rounded-lg flex items-center justify-center shrink-0">
-              <Leaf className="w-4 h-4 text-white" />
-            </div>
-            {!collapsed && (
-              <div>
-                <p className="font-bold text-white text-sm leading-none">ZAD</p>
-                <p className="text-[10px] text-green-300 mt-0.5">Store Manager</p>
-              </div>
-            )}
-          </Link>
+        <div className={`mb-8 flex flex-col gap-1 ${collapsed ? "items-center px-2" : "px-6"}`}>
+          <ZadLogo collapsed={collapsed} to="/store/home" />
+          {!collapsed && (
+            <p className="text-[10px] text-green-300 rtl:text-right">{t("brand.storeTagline")}</p>
+          )}
         </div>
 
         {/* Nav Items */}
@@ -71,24 +77,25 @@ export default function StoreLayout() {
           
           <button onClick={handleLogout}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded text-green-200 hover:bg-[#2D6A4F]/50 hover:text-white transition-colors ${collapsed ? "justify-center" : ""}`}
-            title={collapsed ? "Sign Out" : undefined}
+            title={collapsed ? t("signOut") : undefined}
           >
             <LogOut className="w-4 h-4 shrink-0" />
-            {!collapsed && <span className="text-xs font-semibold uppercase tracking-wide">Sign Out</span>}
+            {!collapsed && <span className="text-xs font-semibold uppercase tracking-wide">{t("signOut")}</span>}
           </button>
         </div>
 
         {/* Toggle Button */}
         <button
           onClick={() => setCollapsed(p => !p)}
-          className="absolute -right-3 top-4 w-6 h-6 bg-[#1B4332] border border-[#2D6A4F] rounded-full flex items-center justify-center shadow-sm hover:bg-[#2D6A4F] transition-colors"
+          aria-label={t("toggleSidebar")}
+          className="absolute -end-3 top-4 w-6 h-6 bg-[#1B4332] border border-[#2D6A4F] rounded-full flex items-center justify-center shadow-sm hover:bg-[#2D6A4F] transition-colors"
         >
-          {collapsed ? <ChevronRight className="w-3 h-3 text-white" /> : <ChevronLeft className="w-3 h-3 text-white" />}
+          {collapsed ? <ChevronRight className="w-3 h-3 text-white rtl:-scale-x-100" /> : <ChevronLeft className="w-3 h-3 text-white rtl:-scale-x-100" />}
         </button>
       </aside>
 
       {/* Main */}
-      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${collapsed ? "ml-16" : "ml-60"}`}>
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${collapsed ? "ms-16" : "ms-60"}`}>
 
         {/* Top Navbar */}
         <header className="flex justify-between items-center h-14 px-6 sticky top-0 z-30 bg-white border-b border-border">
@@ -96,15 +103,16 @@ export default function StoreLayout() {
             <div className="relative w-full">
               <input
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-muted/50 border-none rounded py-2 pl-10 pr-4 text-sm focus:ring-1 focus:ring-primary outline-none"
-                placeholder="Search products, barcodes, or brands..."
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="w-full bg-muted/50 border-none rounded py-2 ps-10 pe-4 text-sm focus:ring-1 focus:ring-primary outline-none"
+                placeholder={t("search.placeholder")}
                 type="text"
               />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
             <NotificationsBell />
             <div className="h-6 w-px bg-border" />
             <Link to="/store/profile"

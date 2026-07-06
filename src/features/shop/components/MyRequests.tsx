@@ -1,14 +1,20 @@
+import { useTranslation } from "react-i18next";
 import { useMyShop } from "../hooks/useShop";
 import { useMyRequests } from "../hooks/useSubmissionRequest";
 import { ClipboardList, Package } from "lucide-react";
 
 function StatusBadge({ status }: { status: string }) {
+  const { t } = useTranslation(["shop"]);
   const s = (status ?? "").toLowerCase();
   const styles =
     s === "approved" ? "bg-green-50 text-green-700 border-green-200"
     : s === "rejected" ? "bg-red-50 text-red-600 border-red-200"
     : "bg-yellow-50 text-yellow-700 border-yellow-200";
-  const label = s === "approved" ? "Approved" : s === "rejected" ? "Rejected" : "Pending";
+  const label = s === "approved"
+    ? t("shop:myRequests.statuses.approved")
+    : s === "rejected"
+    ? t("shop:myRequests.statuses.rejected")
+    : t("shop:myRequests.statuses.pending");
   return (
     <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${styles}`}>
       {label}
@@ -17,6 +23,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function MyRequests() {
+  const { t } = useTranslation(["shop"]);
   const { data: myShop } = useMyShop();
   const { data: requests = [], isLoading } = useMyRequests(myShop?.id);
 
@@ -27,19 +34,19 @@ export default function MyRequests() {
           <ClipboardList className="h-5 w-5" />
         </div>
         <div>
-          <h1 className="text-xl font-black text-[#101828]">My Product Requests</h1>
-          <p className="text-sm text-[#667085]">Track the products you asked to add to the catalog.</p>
+          <h1 className="text-xl font-black text-[#101828]">{t("shop:myRequests.title")}</h1>
+          <p className="text-sm text-[#667085]">{t("shop:myRequests.subtitle")}</p>
         </div>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-[#DDE7DF] bg-white shadow-sm">
         {isLoading ? (
-          <p className="px-4 py-10 text-center text-sm text-[#667085]">Loading your requests...</p>
+          <p className="px-4 py-10 text-center text-sm text-[#667085]">{t("shop:myRequests.loading")}</p>
         ) : requests.length === 0 ? (
           <div className="flex flex-col items-center gap-2 px-4 py-12 text-center">
             <Package className="h-8 w-8 text-[#C9D8CE]" />
-            <p className="text-sm text-[#667085]">You haven't requested any products yet.</p>
-            <p className="text-xs text-[#98A2B3]">Use "Request a new product" from the Add Product screen.</p>
+            <p className="text-sm text-[#667085]">{t("shop:myRequests.emptyTitle")}</p>
+            <p className="text-xs text-[#98A2B3]">{t("shop:myRequests.emptyHint")}</p>
           </div>
         ) : (
           <div className="divide-y divide-[#EEF2EF]">

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
 import { useResetPassword } from "../hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,10 +9,10 @@ import { Eye, EyeOff, Lock, ArrowLeft } from "lucide-react";
 import { z } from "zod";
 
 const resetSchema = z.object({
-  newPassword: z.string().min(6, "Password must be at least 6 characters"),
+  newPassword: z.string().min(6, "resetPassword.errors.passwordMin"),
   confirmPassword: z.string(),
 }).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords do not match",
+  message: "resetPassword.errors.passwordsDoNotMatch",
   path: ["confirmPassword"],
 });
 
@@ -36,7 +37,7 @@ function readTokensFromUrl(): { accessToken: string | null; refreshToken: string
 }
 
 const ZADLogo = () => (
-  <div className="flex items-center justify-center gap-1 mb-4">
+  <div dir="ltr" className="flex items-center justify-center gap-1 mb-4">
     <svg width="36" height="44" viewBox="0 0 32 38" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="zGrad" x1="0" y1="0" x2="1" y2="1">
@@ -51,6 +52,7 @@ const ZADLogo = () => (
 );
 
 export default function ResetPassword() {
+  const { t } = useTranslation("auth");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showNew, setShowNew] = useState(false);
@@ -68,7 +70,7 @@ export default function ResetPassword() {
       const fieldErrors: ResetErrors = {};
       result.error.issues.forEach((err) => {
         const field = err.path[0] as keyof ResetErrors;
-        fieldErrors[field] = err.message;
+        fieldErrors[field] = t(err.message);
       });
       setErrors(fieldErrors);
       return;
@@ -85,27 +87,27 @@ export default function ResetPassword() {
     <div className="w-full space-y-6">
       <div className="text-center space-y-1">
         <ZADLogo />
-        <h1 className="text-2xl font-bold text-foreground">Reset Password</h1>
-        <p className="text-sm text-muted-foreground">Create a new password for your account.</p>
+        <h1 className="text-2xl font-bold text-foreground">{t("resetPassword.title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("resetPassword.subtitle")}</p>
       </div>
 
       {missingTokens && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-          This reset link is invalid or has expired. Please request a new reset link.
+          {t("resetPassword.invalidLink")}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="newPassword">New Password</Label>
+          <Label htmlFor="newPassword">{t("resetPassword.newPasswordLabel")}</Label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Lock className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input id="newPassword" type={showNew ? "text" : "password"}
-              placeholder="Enter your new password" value={newPassword}
+              placeholder={t("resetPassword.newPasswordPlaceholder")} value={newPassword}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
-              className={`pl-9 pr-10 ${errors.newPassword ? "border-destructive" : ""}`} />
+              className={`ps-9 pe-10 ${errors.newPassword ? "border-destructive" : ""}`} />
             <button type="button" onClick={() => setShowNew(!showNew)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+              className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
               {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
@@ -113,15 +115,15 @@ export default function ResetPassword() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="confirmPassword">Confirm Password</Label>
+          <Label htmlFor="confirmPassword">{t("resetPassword.confirmPasswordLabel")}</Label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Lock className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input id="confirmPassword" type={showConfirm ? "text" : "password"}
-              placeholder="Confirm your new password" value={confirmPassword}
+              placeholder={t("resetPassword.confirmPasswordPlaceholder")} value={confirmPassword}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
-              className={`pl-9 pr-10 ${errors.confirmPassword ? "border-destructive" : ""}`} />
+              className={`ps-9 pe-10 ${errors.confirmPassword ? "border-destructive" : ""}`} />
             <button type="button" onClick={() => setShowConfirm(!showConfirm)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+              className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
               {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
@@ -130,19 +132,19 @@ export default function ResetPassword() {
 
         {resetPassword.isError && (
           <p className="text-xs text-destructive">
-            Something went wrong. The link may have expired — please request a new one.
+            {t("resetPassword.errors.generic")}
           </p>
         )}
 
         <Button type="submit" className="w-full bg-[#1B4332] hover:bg-[#2D6A4F] text-white h-11 text-sm font-semibold"
           disabled={resetPassword.isPending || missingTokens}>
-          {resetPassword.isPending ? "Resetting..." : "Reset Password"}
+          {resetPassword.isPending ? t("resetPassword.resetting") : t("resetPassword.submit")}
         </Button>
       </form>
 
       <Link to="/auth/login"
         className="flex items-center justify-center gap-2 text-sm text-[#2D6A4F] hover:underline">
-        <ArrowLeft className="w-4 h-4" /> Back to Sign In
+        <ArrowLeft className="w-4 h-4" /> {t("resetPassword.backToSignIn")}
       </Link>
     </div>
   );

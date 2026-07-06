@@ -1,0 +1,41 @@
+{
+  "brand": {
+    "name": "ZAD",
+    "storeTagline": "مدير المتجر"
+  },
+  "search": {
+    "placeholder": "ابحث عن منتجات أو باركود أو ماركات..."
+  },
+  "admin": {
+    "nav": {
+      "dashboard": "لوحة التحكم",
+      "products": "المنتجات",
+      "categories": "الفئات",
+      "requests": "الطلبات",
+      "users": "المستخدمون",
+      "shops": "المتاجر",
+      "orders": "الطلبات"
+    }
+  },
+  "store": {
+    "nav": {
+      "dashboard": "لوحة التحكم",
+      "inventory": "المخزون",
+      "orders": "الطلبات",
+      "myRequests": "طلباتي",
+      "shopSettings": "إعدادات المتجر"
+    }
+  },
+  "navbar": {
+    "home": "الرئيسية",
+    "inventory": "المخزون",
+    "orders": "الطلبات",
+    "reports": "التقارير",
+    "profile": "الملف الشخصي",
+    "logout": "تسجيل الخروج"
+  },
+  "signOut": "تسجيل الخروج",
+  "toggleSidebar": "تبديل الشريط الجانبي",
+  "defaultAdminName": "المسؤول",
+  "defaultStoreName": "م"
+}

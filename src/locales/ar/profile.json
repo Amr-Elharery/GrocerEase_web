@@ -1,0 +1,40 @@
+{
+  "loading": "جارٍ تحميل الملف الشخصي...",
+  "roles": {
+    "user": "مستخدم",
+    "admin": "مسؤول",
+    "storeManager": "مدير متجر"
+  },
+  "banner": {
+    "portal": "بوابة {{label}} في ZAD",
+    "title": "ملفي الشخصي",
+    "subtitle": "إدارة معلومات حسابك وإعدادات الوصول."
+  },
+  "actions": {
+    "editProfile": "تعديل الملف الشخصي"
+  },
+  "status": {
+    "active": "نشط"
+  },
+  "leftCard": {
+    "accountType": "نوع الحساب",
+    "status": "الحالة",
+    "lastUpdate": "آخر تحديث",
+    "today": "اليوم"
+  },
+  "rightCard": {
+    "heading": "معلومات الحساب",
+    "subtitle": "تُستخدم هذه التفاصيل للتعرف على الحساب والوصول إلى المنصة."
+  },
+  "fields": {
+    "fullName": "الاسم الكامل",
+    "email": "البريد الإلكتروني",
+    "phone": "رقم الهاتف",
+    "role": "الدور",
+    "notAvailable": "غير متوفر"
+  },
+  "footer": {
+    "secureAccount": "حساب {{label}} آمن",
+    "secureDescription": "حافظ على تحديث معلومات الاتصال الخاصة بك للحفاظ على أمان الوصول إلى الحساب."
+  }
+}

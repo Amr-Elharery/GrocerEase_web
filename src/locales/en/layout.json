@@ -1,0 +1,41 @@
+{
+  "brand": {
+    "name": "ZAD",
+    "storeTagline": "Store Manager"
+  },
+  "search": {
+    "placeholder": "Search products, barcodes, or brands..."
+  },
+  "admin": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "products": "Products",
+      "categories": "Categories",
+      "requests": "Requests",
+      "users": "Users",
+      "shops": "Shops",
+      "orders": "Orders"
+    }
+  },
+  "store": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "inventory": "Inventory",
+      "orders": "Orders",
+      "myRequests": "My Requests",
+      "shopSettings": "Shop Settings"
+    }
+  },
+  "navbar": {
+    "home": "Home",
+    "inventory": "Inventory",
+    "orders": "Orders",
+    "reports": "Reports",
+    "profile": "Profile",
+    "logout": "Logout"
+  },
+  "signOut": "Sign Out",
+  "toggleSidebar": "Toggle sidebar",
+  "defaultAdminName": "Admin",
+  "defaultStoreName": "S"
+}

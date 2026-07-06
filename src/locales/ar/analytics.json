@@ -1,0 +1,95 @@
+{
+  "shared": {
+    "loading": "جارٍ تحميل لوحة التحكم...",
+    "metrics": {
+      "totalRevenue": "إجمالي الإيرادات",
+      "totalOrders": "إجمالي الطلبات"
+    },
+    "revenueOverview": {
+      "title": "نظرة عامة على الإيرادات",
+      "lastDays": "آخر {{count}} يوم",
+      "empty": "لا توجد بيانات إيرادات بعد."
+    },
+    "ordersByStatus": {
+      "title": "الطلبات حسب الحالة",
+      "empty": "لا توجد طلبات بعد.",
+      "centerLabel": "طلب"
+    },
+    "statusLabels": {
+      "pending": "معلّق",
+      "processing": "قيد المعالجة",
+      "assigned": "تم التعيين",
+      "outForDelivery": "قيد التوصيل",
+      "pickedUp": "تم الاستلام",
+      "delivered": "تم التسليم",
+      "cancelled": "ملغى"
+    },
+    "tableHeaders": {
+      "shop": "المتجر",
+      "orders": "الطلبات",
+      "revenue": "الإيرادات",
+      "product": "المنتج",
+      "sold": "المُباع",
+      "area": "المنطقة",
+      "shops": "المتاجر",
+      "active": "نشط",
+      "orderId": "رقم الطلب",
+      "customer": "العميل",
+      "items": "العناصر",
+      "total": "الإجمالي",
+      "status": "الحالة",
+      "date": "التاريخ",
+      "available": "المتوفر"
+    }
+  },
+  "admin": {
+    "title": "لوحة تحكم المسؤول",
+    "subtitle": "نظرة عامة على أداء المنصة.",
+    "metrics": {
+      "revenueThisMonth": "إيرادات هذا الشهر",
+      "ordersThisMonth": "طلبات هذا الشهر",
+      "activeDrivers": "السائقون النشطون",
+      "totalDeliveries": "إجمالي التوصيلات",
+      "avgOrdersPerDriver": "متوسط الطلبات لكل سائق"
+    },
+    "topShops": {
+      "title": "أفضل المتاجر",
+      "empty": "لا توجد بيانات متاجر بعد."
+    },
+    "topProducts": {
+      "title": "أفضل المنتجات",
+      "empty": "لا توجد بيانات منتجات بعد."
+    },
+    "ordersByArea": {
+      "title": "الطلبات حسب المنطقة",
+      "empty": "لا توجد بيانات مناطق بعد."
+    },
+    "shopsByArea": {
+      "title": "المتاجر حسب المنطقة",
+      "empty": "لا توجد بيانات مناطق بعد."
+    }
+  },
+  "store": {
+    "title": "لوحة التحكم",
+    "subtitle": "نظرة عامة على أداء متجرك.",
+    "metrics": {
+      "uniqueCustomers": "العملاء الفريدون",
+      "repeatCustomers": "العملاء المتكررون",
+      "lowStock": "مخزون منخفض"
+    },
+    "bestSelling": {
+      "title": "المنتجات الأكثر مبيعًا",
+      "soldBadge": "{{count}} مُباع",
+      "empty": "لا توجد بيانات مبيعات بعد."
+    },
+    "lowStock": {
+      "title": "منتجات ذات مخزون منخفض",
+      "empty": "كل شيء متوفر بكمية جيدة. 🎉",
+      "leftBadge": "متبقٍ {{count}}"
+    },
+    "recentOrders": {
+      "title": "الطلبات الأخيرة",
+      "empty": "لا توجد طلبات بعد."
+    }
+  }
+}

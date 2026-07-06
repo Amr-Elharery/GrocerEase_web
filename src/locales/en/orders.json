@@ -1,0 +1,75 @@
+{
+  "statuses": {
+    "pending": "Pending",
+    "processing": "Processing",
+    "assigned": "Assigned",
+    "outForDelivery": "Out for Delivery",
+    "pickedUp": "Picked Up",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
+  },
+  "paymentMethods": {
+    "cash": "Cash",
+    "card": "Card"
+  },
+  "detailModal": {
+    "title": "Order Details",
+    "status": "Status",
+    "customer": "Customer",
+    "store": "Store",
+    "totalItems": "Total Items",
+    "itemsCount": "{{n}} items",
+    "totalPayment": "Total / Payment",
+    "placedAt": "Placed At",
+    "products": "Products ({{n}})",
+    "item": "Item #{{id}}",
+    "subtotal": "Subtotal",
+    "deliveryFee": "Delivery fee",
+    "total": "Total"
+  },
+  "list": {
+    "title": "Orders",
+    "subtitle": "Track and manage all customer orders.",
+    "loading": "Loading orders...",
+    "filterOrders": "Filter Orders",
+    "filterOrdersDescription": "Refine orders by status, payment, or search.",
+    "searchPlaceholder": "Search orders...",
+    "reset": "Reset",
+    "columns": {
+      "orderId": "Order ID",
+      "customer": "Customer",
+      "store": "Store",
+      "items": "Items",
+      "total": "Total",
+      "payment": "Payment",
+      "status": "Status",
+      "date": "Date"
+    },
+    "allStatuses": "All Statuses",
+    "allPayments": "All Payments",
+    "itemsCount": "{{n}} items",
+    "showing": "Showing {{n}} orders",
+    "page": "Page {{n}}"
+  },
+  "storeOrders": {
+    "title": "Orders",
+    "subtitle": "Real-time view of incoming orders.",
+    "loading": "Loading orders...",
+    "refreshingIn": "Refreshing in {{n}}s",
+    "refresh": "Refresh",
+    "filterByStatus": "Filter by status",
+    "all": "All",
+    "lastUpdated": "Last updated:",
+    "columns": {
+      "orderId": "Order ID",
+      "customer": "Customer",
+      "items": "Items",
+      "total": "Total",
+      "status": "Status",
+      "time": "Time",
+      "actions": "Actions"
+    },
+    "itemsCount": "{{n}} items",
+    "showing": "Showing {{filtered}} of {{total}} orders"
+  }
+}

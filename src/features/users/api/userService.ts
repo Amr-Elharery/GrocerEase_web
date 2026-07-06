@@ -23,7 +23,6 @@ export const CreateUserSchema = z.object({
 export type User = z.infer<typeof UserSchema>;
 export type CreateUserInput = z.infer<typeof CreateUserSchema>;
 
-// نتيجة فيها الصفحات
 export interface UsersPage {
   users: User[];
   total: number;
@@ -70,7 +69,6 @@ function mapUser(u: ApiUser): User {
   };
 }
 
-// ترجمة دور الواجهة → اسم الدور اللي الباك بيفهمه
 const roleToApi: Record<string, string> = {
   admin: "admin",
   store_manager: "vendor",

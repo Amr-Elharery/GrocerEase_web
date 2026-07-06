@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useProfile, useUpdateProfile } from "../hooks/useProfile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,17 +15,18 @@ import {
 } from "lucide-react";
 import ChangePassword from "@/features/auth/components/ChangePassword";
 
-function roleLabel(role?: string): string {
-  if (!role) return "User";
-  const r = role.toLowerCase();
-  if (r === "admin") return "Admin";
-  if (r === "vendor" || r.includes("store")) return "Store Manager";
-  return role.charAt(0).toUpperCase() + role.slice(1);
-}
-
 export default function Profile() {
+  const { t } = useTranslation(["common", "profile"]);
   const { data: user, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
+
+  const roleLabel = (role?: string): string => {
+    if (!role) return t("profile:roles.user");
+    const r = role.toLowerCase();
+    if (r === "admin") return t("profile:roles.admin");
+    if (r === "vendor" || r.includes("store")) return t("profile:roles.storeManager");
+    return role.charAt(0).toUpperCase() + role.slice(1);
+  };
 
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
@@ -65,7 +67,7 @@ export default function Profile() {
   if (isLoading) {
     return (
       <section className="flex min-h-[300px] items-center justify-center">
-        <p className="text-sm text-[#6B7A70]">Loading profile...</p>
+        <p className="text-sm text-[#6B7A70]">{t("profile:loading")}</p>
       </section>
     );
   }
@@ -81,15 +83,15 @@ export default function Profile() {
           <div className="relative z-10 flex items-start justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#D8F3DC]">
-                ZAD {label} Portal
+                {t("profile:banner.portal", { label })}
               </p>
 
               <h1 className="mt-2 text-2xl font-black tracking-tight text-white">
-                My Profile
+                {t("profile:banner.title")}
               </h1>
 
               <p className="mt-1 max-w-2xl text-sm leading-5 text-[#F8FAF8]">
-                Manage your account information and access settings.
+                {t("profile:banner.subtitle")}
               </p>
             </div>
     
@@ -103,7 +105,7 @@ export default function Profile() {
       className="gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-[#1B4332] hover:bg-[#E6F3EB]"
     >
       <Pencil className="h-4 w-4" />
-      Edit Profile
+      {t("profile:actions.editProfile")}
     </Button>
   ) : (
     <>
@@ -114,7 +116,7 @@ export default function Profile() {
         className="gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-[#1B4332] hover:bg-[#E6F3EB]"
       >
         <Save className="h-4 w-4" />
-        {updateProfile.isPending ? "Saving..." : "Save"}
+        {updateProfile.isPending ? t("common:status.saving") : t("common:actions.save")}
       </Button>
 
       <Button
@@ -124,7 +126,7 @@ export default function Profile() {
         className="gap-2 rounded-xl border-white/40 bg-white/10 px-5 py-2.5 text-sm font-bold text-white hover:bg-white/20"
       >
         <X className="h-4 w-4" />
-        Cancel
+        {t("common:actions.cancel")}
       </Button>
     </>
   )}
@@ -150,7 +152,7 @@ export default function Profile() {
               <div className="mt-3 flex flex-wrap justify-center gap-2">
                 <span className="inline-flex items-center gap-2 rounded-full bg-[#E6F3EB] px-3 py-1 text-xs font-bold text-[#2D6A4F]">
                   <ShieldCheck className="h-4 w-4" />
-                  Active
+                  {t("profile:status.active")}
                 </span>
 
                 <span className="inline-flex items-center gap-2 rounded-full bg-[#E6F3EB] px-3 py-1 text-xs font-bold text-[#1B4332]">
@@ -162,18 +164,18 @@ export default function Profile() {
 
             <div className="mt-4 space-y-2 border-t border-[#E2E8E3] pt-4">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-[#6B7A70]">Account Type</span>
+                <span className="text-[#6B7A70]">{t("profile:leftCard.accountType")}</span>
                 <span className="font-bold text-[#1a1f2e]">{label}</span>
               </div>
 
               <div className="flex items-center justify-between text-sm">
-                <span className="text-[#6B7A70]">Status</span>
-                <span className="font-bold text-[#2D6A4F]">Active</span>
+                <span className="text-[#6B7A70]">{t("profile:leftCard.status")}</span>
+                <span className="font-bold text-[#2D6A4F]">{t("profile:status.active")}</span>
               </div>
 
               <div className="flex items-center justify-between text-sm">
-                <span className="text-[#6B7A70]">Last Update</span>
-                <span className="font-bold text-[#1a1f2e]">Today</span>
+                <span className="text-[#6B7A70]">{t("profile:leftCard.lastUpdate")}</span>
+                <span className="font-bold text-[#1a1f2e]">{t("profile:leftCard.today")}</span>
               </div>
             </div>
           </div>
@@ -182,12 +184,11 @@ export default function Profile() {
           <div className="rounded-2xl border border-[#E2E8E3] bg-white p-4">
             <div className="mb-4">
               <h3 className="text-xl font-black text-[#1a1f2e]">
-                Account Information
+                {t("profile:rightCard.heading")}
               </h3>
 
               <p className="mt-1 text-sm text-[#6B7A70]">
-                These details are used for account identification and platform
-                access.
+                {t("profile:rightCard.subtitle")}
               </p>
             </div>
 
@@ -195,7 +196,7 @@ export default function Profile() {
               <div>
                 <label className="mb-2 flex items-center gap-2 text-sm font-bold text-[#1a1f2e]">
                   <User className="h-4 w-4" />
-                  Full Name
+                  {t("profile:fields.fullName")}
                 </label>
 
                 {editMode ? (
@@ -215,7 +216,7 @@ export default function Profile() {
               <div>
                 <label className="mb-2 flex items-center gap-2 text-sm font-bold text-[#1a1f2e]">
                   <Mail className="h-4 w-4" />
-                  Email Address
+                  {t("profile:fields.email")}
                 </label>
 
                 <div className="flex h-10 items-center rounded-xl border border-[#DFE7E1] bg-[#F8FAF8] px-4 text-sm font-medium text-[#6B7A70]">
@@ -226,7 +227,7 @@ export default function Profile() {
               <div>
                 <label className="mb-2 flex items-center gap-2 text-sm font-bold text-[#1a1f2e]">
                   <Phone className="h-4 w-4" />
-                  Phone Number
+                  {t("profile:fields.phone")}
                 </label>
 
                 {editMode ? (
@@ -246,11 +247,11 @@ export default function Profile() {
               <div>
                 <label className="mb-2 flex items-center gap-2 text-sm font-bold text-[#1a1f2e]">
                   <ShieldCheck className="h-4 w-4" />
-                  Role
+                  {t("profile:fields.role")}
                 </label>
 
                 <div className="flex h-10 items-center rounded-xl border border-[#DFE7E1] bg-[#F8FAF8] px-4 text-sm font-medium text-[#1a1f2e]">
-                  {user?.roles?.map(roleLabel).join(", ") || "N/A"}
+                  {user?.roles?.map(roleLabel).join(", ") || t("profile:fields.notAvailable")}
                 </div>
               </div>
             </div>
@@ -263,11 +264,10 @@ export default function Profile() {
 
                 <div>
                   <p className="text-sm font-bold text-[#1a1f2e]">
-                    Secure {label} Account
+                    {t("profile:footer.secureAccount", { label })}
                   </p>
                   <p className="mt-1 text-xs leading-5 text-[#6B7A70]">
-                    Keep your contact information updated to maintain secure
-                    account access.
+                    {t("profile:footer.secureDescription")}
                   </p>
                 </div>
               </div>

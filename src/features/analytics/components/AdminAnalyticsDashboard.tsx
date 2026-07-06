@@ -1,5 +1,7 @@
-import type { ElementType } from "react";
-import { DollarSign, ShoppingCart, CalendarDays, TrendingUp, Store, Truck } from "lucide-react";
+import { useState, type ElementType } from "react";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
+import { DollarSign, ShoppingCart, CalendarDays, TrendingUp, Store, Truck, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAdminDashboard } from "../hooks/useAnalytics";
 import type {
   TopShop,
@@ -19,8 +21,19 @@ const STATUS_PALETTE: Record<string, string> = {
 };
 const FALLBACK_COLORS = ["#16A34A", "#2563EB", "#D97706", "#7E22CE", "#DC2626", "#0EA5E9", "#F97316"];
 
-function formatStatus(s: string) {
-  return s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+const STATUS_LABEL_KEYS: Record<string, string> = {
+  pending: "pending",
+  processing: "processing",
+  assigned: "assigned",
+  out_for_delivery: "outForDelivery",
+  picked_up: "pickedUp",
+  delivered: "delivered",
+  cancelled: "cancelled",
+};
+
+function formatStatus(t: TFunction, s: string) {
+  const key = STATUS_LABEL_KEYS[s];
+  return key ? t(`analytics:shared.statusLabels.${key}`) : s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 function SectionCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -114,7 +127,7 @@ function RevenueChart({ values, labels }: { values: number[]; labels: string[] }
   );
 }
 
-function StatusDonut({ data }: { data: { status: string; total: number }[] }) {
+function StatusDonut({ data, t }: { data: { status: string; total: number }[]; t: TFunction }) {
   const total = data.reduce((s, d) => s + d.total, 0);
   const size = 168;
   const stroke = 26;
@@ -151,7 +164,7 @@ function StatusDonut({ data }: { data: { status: string; total: number }[] }) {
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-2xl font-bold text-[#101828]">{total}</span>
-          <span className="text-[11px] text-[#667085]">Orders</span>
+          <span className="text-[11px] text-[#667085]">{t("analytics:shared.ordersByStatus.centerLabel")}</span>
         </div>
       </div>
       <div className="min-w-0 flex-1 space-y-2">
@@ -162,7 +175,7 @@ function StatusDonut({ data }: { data: { status: string; total: number }[] }) {
                 className="h-2.5 w-2.5 shrink-0 rounded-full"
                 style={{ background: STATUS_PALETTE[d.status] ?? FALLBACK_COLORS[i % FALLBACK_COLORS.length] }}
               />
-              <span className="truncate text-sm text-[#475467]">{formatStatus(d.status)}</span>
+              <span className="truncate text-sm text-[#475467]">{formatStatus(t, d.status)}</span>
             </span>
             <span className="text-sm font-semibold text-[#101828]">{d.total}</span>
           </div>
@@ -173,12 +186,13 @@ function StatusDonut({ data }: { data: { status: string; total: number }[] }) {
 }
 
 export default function AdminAnalyticsDashboard() {
+  const { t } = useTranslation("analytics");
   const { data, isLoading } = useAdminDashboard();
 
   if (isLoading) {
     return (
       <div className="flex min-h-[calc(100vh-80px)] items-center justify-center">
-        <p className="text-sm text-muted-foreground">Loading dashboard...</p>
+        <p className="text-sm text-muted-foreground">{t("shared.loading")}</p>
       </div>
     );
   }
@@ -209,33 +223,33 @@ export default function AdminAnalyticsDashboard() {
     <section className="mx-auto max-w-[1420px] space-y-4">
       {/* Header */}
       <div>
-        <h1 className="text-[30px] font-bold tracking-tight text-[#101828]">Admin Dashboard</h1>
-        <p className="mt-1 text-sm text-[#667085]">Platform-wide performance overview.</p>
+        <h1 className="text-[30px] font-bold tracking-tight text-[#101828]">{t("admin.title")}</h1>
+        <p className="mt-1 text-sm text-[#667085]">{t("admin.subtitle")}</p>
       </div>
 
       {/* ---- */}
- 
+
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
-          title="Total Revenue"
+          title={t("shared.metrics.totalRevenue")}
           value={`EGP ${overview.total_revenue.toFixed(2)}`}
           icon={DollarSign}
           tone="bg-[#EAF7EE] text-[#16A34A]"
         />
         <MetricCard
-          title="Total Orders"
+          title={t("shared.metrics.totalOrders")}
           value={String(totalOrders)}
           icon={ShoppingCart}
           tone="bg-[#EAF1FF] text-[#2563EB]"
         />
         <MetricCard
-          title="Revenue This Month"
+          title={t("admin.metrics.revenueThisMonth")}
           value={`EGP ${overview.revenue_this_month.toFixed(2)}`}
           icon={TrendingUp}
           tone="bg-[#F3E8FF] text-[#7E22CE]"
         />
         <MetricCard
-          title="Orders This Month"
+          title={t("admin.metrics.ordersThisMonth")}
           value={String(overview.orders_this_month)}
           icon={CalendarDays}
           tone="bg-[#FFF4D8] text-[#D97706]"
@@ -245,19 +259,19 @@ export default function AdminAnalyticsDashboard() {
       {/* Delivery stats  */}
       <div className="grid gap-3 sm:grid-cols-3">
         <MetricCard
-          title="Active Drivers"
+          title={t("admin.metrics.activeDrivers")}
           value={String(delivery.active_drivers)}
           icon={Truck}
           tone="bg-[#EAF1FF] text-[#2563EB]"
         />
         <MetricCard
-          title="Total Deliveries"
+          title={t("admin.metrics.totalDeliveries")}
           value={String(delivery.total_deliveries)}
           icon={ShoppingCart}
           tone="bg-[#EAF7EE] text-[#16A34A]"
         />
         <MetricCard
-          title="Avg Orders / Driver"
+          title={t("admin.metrics.avgOrdersPerDriver")}
           value={delivery.avg_orders_per_driver.toFixed(1)}
           icon={TrendingUp}
           tone="bg-[#F3E8FF] text-[#7E22CE]"
@@ -269,15 +283,15 @@ export default function AdminAnalyticsDashboard() {
         <SectionCard className="lg:col-span-2">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-semibold text-[#101828]">Revenue Overview</h2>
+              <h2 className="text-sm font-semibold text-[#101828]">{t("shared.revenueOverview.title")}</h2>
               <p className="text-[22px] font-bold text-[#101828]">EGP {overview.total_revenue.toFixed(2)}</p>
             </div>
             <span className="rounded-lg border border-[#E7EBF0] px-2.5 py-1 text-xs text-[#667085]">
-              Last {daily.length} days
+              {t("shared.revenueOverview.lastDays", { count: daily.length })}
             </span>
           </div>
           {daily.length === 0 ? (
-            <p className="mt-8 text-sm text-[#98A2B3]">No revenue data yet.</p>
+            <p className="mt-8 text-sm text-[#98A2B3]">{t("shared.revenueOverview.empty")}</p>
           ) : (
             <div className="mt-3">
               <RevenueChart values={revValues} labels={revLabels} />
@@ -286,12 +300,12 @@ export default function AdminAnalyticsDashboard() {
         </SectionCard>
 
         <SectionCard>
-          <h2 className="text-sm font-semibold text-[#101828]">Orders by Status</h2>
+          <h2 className="text-sm font-semibold text-[#101828]">{t("shared.ordersByStatus.title")}</h2>
           {byStatus.length === 0 ? (
-            <p className="mt-8 text-sm text-[#98A2B3]">No orders yet.</p>
+            <p className="mt-8 text-sm text-[#98A2B3]">{t("shared.ordersByStatus.empty")}</p>
           ) : (
             <div className="mt-4">
-              <StatusDonut data={byStatus} />
+              <StatusDonut data={byStatus} t={t} />
             </div>
           )}
         </SectionCard>
@@ -299,8 +313,8 @@ export default function AdminAnalyticsDashboard() {
 
       {/*  */}
       <div className="grid gap-4 lg:grid-cols-2 lg:items-stretch">
-        <TableCard title="Top Shops" icon={Store} empty="No shop data yet." rows={topShops}
-          head={["Shop", "Orders", "Revenue"]}
+        <TableCard title={t("admin.topShops.title")} icon={Store} empty={t("admin.topShops.empty")} rows={topShops}
+          head={[t("shared.tableHeaders.shop"), t("shared.tableHeaders.orders"), t("shared.tableHeaders.revenue")]}
           render={(s: TopShop) => (
             <tr key={s.shop_id} className="hover:bg-[#F9FAFB]">
               <td className="px-5 py-3 text-sm font-medium text-[#101828]">{s.shop_name}</td>
@@ -309,8 +323,8 @@ export default function AdminAnalyticsDashboard() {
             </tr>
           )}
         />
-        <TableCard title="Top Products" icon={TrendingUp} empty="No product data yet." rows={topProducts}
-          head={["Product", "Sold", "Revenue"]}
+        <TableCard title={t("admin.topProducts.title")} icon={TrendingUp} empty={t("admin.topProducts.empty")} rows={topProducts}
+          head={[t("shared.tableHeaders.product"), t("shared.tableHeaders.sold"), t("shared.tableHeaders.revenue")]}
           render={(p: TopProduct) => (
             <tr key={p.product_id} className="hover:bg-[#F9FAFB]">
               <td className="px-5 py-3 text-sm font-medium text-[#101828]">{p.product_name}</td>
@@ -319,8 +333,8 @@ export default function AdminAnalyticsDashboard() {
             </tr>
           )}
         />
-        <TableCard title="Orders by Area" icon={ShoppingCart} empty="No area data yet." rows={ordersByArea}
-          head={["Area", "Orders", "Revenue"]}
+        <TableCard title={t("admin.ordersByArea.title")} icon={ShoppingCart} empty={t("admin.ordersByArea.empty")} rows={ordersByArea}
+          head={[t("shared.tableHeaders.area"), t("shared.tableHeaders.orders"), t("shared.tableHeaders.revenue")]}
           render={(a: OrdersByArea) => (
             <tr key={a.area_id} className="hover:bg-[#F9FAFB]">
               <td className="px-5 py-3 text-sm font-medium text-[#101828]">
@@ -331,8 +345,9 @@ export default function AdminAnalyticsDashboard() {
             </tr>
           )}
         />
-        <TableCard title="Shops by Area" icon={Store} empty="No area data yet." rows={shopsByArea}
-          head={["Area", "Shops", "Active"]}
+        <TableCard title={t("admin.shopsByArea.title")} icon={Store} empty={t("admin.shopsByArea.empty")} rows={shopsByArea}
+          pageSize={5}
+          head={[t("shared.tableHeaders.area"), t("shared.tableHeaders.shops"), t("shared.tableHeaders.active")]}
           render={(a: ShopsByArea) => (
             <tr key={a.area_id} className="hover:bg-[#F9FAFB]">
               <td className="px-5 py-3 text-sm font-medium text-[#101828]">
@@ -355,6 +370,7 @@ function TableCard<T>({
   rows,
   head,
   render,
+  pageSize,
 }: {
   title: string;
   icon: ElementType;
@@ -362,26 +378,65 @@ function TableCard<T>({
   rows: T[];
   head: string[];
   render: (row: T) => React.ReactNode;
+  pageSize?: number;
 }) {
+  const safeRows = Array.isArray(rows) ? rows : [];
+  const [page, setPage] = useState(1);
+
+  const paginated = typeof pageSize === "number" && pageSize > 0;
+  const totalPages = paginated ? Math.max(1, Math.ceil(safeRows.length / pageSize!)) : 1;
+  const currentPage = Math.min(page, totalPages);
+  const visibleRows = paginated
+    ? safeRows.slice((currentPage - 1) * pageSize!, currentPage * pageSize!)
+    : safeRows;
+
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-xl border border-[#E7EBF0] bg-white shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
       <div className="flex items-center gap-2 border-b border-[#E7EBF0] px-5 py-3.5">
         <Icon className="h-4 w-4 text-[#667085]" />
         <h2 className="text-sm font-semibold text-[#101828]">{title}</h2>
       </div>
-      {rows.length === 0 ? (
+      {safeRows.length === 0 ? (
         <p className="px-5 py-6 text-sm text-[#98A2B3]">{empty}</p>
       ) : (
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b border-[#E7EBF0] bg-[#F9FAFB] text-[11px] font-semibold uppercase tracking-wide text-[#667085]">
-              {head.map((h) => (
-                <th key={h} className="px-5 py-2.5">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[#F1F3F5]">{rows.map(render)}</tbody>
-        </table>
+        <>
+          <table className="w-full text-start">
+            <thead>
+              <tr className="border-b border-[#E7EBF0] bg-[#F9FAFB] text-[11px] font-semibold uppercase tracking-wide text-[#667085]">
+                {head.map((h) => (
+                  <th key={h} className="px-5 py-2.5 text-start">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#F1F3F5]">{visibleRows.map(render)}</tbody>
+          </table>
+
+          {paginated && totalPages > 1 && (
+            <div className="mt-auto flex items-center justify-between border-t border-[#E7EBF0] px-5 py-2.5">
+              <span className="text-xs text-[#98A2B3]">
+                {currentPage} / {totalPages}
+              </span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage <= 1}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#E7EBF0] text-[#5F7168] transition hover:bg-[#F8FAF8] disabled:opacity-40"
+                >
+                  <ChevronLeft className="h-4 w-4 rtl:-scale-x-100" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage >= totalPages}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#E7EBF0] text-[#5F7168] transition hover:bg-[#F8FAF8] disabled:opacity-40"
+                >
+                  <ChevronRight className="h-4 w-4 rtl:-scale-x-100" />
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

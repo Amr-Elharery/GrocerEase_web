@@ -39,15 +39,23 @@ export interface ShopDashboard {
   customer_stats: CustomerStats;
 }
 
+function readList<T>(value: unknown): T[] {
+  if (Array.isArray(value)) return value as T[];
+  if (value && typeof value === "object" && Array.isArray((value as { items?: T[] }).items)) {
+    return (value as { items: T[] }).items;
+  }
+  return [];
+}
+
 export const analyticsService = {
   async getShopDashboard(): Promise<ShopDashboard> {
     const res = await http.get("/analytics/shop");
     const d = res.data ?? {};
     return {
-      daily_revenue: d.daily_revenue ?? [],
-      orders_by_status: d.orders_by_status ?? [],
-      best_selling_products: d.best_selling_products ?? [],
-      low_stock_products: d.low_stock_products ?? [],
+      daily_revenue: readList<DailyRevenue>(d.daily_revenue),
+      orders_by_status: readList<OrdersByStatus>(d.orders_by_status),
+      best_selling_products: readList<BestSellingProduct>(d.best_selling_products),
+      low_stock_products: readList<LowStockProduct>(d.low_stock_products),
       customer_stats: d.customer_stats ?? { unique_customers: 0, repeat_customers: 0 },
     };
   },
@@ -62,17 +70,17 @@ export const analyticsService = {
         orders_this_month: 0,
         revenue_this_month: 0,
       },
-      orders_by_status: d.orders_by_status ?? [],
-      daily_orders: d.daily_orders ?? [],
-      top_shops: d.top_shops ?? [],
-      top_products: d.top_products ?? [],
-      orders_by_area: d.orders_by_area ?? [],
+      orders_by_status: readList<OrdersByStatus>(d.orders_by_status),
+      daily_orders: readList<DailyOrders>(d.daily_orders),
+      top_shops: readList<TopShop>(d.top_shops),
+      top_products: readList<TopProduct>(d.top_products),
+      orders_by_area: readList<OrdersByArea>(d.orders_by_area),
       delivery_stats: d.delivery_stats ?? {
         active_drivers: 0,
         total_deliveries: 0,
         avg_orders_per_driver: 0,
       },
-      shops_by_area: d.shops_by_area ?? [],
+      shops_by_area: readList<ShopsByArea>(d.shops_by_area),
     };
   },
 };

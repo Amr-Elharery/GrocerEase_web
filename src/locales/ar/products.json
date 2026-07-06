@@ -1,0 +1,115 @@
+{
+  "units": {
+    "piece": "قطعة",
+    "kg": "كجم",
+    "litre": "لتر",
+    "pack": "عبوة",
+    "box": "صندوق",
+    "bottle": "زجاجة",
+    "can": "علبة",
+    "bag": "كيس",
+    "tray": "صينية",
+    "jar": "برطمان"
+  },
+  "form": {
+    "errors": {
+      "required": "حقل مطلوب",
+      "categoryRequired": "الفئة مطلوبة"
+    },
+    "category": {
+      "sectionTitle": "تصنيف الفئات",
+      "topLevelLabel": "الفئة الرئيسية *",
+      "selectPlaceholder": "اختر الفئة",
+      "subCategoryLabel": "الفئة الفرعية *"
+    },
+    "assets": {
+      "sectionTitle": "وسائط المنتج",
+      "helpText": "قم بتحميل حتى 5 صور للمنتج. انقر على صورة لجعلها الصورة الرئيسية.",
+      "dropText": "اسحب الصور وأفلتها هنا",
+      "fileTypes": "JPG, PNG, WEBP",
+      "browseText": "أو تصفح الملفات",
+      "primaryBadge": "رئيسية",
+      "primaryTitle": "انقر لجعلها الصورة الرئيسية"
+    },
+    "info": {
+      "sectionTitle": "معلومات المنتج",
+      "nameLabel": "اسم المنتج *",
+      "namePlaceholder": "مثال: حليب كامل الدسم 1 لتر",
+      "brandLabel": "العلامة التجارية *",
+      "brandPlaceholder": "أدخل اسم العلامة التجارية",
+      "unitLabel": "الوحدة *",
+      "unitPlaceholder": "اختر الوحدة",
+      "barcodeLabel": "الباركود / رمز المنتج *",
+      "barcodePlaceholder": "مثال: 745920381442",
+      "barcodeConflict": "تعارض: الباركود موجود بالفعل في النظام",
+      "barcodeConflictTitle": "تحذير: تعارض في الباركود",
+      "barcodeConflictMessage": "الباركود <1>{{barcode}}</1> مُخصص بالفعل لمنتج آخر.",
+      "descriptionLabel": "وصف المنتج",
+      "descriptionPlaceholder": "أدخل المواصفات الفنية التفصيلية والنص التسويقي..."
+    },
+    "create": {
+      "title": "إدخال منتج جديد",
+      "subtitle": "قم بتهيئة تفاصيل المنتج وتصنيف الفئات وأصول المنتج.",
+      "discard": "تجاهل",
+      "save": "حفظ المنتج",
+      "saving": "جارٍ الحفظ...",
+      "imageRequired": "يجب إضافة صورة واحدة على الأقل للمنتج."
+    },
+    "edit": {
+      "title": "تعديل المنتج",
+      "loading": "جارٍ تحميل المنتج...",
+      "unsavedChanges": "تغييرات غير محفوظة",
+      "discard": "تجاهل",
+      "save": "حفظ التغييرات",
+      "saving": "جارٍ الحفظ...",
+      "idLabel": "المعرّف: {{id}}",
+      "leaveConfirm": "لديك تغييرات غير محفوظة. هل أنت متأكد من أنك تريد المغادرة؟"
+    }
+  },
+  "list": {
+    "breadcrumb": {
+      "catalogue": "الكتالوج",
+      "products": "المنتجات"
+    },
+    "title": "إدارة المنتجات",
+    "subtitle": "إدارة كتالوج المنتجات وحالة المخزون وتغطية المتاجر.",
+    "createButton": "إنشاء منتج",
+    "loading": "جارٍ تحميل المنتجات...",
+    "filter": {
+      "allCategories": "جميع الفئات",
+      "allSubCategories": "جميع الفئات الفرعية",
+      "categoryPlaceholder": "تصفية حسب الفئة",
+      "subCategoryPlaceholder": "تصفية حسب الفئة الفرعية"
+    },
+    "columns": {
+      "product": "المنتج",
+      "brand": "العلامة التجارية",
+      "category": "الفئة",
+      "subCategory": "الفئة الفرعية",
+      "unit": "الوحدة",
+      "stores": "المتاجر"
+    },
+    "footer": {
+      "showing": "عرض <1>{{count}}</1> منتج"
+    },
+    "deleteConfirm": {
+      "title": "حذف المنتج",
+      "message": "هل أنت متأكد من أنك تريد حذف <1>{{name}}</1>؟"
+    }
+  },
+  "coverage": {
+    "loading": "جارٍ التحميل...",
+    "productDetailsFallback": "تفاصيل المنتج",
+    "category": "الفئة",
+    "subCategory": "الفئة الفرعية",
+    "unitSize": "الوحدة / الحجم",
+    "brand": "العلامة التجارية",
+    "description": "الوصف",
+    "images": "الصور ({{count}})",
+    "storeCoverage": "تغطية المتاجر ({{count}})",
+    "noStores": "لا يوجد متجر يقدم هذا المنتج حتى الآن.",
+    "stockPrice": "{{stock}} متوفر بالمخزون · جنيه {{price}}",
+    "active": "نشط",
+    "hidden": "مخفي"
+  }
+}

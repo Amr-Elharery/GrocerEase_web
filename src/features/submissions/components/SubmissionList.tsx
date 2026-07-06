@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   useSubmissions,
   useApproveSubmission,
@@ -16,15 +17,6 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-
-const rejectReasons = [
-  "Duplicate product",
-  "Invalid category",
-  "Insufficient information",
-  "Not a grocery product",
-  "Other",
-];
 
 const statusColors: Record<string, string> = {
   pending: "border border-yellow-200 bg-yellow-50 text-yellow-700",
@@ -54,11 +46,12 @@ function formatDate(date: string) {
 }
 
 export default function SubmissionList() {
+  const { t } = useTranslation(["common", "submissions"]);
   const { data: submissions = [], isLoading } = useSubmissions();
   const approveSubmission = useApproveSubmission();
   const rejectSubmission = useRejectSubmission();
   const [apiError, setApiError] = useState("");
-  
+
   const [selectedSubmission, setSelectedSubmission] =
     useState<Submission | null>(null);
 
@@ -72,21 +65,29 @@ export default function SubmissionList() {
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
   const statusDropdownRef = useRef<HTMLDivElement | null>(null);
 
+  const rejectReasons = [
+    t("submissions:rejectReasons.duplicateProduct"),
+    t("submissions:rejectReasons.invalidCategory"),
+    t("submissions:rejectReasons.insufficientInformation"),
+    t("submissions:rejectReasons.notGroceryProduct"),
+    t("submissions:rejectReasons.other"),
+  ];
+
   const pendingCount = submissions.filter(
     (submission) => submission.status === "pending"
   ).length;
 
   const statusOptions = [
-    { value: "all", label: "All Statuses" },
-    { value: "pending", label: "Pending" },
-    { value: "flagged", label: "Flagged" },
-    { value: "approved", label: "Approved" },
-    { value: "rejected", label: "Rejected" },
+    { value: "all", label: t("submissions:statuses.all") },
+    { value: "pending", label: t("submissions:statuses.pending") },
+    { value: "flagged", label: t("submissions:statuses.flagged") },
+    { value: "approved", label: t("submissions:statuses.approved") },
+    { value: "rejected", label: t("submissions:statuses.rejected") },
   ];
 
   const selectedStatusLabel =
     statusOptions.find((option) => option.value === statusFilter)?.label ??
-    "All Statuses";
+    t("submissions:statuses.all");
 
   const filtered = submissions.filter((submission) => {
     const matchesStatus =
@@ -138,7 +139,7 @@ export default function SubmissionList() {
           setRejectMode(false);
           setRejectReason("");
         },
-        onError: (err) => setApiError(readErr(err, "Couldn't approve this request.")),
+        onError: (err) => setApiError(readErr(err, t("submissions:errors.approveFailed"))),
       }
     );
   };
@@ -149,7 +150,7 @@ export default function SubmissionList() {
       id: submission.id,
       data: getEditData(submission),
     }, {
-      onError: (err) => setApiError(readErr(err, "Couldn't approve this request.")),
+      onError: (err) => setApiError(readErr(err, t("submissions:errors.approveFailed"))),
     });
   };
 
@@ -168,7 +169,7 @@ export default function SubmissionList() {
           setRejectMode(false);
           setRejectReason("");
         },
-        onError: (err) => setApiError(readErr(err, "Couldn't reject this request.")),
+        onError: (err) => setApiError(readErr(err, t("submissions:errors.rejectFailed"))),
       }
     );
   };
@@ -197,7 +198,7 @@ export default function SubmissionList() {
   if (isLoading) {
     return (
       <div className="flex min-h-[calc(100vh-64px)] items-center justify-center">
-        <p className="text-sm text-[#667085]">Loading submissions...</p>
+        <p className="text-sm text-[#667085]">{t("submissions:loading")}</p>
       </div>
     );
   }
@@ -214,11 +215,11 @@ export default function SubmissionList() {
           {/* Header */}
           <div>
             <h1 className="text-[23px] font-bold tracking-tight text-[#101828]">
-              Product Requests
+              {t("submissions:title")}
             </h1>
 
             <p className="mt-1 text-sm text-[#667085]">
-              {pendingCount} pending requests requiring your review.
+              {t("submissions:subtitle", { count: pendingCount })}
             </p>
           </div>
 
@@ -243,10 +244,10 @@ export default function SubmissionList() {
 
                   <div>
                     <p className="text-sm font-bold text-[#101828]">
-                      Filter Submissions
+                      {t("submissions:filter.heading")}
                     </p>
                     <p className="text-xs text-[#667085]">
-                      Refine submissions by status or search.
+                      {t("submissions:filter.subtitle")}
                     </p>
                   </div>
                 </div>
@@ -271,7 +272,7 @@ export default function SubmissionList() {
                     </button>
 
                     {statusDropdownOpen && (
-                      <div className="absolute right-0 top-11 z-50 w-[165px] overflow-hidden rounded-lg border border-[#DDE7DF] bg-white shadow-[0_12px_28px_rgba(15,23,42,0.14)]">
+                      <div className="absolute end-0 top-11 z-50 w-[165px] overflow-hidden rounded-lg border border-[#DDE7DF] bg-white shadow-[0_12px_28px_rgba(15,23,42,0.14)]">
                         {statusOptions.map((option) => (
                           <button
                             key={option.value}
@@ -280,7 +281,7 @@ export default function SubmissionList() {
                               setStatusFilter(option.value);
                               setStatusDropdownOpen(false);
                             }}
-                            className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition ${
+                            className={`flex w-full items-center justify-between px-3 py-2 text-start text-sm transition ${
                               statusFilter === option.value
                                 ? "bg-[#EAF7EE] font-semibold text-[#006B22]"
                                 : "text-[#101828] hover:bg-[#F8FAF8]"
@@ -299,13 +300,13 @@ export default function SubmissionList() {
 
                   {/* Search */}
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#667085]" />
+                    <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#667085]" />
 
                     <input
                       value={searchTerm}
                       onChange={(event) => setSearchTerm(event.target.value)}
-                      placeholder="Search submissions..."
-                      className="h-9 w-full rounded-lg border border-[#DDE7DF] bg-[#F8FAF8] pl-9 pr-3 text-sm text-[#101828] outline-none placeholder:text-[#98A2B3] focus:border-[#2D6A4F] focus:ring-2 focus:ring-[#2D6A4F]/10 sm:w-[230px]"
+                      placeholder={t("submissions:filter.searchPlaceholder")}
+                      className="h-9 w-full rounded-lg border border-[#DDE7DF] bg-[#F8FAF8] ps-9 pe-3 text-sm text-[#101828] outline-none placeholder:text-[#98A2B3] focus:border-[#2D6A4F] focus:ring-2 focus:ring-[#2D6A4F]/10 sm:w-[230px]"
                     />
                   </div>
 
@@ -318,7 +319,7 @@ export default function SubmissionList() {
                     }}
                     className="h-9 rounded-lg border border-[#DDE7DF] bg-white px-3 text-sm font-semibold text-[#5F7168] transition hover:bg-[#F8FAF8] hover:text-[#101828]"
                   >
-                    Reset
+                    {t("submissions:filter.reset")}
                   </button>
                 </div>
               </div>
@@ -326,16 +327,17 @@ export default function SubmissionList() {
 
             {/* Table */}
             <div className="overflow-x-auto">
-              <table className="w-full table-fixed text-left">
+              <table className="w-full table-fixed text-start">
                 <thead>
                   <tr className="border-b border-[#DDE7DF] bg-[#F8FAF8] text-[11px] font-semibold uppercase tracking-wide text-[#5F7168]">
-                  <th className="w-[120px] px-2.5 py-2.5 whitespace-nowrap">Submission ID</th>                    <th className="w-[175px] px-2.5 py-2.5">Product Name</th>
-                    <th className="w-[115px] px-2.5 py-2.5">Category</th>
-                    <th className="w-[135px] px-2.5 py-2.5">Submitter</th>
-                    <th className="w-[95px] px-2.5 py-2.5">Date</th>
-                    <th className="w-[100px] px-2.5 py-2.5">Status</th>
-                    <th className="w-[85px] px-2.5 py-2.5 text-right">
-                      Actions
+                  <th className="w-[120px] px-2.5 py-2.5 text-start whitespace-nowrap">{t("submissions:table.submissionId")}</th>
+                    <th className="w-[175px] px-2.5 py-2.5 text-start">{t("submissions:table.productName")}</th>
+                    <th className="w-[115px] px-2.5 py-2.5 text-start">{t("submissions:table.category")}</th>
+                    <th className="w-[135px] px-2.5 py-2.5 text-start">{t("submissions:table.submitter")}</th>
+                    <th className="w-[95px] px-2.5 py-2.5 text-start">{t("submissions:table.date")}</th>
+                    <th className="w-[100px] px-2.5 py-2.5 text-start">{t("submissions:table.status")}</th>
+                    <th className="w-[85px] px-2.5 py-2.5 text-center">
+                      {t("submissions:table.actions")}
                     </th>
                   </tr>
                 </thead>
@@ -408,20 +410,20 @@ export default function SubmissionList() {
                             statusColors[submission.status]
                           }`}
                         >
-                          {submission.status}
+                          {t(`submissions:statuses.${submission.status}`)}
                         </span>
                       </td>
 
                       <td className="px-2.5 py-3">
                         <div
-                          className="flex items-center justify-end gap-1"
+                          className="flex items-center justify-center gap-1"
                           onClick={(event) => event.stopPropagation()}
                         >
                           <button
                             type="button"
                             onClick={() => handleSelectRow(submission)}
                             className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#DDE7DF] bg-white text-[#5F7168] transition hover:bg-[#F8FAF8] hover:text-[#101828]"
-                            title="View"
+                            title={t("submissions:actions.view")}
                           >
                             <Eye className="h-3.5 w-3.5" />
                           </button>
@@ -430,7 +432,7 @@ export default function SubmissionList() {
                             type="button"
                             onClick={() => handleQuickApprove(submission)}
                             className="flex h-7 w-7 items-center justify-center rounded-lg border border-green-200 bg-white text-green-600 transition hover:bg-green-50"
-                            title="Approve"
+                            title={t("submissions:actions.approve")}
                           >
                             <Check className="h-3.5 w-3.5" />
                           </button>
@@ -442,7 +444,7 @@ export default function SubmissionList() {
                               setRejectMode(true);
                             }}
                             className="flex h-7 w-7 items-center justify-center rounded-lg border border-red-200 bg-white text-red-500 transition hover:bg-red-50"
-                            title="Reject"
+                            title={t("submissions:actions.reject")}
                           >
                             <X className="h-3.5 w-3.5" />
                           </button>
@@ -457,7 +459,7 @@ export default function SubmissionList() {
                         colSpan={7}
                         className="px-4 py-10 text-center text-sm text-[#667085]"
                       >
-                        No submissions match your filters.
+                        {t("submissions:table.empty")}
                       </td>
                     </tr>
                   )}
@@ -466,8 +468,8 @@ export default function SubmissionList() {
             </div>
 
             <div className="border-t border-[#DDE7DF] px-4 py-3 text-sm text-[#667085]">
-              Showing {filtered.length === 0 ? 0 : 1}-{filtered.length} of{" "}
-              {filtered.length} submissions
+              {t("submissions:footer.showing")} {filtered.length === 0 ? 0 : 1}-{filtered.length}{" "}
+              {t("submissions:footer.of")} {filtered.length} {t("submissions:footer.submissions")}
             </div>
           </div>
         </div>
@@ -479,7 +481,7 @@ export default function SubmissionList() {
               <div className="flex items-center justify-between border-b border-[#DDE7DF] px-4 py-3">
                 <div>
                   <p className="text-sm font-bold text-[#101828]">
-                    Quick Review
+                    {t("submissions:panel.title")}
                   </p>
                   <p className="text-xs font-semibold uppercase tracking-wide text-[#667085]">
                     {selectedSubmission.submission_id}
@@ -490,7 +492,7 @@ export default function SubmissionList() {
                   <button
                     type="button"
                     className="flex h-7 w-7 items-center justify-center rounded-lg text-[#5F7168] transition hover:bg-[#F8FAF8] hover:text-[#101828]"
-                    title="Open full view"
+                    title={t("submissions:panel.openFullView")}
                   >
                     <ArrowUpRight className="h-3.5 w-3.5" />
                   </button>
@@ -499,7 +501,7 @@ export default function SubmissionList() {
                     type="button"
                     onClick={() => setSelectedSubmission(null)}
                     className="flex h-7 w-7 items-center justify-center rounded-lg text-[#5F7168] transition hover:bg-[#F8FAF8] hover:text-[#101828]"
-                    title="Close"
+                    title={t("common:actions.close")}
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
@@ -516,7 +518,7 @@ export default function SubmissionList() {
                     />
                   ) : (
                     <p className="text-xs text-[#667085]">
-                      No image submitted
+                      {t("submissions:panel.noImage")}
                     </p>
                   )}
                 </div>
@@ -524,7 +526,7 @@ export default function SubmissionList() {
                 <div className="space-y-3">
                   <div>
                     <label className="text-[10px] font-semibold uppercase tracking-wide text-[#667085]">
-                      Product Name
+                      {t("submissions:table.productName")}
                     </label>
                     <input
                       value={editData.product_name ?? ""}
@@ -541,7 +543,7 @@ export default function SubmissionList() {
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="text-[10px] font-semibold uppercase tracking-wide text-[#667085]">
-                        Brand
+                        {t("submissions:panel.brand")}
                       </label>
                       <input
                         value={editData.brand ?? ""}
@@ -562,7 +564,7 @@ export default function SubmissionList() {
     {/* Category */}
 <div>
   <label className="text-[10px] font-semibold uppercase tracking-wide text-[#667085]">
-    Category
+    {t("submissions:table.category")}
   </label>
 
   <div className="mt-1 flex h-8 items-center rounded-lg border border-[#DDE7DF] bg-[#F8FAF8] px-2 text-sm text-[#101828]">
@@ -573,18 +575,18 @@ export default function SubmissionList() {
 {/* Sub-Category */}
 <div>
   <label className="text-[10px] font-semibold uppercase tracking-wide text-[#667085]">
-    Sub-Category
+    {t("submissions:panel.subCategory")}
   </label>
 
   <div className="mt-1 flex h-8 items-center rounded-lg border border-[#DDE7DF] bg-[#F8FAF8] px-2 text-sm text-[#101828]">
     {selectedSubmission.sub_category_name || "-"}
   </div>
 </div>
-    
+
 
                   <div>
                     <label className="text-[10px] font-semibold uppercase tracking-wide text-[#667085]">
-                      Product Description
+                      {t("submissions:panel.description")}
                     </label>
                     <p className="mt-1 rounded-lg bg-[#F8FAF8] p-2 text-xs leading-5 text-[#667085]">
                       {selectedSubmission.description}
@@ -596,7 +598,7 @@ export default function SubmissionList() {
                   selectedSubmission.assets.length > 0 && (
                     <div>
                       <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[#667085]">
-                        Attached Assets ({selectedSubmission.assets.length})
+                        {t("submissions:panel.attachedAssets", { count: selectedSubmission.assets.length })}
                       </p>
 
                       <div className="space-y-1.5">
@@ -630,7 +632,7 @@ export default function SubmissionList() {
                 {rejectMode && (
                   <div className="space-y-2 rounded-xl border border-red-200 bg-red-50 p-3">
                     <p className="text-[10px] font-bold uppercase tracking-wide text-red-600">
-                      Select Rejection Reason
+                      {t("submissions:panel.selectRejectionReason")}
                     </p>
 
                     <div className="space-y-1">
@@ -639,7 +641,7 @@ export default function SubmissionList() {
                           key={reason}
                           type="button"
                           onClick={() => setRejectReason(reason)}
-                          className={`w-full rounded-lg border px-3 py-2 text-left text-xs transition ${
+                          className={`w-full rounded-lg border px-3 py-2 text-start text-xs transition ${
                             rejectReason === reason
                               ? "border-red-500 bg-white font-semibold text-red-600"
                               : "border-red-100 bg-white/70 text-[#101828] hover:bg-white"
@@ -663,7 +665,7 @@ export default function SubmissionList() {
                         setRejectReason("");
                       }}
                     >
-                      Cancel
+                      {t("common:actions.cancel")}
                     </Button>
 
                     <Button
@@ -673,7 +675,7 @@ export default function SubmissionList() {
                       disabled={!rejectReason || rejectSubmission.isPending}
                       onClick={handleReject}
                     >
-                      {rejectSubmission.isPending ? "Rejecting..." : "Reject"}
+                      {rejectSubmission.isPending ? t("submissions:actions.rejecting") : t("submissions:actions.reject")}
                     </Button>
                   </div>
                 ) : (
@@ -684,7 +686,7 @@ export default function SubmissionList() {
                       className="h-9 flex-1 rounded-lg border-[#DDE7DF] text-sm font-semibold"
                       onClick={() => setRejectMode(true)}
                     >
-                      Reject
+                      {t("submissions:actions.reject")}
                     </Button>
 
                     <Button
@@ -693,8 +695,8 @@ export default function SubmissionList() {
                       disabled={approveSubmission.isPending}
                       onClick={handleApprove}
                     >
-                      <BadgeCheck className="mr-1.5 h-3.5 w-3.5" />
-                      {approveSubmission.isPending ? "Approving..." : "Approve"}
+                      <BadgeCheck className="me-1.5 h-3.5 w-3.5" />
+                      {approveSubmission.isPending ? t("submissions:actions.approving") : t("submissions:actions.approve")}
                     </Button>
                   </div>
                 )}
@@ -704,7 +706,7 @@ export default function SubmissionList() {
                 selectedSubmission.internal_log.length > 0 && (
                   <div className="border-t border-[#DDE7DF] px-4 pb-4 pt-3">
                     <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[#667085]">
-                      Internal Log
+                      {t("submissions:panel.internalLog")}
                     </p>
 
                     <div className="space-y-2">

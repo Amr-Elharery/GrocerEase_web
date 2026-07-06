@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router";
+import { useTranslation, Trans } from "react-i18next";
 import { Plus, MoreVertical, Pencil, Trash2, ChevronDown, Check, Filter } from "lucide-react";
 import { useProducts } from "../hooks/useProducts";
 import { useDeleteProduct } from "../hooks/useDeleteProduct";
@@ -35,16 +36,18 @@ function CategoryFilterDropdown({
   value,
   options,
   onChange,
-  placeholder = "Filter by category",
+  placeholder,
 }: {
   value: string;
   options: { value: string; label: string }[];
   onChange: (value: string) => void;
   placeholder?: string;
 }) {
+  const { t } = useTranslation("products");
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const selected = options.find((o) => o.value === value) ?? options[0];
+  const resolvedPlaceholder = placeholder ?? t("list.filter.categoryPlaceholder");
 
   useEffect(() => {
     function onOutside(e: MouseEvent) {
@@ -62,18 +65,18 @@ function CategoryFilterDropdown({
         className="flex h-9 w-full items-center justify-between rounded-lg border border-[#078A2D] bg-white px-3 text-sm font-semibold text-[#101828] shadow-sm transition hover:bg-[#F0FDF4]"
       >
         <span className={value === "all" ? "text-[#667085] font-medium" : ""}>
-          {value === "all" ? placeholder : selected.label}
+          {value === "all" ? resolvedPlaceholder : selected.label}
         </span>
         <ChevronDown className={`h-4 w-4 shrink-0 text-[#078A2D] transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
-        <div className="absolute left-0 top-[44px] z-30 max-h-[260px] w-full overflow-y-auto rounded-lg border border-[#CDE8D5] bg-white shadow-[0_12px_30px_rgba(15,23,42,0.12)]">
+        <div className="absolute start-0 top-[44px] z-30 max-h-[260px] w-full overflow-y-auto rounded-lg border border-[#CDE8D5] bg-white shadow-[0_12px_30px_rgba(15,23,42,0.12)]">
           {options.map((o) => (
             <button
               key={o.value}
               type="button"
               onClick={() => { onChange(o.value); setOpen(false); }}
-              className={`flex w-full items-center justify-between px-3 py-2.5 text-left text-sm transition ${
+              className={`flex w-full items-center justify-between px-3 py-2.5 text-start text-sm transition ${
                 value === o.value ? "bg-[#EAF7EE] font-semibold text-[#078A2D]" : "text-[#101828] hover:bg-[#F0FDF4]"
               }`}
             >
@@ -88,6 +91,7 @@ function CategoryFilterDropdown({
 }
 
 export default function ProductList() {
+  const { t } = useTranslation(["common", "products"]);
   const [page, setPage] = useState(1);
   const { search } = useSearch();
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -125,11 +129,11 @@ export default function ProductList() {
   const subNamesOfSelected = subsOfSelected.map((s) => s.name);
 
   const parentOptions = [
-    { value: "all", label: "All Categories" },
+    { value: "all", label: t("products:list.filter.allCategories") },
     ...parents.map((c) => ({ value: c.name, label: c.name })),
   ];
   const subOptions = [
-    { value: "all", label: "All Sub-Categories" },
+    { value: "all", label: t("products:list.filter.allSubCategories") },
     ...subsOfSelected.map((c) => ({ value: c.name, label: c.name })),
   ];
 
@@ -164,7 +168,7 @@ export default function ProductList() {
   if (isLoading) {
     return (
       <div className="flex min-h-[calc(100vh-64px)] items-center justify-center">
-        <p className="text-sm text-[#667085]">Loading products...</p>
+        <p className="text-sm text-[#667085]">{t("products:list.loading")}</p>
       </div>
     );
   }
@@ -181,21 +185,24 @@ export default function ProductList() {
                 <Trash2 className="h-5 w-5 text-red-600" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-[#101828]">Delete product</h3>
+                <h3 className="text-base font-bold text-[#101828]">{t("products:list.deleteConfirm.title")}</h3>
               </div>
             </div>
             <p className="mt-4 text-sm text-[#475467]">
-              Are you sure you want to delete{" "}
-              <span className="font-semibold text-[#101828]">{confirmTarget.product_name}</span>?
+              <Trans
+                i18nKey="products:list.deleteConfirm.message"
+                values={{ name: confirmTarget.product_name }}
+                components={{ 1: <span className="font-semibold text-[#101828]" /> }}
+              />
             </p>
             <div className="mt-5 flex justify-end gap-2">
               <button type="button" onClick={() => setConfirmTarget(null)} disabled={deleteProduct.isPending}
                 className="h-9 rounded-lg border border-[#DDE7DF] px-4 text-sm font-semibold text-[#5F7168] transition hover:bg-[#F8FAF8] disabled:opacity-40">
-                Cancel
+                {t("common:actions.cancel")}
               </button>
               <button type="button" onClick={confirmDelete} disabled={deleteProduct.isPending}
                 className="h-9 rounded-lg bg-red-600 px-4 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60">
-                {deleteProduct.isPending ? "Deleting..." : "Delete"}
+                {deleteProduct.isPending ? t("common:status.deleting") : t("common:actions.delete")}
               </button>
             </div>
           </div>
@@ -215,21 +222,21 @@ export default function ProductList() {
       )}
 
       <div className="flex items-center gap-2 text-xs text-[#667085]">
-        <span>Catalogue</span>
+        <span>{t("products:list.breadcrumb.catalogue")}</span>
         <span>›</span>
-        <span className="font-semibold text-[#101828]">Products</span>
+        <span className="font-semibold text-[#101828]">{t("products:list.breadcrumb.products")}</span>
       </div>
 
       {/* Header */}
       <div className="flex flex-col justify-between gap-3 lg:flex-row lg:items-center">
         <div>
-          <h1 className="text-[23px] font-bold tracking-tight text-[#101828]">Product Management</h1>
-          <p className="mt-1 text-sm text-[#667085]">Manage product catalogue, inventory status, and store coverage.</p>
+          <h1 className="text-[23px] font-bold tracking-tight text-[#101828]">{t("products:list.title")}</h1>
+          <p className="mt-1 text-sm text-[#667085]">{t("products:list.subtitle")}</p>
         </div>
         <Button size="sm" onClick={() => navigate("/app/inventory/create")}
           className="h-10 w-fit gap-2 rounded-lg bg-[#006B22] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#00571C]">
           <Plus className="h-4 w-4" />
-          Create Product
+          {t("products:list.createButton")}
         </Button>
       </div>
 
@@ -248,7 +255,7 @@ export default function ProductList() {
             value={subFilter}
             options={subOptions}
             onChange={setSubFilter}
-            placeholder="Filter by sub-category"
+            placeholder={t("products:list.filter.subCategoryPlaceholder")}
           />
         )}
         {isFiltering && (
@@ -257,23 +264,23 @@ export default function ProductList() {
             onClick={() => { setCategoryFilter("all"); setSubFilter("all"); }}
             className="text-xs font-semibold text-[#5F7168] underline"
           >
-            Clear
+            {t("common:actions.clear")}
           </button>
         )}
       </div>
 
       {/* Table */}
       <div className="overflow-hidden rounded-xl border border-[#DDE7DF] bg-white shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
-        <table className="w-full table-fixed border-collapse text-left">
+        <table className="w-full table-fixed border-collapse text-start">
           <thead>
             <tr className="border-b border-[#DDE7DF] bg-[#F8FAF8] text-[11px] font-semibold uppercase tracking-wide text-[#5F7168]">
-              <th className="w-[220px] px-4 py-3">Product</th>
-              <th className="w-[120px] px-3 py-3">Brand</th>
-              <th className="w-[120px] px-3 py-3">Category</th>
-              <th className="w-[130px] px-3 py-3">Sub-Category</th>
-              <th className="w-[65px] px-2 py-3 text-center">Unit</th>
-              <th className="w-[80px] px-2 py-3 text-center">Stores</th>
-              <th className="w-[36px] px-2 py-3"></th>
+              <th className="w-[220px] px-4 py-3 text-start">{t("products:list.columns.product")}</th>
+              <th className="w-[120px] px-3 py-3 text-start">{t("products:list.columns.brand")}</th>
+              <th className="w-[120px] px-3 py-3 text-start">{t("products:list.columns.category")}</th>
+              <th className="w-[130px] px-3 py-3 text-start">{t("products:list.columns.subCategory")}</th>
+              <th className="w-[65px] px-2 py-3 text-center">{t("products:list.columns.unit")}</th>
+              <th className="w-[80px] px-2 py-3 text-center">{t("products:list.columns.stores")}</th>
+              <th className="w-[36px] px-2 py-3 text-center"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#DDE7DF]">
@@ -284,7 +291,7 @@ export default function ProductList() {
                 <td className="px-4 py-2.5">
                   <button type="button"
                     onClick={() => setCoverageTarget(product)}
-                    className="flex min-w-0 items-center gap-2.5 text-left">
+                    className="flex min-w-0 items-center gap-2.5 text-start">
                     {imageUrl ? (
                       <img
                         src={imageUrl}
@@ -316,10 +323,10 @@ export default function ProductList() {
                   <button type="button"
                     onClick={() => setCoverageTarget(product)}
                     className="inline-flex items-center gap-1 rounded-full bg-[#EAF7EE] px-2.5 py-1 text-xs font-semibold text-[#006B22] transition hover:bg-[#d8f0df]">
-                    View
+                    {t("common:actions.view")}
                   </button>
                 </td>
-                <td className="relative px-2 py-2.5 text-right">
+                <td className="relative px-2 py-2.5 text-center">
                   <button type="button"
                     onClick={() => setMenuId(menuId === product.id ? null : product.id)}
                     className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-[#5F7168] transition hover:bg-[#E8F0EA] hover:text-[#101828]">
@@ -327,18 +334,18 @@ export default function ProductList() {
                   </button>
 
                   {menuId === product.id && (
-                    <div className="absolute right-2 top-10 z-20 w-36 overflow-hidden rounded-lg border border-[#DDE7DF] bg-white shadow-[0_10px_24px_rgba(15,23,42,0.12)]">
+                    <div className="absolute end-2 top-10 z-20 w-36 overflow-hidden rounded-lg border border-[#DDE7DF] bg-white shadow-[0_10px_24px_rgba(15,23,42,0.12)]">
                       <button type="button"
                         onClick={() => { setMenuId(null); navigate(`/app/inventory/${product.id}/edit`); }}
-                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-[#101828] transition hover:bg-[#F8FAF8]">
+                        className="flex w-full items-center gap-2 px-3 py-2 text-start text-sm text-[#101828] transition hover:bg-[#F8FAF8]">
                         <Pencil className="h-3.5 w-3.5" />
-                        Edit
+                        {t("common:actions.edit")}
                       </button>
                       <button type="button"
                         onClick={() => handleDelete(product)}
-                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50">
+                        className="flex w-full items-center gap-2 px-3 py-2 text-start text-sm text-red-600 transition hover:bg-red-50">
                         <Trash2 className="h-3.5 w-3.5" />
-                        Delete
+                        {t("common:actions.delete")}
                       </button>
                     </div>
                   )}
