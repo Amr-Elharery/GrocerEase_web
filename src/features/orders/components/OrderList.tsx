@@ -282,14 +282,14 @@ export default function OrderList() {
           <table className="w-full table-fixed border-collapse text-start">
             <thead>
               <tr className="border-b border-[#DDE7DF] bg-[#F8FAF8] text-[11px] font-semibold uppercase tracking-wide text-[#5F7168]">
-                <th className="w-[105px] px-4 py-3">{t("orders:list.columns.orderId")}</th>
-                <th className="w-[140px] px-4 py-3">{t("orders:list.columns.customer")}</th>
-                <th className="w-[120px] px-4 py-3">{t("orders:list.columns.store")}</th>
-                <th className="w-[78px] px-4 py-3">{t("orders:list.columns.items")}</th>
-                <th className="w-[120px] px-4 py-3">{t("orders:list.columns.total")}</th>
-                <th className="w-[140px] px-4 py-3">{t("orders:list.columns.payment")}</th>
-                <th className="w-[158px] ps-6 pe-4 py-3">{t("orders:list.columns.status")}</th>
-                <th className="w-[100px] px-4 py-3">{t("orders:list.columns.date")}</th>
+                <th className="w-[105px] px-4 py-3 text-center">{t("orders:list.columns.orderId")}</th>
+                <th className="w-[140px] px-4 py-3 text-center">{t("orders:list.columns.customer")}</th>
+                <th className="w-[120px] px-4 py-3 text-center">{t("orders:list.columns.store")}</th>
+                <th className="w-[78px] px-4 py-3 text-center">{t("orders:list.columns.items")}</th>
+                <th className="w-[120px] px-4 py-3 text-center">{t("orders:list.columns.total")}</th>
+                <th className="w-[140px] px-4 py-3 text-center">{t("orders:list.columns.payment")}</th>
+                <th className="w-[158px] ps-6 pe-4 py-3 text-center">{t("orders:list.columns.status")}</th>
+                <th className="w-[100px] px-4 py-3 text-center">{t("orders:list.columns.date")}</th>
               </tr>
             </thead>
 

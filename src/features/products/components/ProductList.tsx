@@ -274,13 +274,13 @@ export default function ProductList() {
         <table className="w-full table-fixed border-collapse text-start">
           <thead>
             <tr className="border-b border-[#DDE7DF] bg-[#F8FAF8] text-[11px] font-semibold uppercase tracking-wide text-[#5F7168]">
-              <th className="w-[220px] px-4 py-3">{t("products:list.columns.product")}</th>
-              <th className="w-[120px] px-3 py-3">{t("products:list.columns.brand")}</th>
-              <th className="w-[120px] px-3 py-3">{t("products:list.columns.category")}</th>
-              <th className="w-[130px] px-3 py-3">{t("products:list.columns.subCategory")}</th>
+              <th className="w-[220px] px-4 py-3 text-start">{t("products:list.columns.product")}</th>
+              <th className="w-[120px] px-3 py-3 text-start">{t("products:list.columns.brand")}</th>
+              <th className="w-[120px] px-3 py-3 text-start">{t("products:list.columns.category")}</th>
+              <th className="w-[130px] px-3 py-3 text-start">{t("products:list.columns.subCategory")}</th>
               <th className="w-[65px] px-2 py-3 text-center">{t("products:list.columns.unit")}</th>
               <th className="w-[80px] px-2 py-3 text-center">{t("products:list.columns.stores")}</th>
-              <th className="w-[36px] px-2 py-3"></th>
+              <th className="w-[36px] px-2 py-3 text-center"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#DDE7DF]">
@@ -326,7 +326,7 @@ export default function ProductList() {
                     {t("common:actions.view")}
                   </button>
                 </td>
-                <td className="relative px-2 py-2.5 text-end">
+                <td className="relative px-2 py-2.5 text-center">
                   <button type="button"
                     onClick={() => setMenuId(menuId === product.id ? null : product.id)}
                     className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-[#5F7168] transition hover:bg-[#E8F0EA] hover:text-[#101828]">
@@ -359,21 +359,17 @@ export default function ProductList() {
         {/* Footer */}
         <div className="flex items-center justify-between border-t border-[#DDE7DF] px-4 py-2.5">
           <p className="text-xs text-[#667085]">
-            <Trans
-              i18nKey="products:list.footer.showing"
-              values={{ count: filtered.length }}
-              components={{ 1: <span className="font-semibold text-[#101828]" /> }}
-            />
+            Showing <span className="font-semibold text-[#101828]">{filtered.length}</span> products
           </p>
           {!isFiltering && (
             <div className="flex items-center gap-1.5">
               <button type="button" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
                 className="flex h-8 items-center justify-center rounded-lg border border-[#DDE7DF] px-3 text-xs font-semibold text-[#5F7168] transition hover:bg-[#F8FAF8] disabled:opacity-40">
-                {t("common:actions.previous")}
+                Previous
               </button>
               <button type="button" onClick={() => setPage(p => p + 1)} disabled={products.length < 10}
                 className="flex h-8 items-center justify-center rounded-lg border border-[#DDE7DF] px-3 text-xs font-semibold text-[#5F7168] transition hover:bg-[#F8FAF8] disabled:opacity-40">
-                {t("common:actions.next")}
+                Next
               </button>
             </div>
           )}

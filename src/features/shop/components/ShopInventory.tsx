@@ -231,16 +231,12 @@ const handleToggleAvailability = (product: ShopProduct) => {
           <table className="min-w-full text-start border-collapse">
             <thead>
               <tr className="border-b border-border bg-muted/20">
-                 <th className="px-10 py-3 text-right text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
-  {t("shop:inventory.columns.productName")}
-</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{t("shop:inventory.columns.category")}</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{t("shop:inventory.columns.price")}</th>
-                <th className="px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{t("shop:inventory.columns.stock")}</th>
-                <th className="px-4 py-2.5 text-center text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
-  {t("shop:inventory.columns.availability")}
-</th>
-                <th className="px-4 py-2.5"></th>
+                <th className="px-4 py-2.5 text-start text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{t("shop:inventory.columns.productName")}</th>
+                <th className="px-4 py-2.5 text-start text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{t("shop:inventory.columns.category")}</th>
+                <th className="px-4 py-2.5 text-start text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{t("shop:inventory.columns.price")}</th>
+                <th className="px-4 py-2.5 text-start text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{t("shop:inventory.columns.stock")}</th>
+                <th className="px-4 py-2.5 text-center text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{t("shop:inventory.columns.availability")}</th>
+                <th className="px-4 py-2.5 text-center"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -293,9 +289,9 @@ const handleToggleAvailability = (product: ShopProduct) => {
   />
  </div>
 </td>
-                    <td className="px-4 py-2.5 text-end whitespace-nowrap">
+                    <td className="px-4 py-2.5 text-center whitespace-nowrap">
                       {isEditing ? (
-                        <div className="flex items-center justify-end gap-1.5">
+                        <div className="flex items-center justify-center gap-1.5">
                           <button onClick={() => handleSaveEdit(product)}
                             className="w-7 h-7 flex items-center justify-center rounded border border-green-200 text-green-600 hover:bg-green-50 transition-colors">
                             <Check className="w-3.5 h-3.5" />
@@ -306,7 +302,7 @@ const handleToggleAvailability = (product: ShopProduct) => {
                           </button>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-end gap-1.5">
+                        <div className="flex items-center justify-center gap-1.5">
                           <button onClick={() => handleStartEdit(product)}
                             className="w-7 h-7 flex items-center justify-center rounded border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
                             <Pencil className="w-3.5 h-3.5" />

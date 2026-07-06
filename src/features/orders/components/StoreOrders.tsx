@@ -306,31 +306,31 @@ export default function StoreOrders() {
           <table className="min-w-full border-collapse text-start">
             <thead>
               <tr className="border-b border-border bg-muted/20">
-                <th className="whitespace-nowrap px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <th className="whitespace-nowrap px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   {t("orders:storeOrders.columns.orderId")}
                 </th>
 
-                <th className="whitespace-nowrap px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <th className="whitespace-nowrap px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   {t("orders:storeOrders.columns.customer")}
                 </th>
 
-                <th className="whitespace-nowrap px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <th className="whitespace-nowrap px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   {t("orders:storeOrders.columns.items")}
                 </th>
 
-                <th className="whitespace-nowrap px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <th className="whitespace-nowrap px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   {t("orders:storeOrders.columns.total")}
                 </th>
 
-                <th className="whitespace-nowrap px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <th className="whitespace-nowrap px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   {t("orders:storeOrders.columns.status")}
                 </th>
 
-                <th className="whitespace-nowrap px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <th className="whitespace-nowrap px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   {t("orders:storeOrders.columns.time")}
                 </th>
 
-                <th className="whitespace-nowrap px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <th className="whitespace-nowrap px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   {t("orders:storeOrders.columns.actions")}
                 </th>
               </tr>

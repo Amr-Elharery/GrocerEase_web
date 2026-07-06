@@ -187,10 +187,10 @@ export default function UserManagement() {
         <table className="min-w-full border-collapse text-start">
           <thead>
             <tr className="border-b border-[#DDE7DF] bg-[#F8FAF8] text-[11px] font-semibold uppercase tracking-wider text-[#5F7168]">
-              <th className="px-4 py-3">{t("users:table.user")}</th>
-              <th className="px-4 py-3">{t("users:table.role")}</th>
-              <th className="px-4 py-3">{t("users:table.status")}</th>
-              <th className="px-4 py-3 text-end">{t("users:table.action")}</th>
+              <th className="px-5 py-3 text-start">{t("users:table.user")}</th>
+              <th className="px-4 py-3 text-start">{t("users:table.role")}</th>
+              <th className="px-4 py-3 text-start">{t("users:table.status")}</th>
+              <th className="px-5 py-3 text-center">{t("users:table.action")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#DDE7DF]">
@@ -198,7 +198,7 @@ export default function UserManagement() {
               const busy = suspendUser.isPending || reactivateUser.isPending;
               return (
                 <tr key={user.id} onClick={() => setSelectedUser(user)} className="cursor-pointer transition hover:bg-[#F8FAF8]">
-                  <td className="px-4 py-3">
+                  <td className="px-5 py-3">
                     <div className="flex items-center gap-3">
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#2D6A4F] text-xs font-bold text-white">
                         {getInitials(user.name)}
@@ -220,7 +220,7 @@ export default function UserManagement() {
                       <span className="text-sm text-[#101828]">{statusLabel(user.status)}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-end" onClick={(e) => e.stopPropagation()}>
+                  <td className="px-5 py-3 text-center" onClick={(e) => e.stopPropagation()}>
                     {user.status === "active" ? (
                       <button
                         type="button"

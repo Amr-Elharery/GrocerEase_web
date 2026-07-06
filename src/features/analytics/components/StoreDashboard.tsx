@@ -327,9 +327,9 @@ export default function StoreDashboard() {
             <table className="w-full text-start">
               <thead>
                 <tr className="border-b border-[#E7EBF0] bg-[#F9FAFB] text-[11px] font-semibold uppercase tracking-wide text-[#667085]">
-                  <th className="px-5 py-2.5">{t("shared.tableHeaders.product")}</th>
-                  <th className="px-5 py-2.5">{t("shared.tableHeaders.sold")}</th>
-                  <th className="px-5 py-2.5">{t("shared.tableHeaders.revenue")}</th>
+                  <th className="px-5 py-2.5 text-start">{t("shared.tableHeaders.product")}</th>
+                  <th className="px-5 py-2.5 text-start">{t("shared.tableHeaders.sold")}</th>
+                  <th className="px-5 py-2.5 text-start">{t("shared.tableHeaders.revenue")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#F1F3F5]">
@@ -359,8 +359,8 @@ export default function StoreDashboard() {
             <table className="w-full text-start">
               <thead>
                 <tr className="border-b border-[#E7EBF0] bg-[#F9FAFB] text-[11px] font-semibold uppercase tracking-wide text-[#667085]">
-                  <th className="px-5 py-2.5">{t("shared.tableHeaders.product")}</th>
-                  <th className="px-5 py-2.5">{t("shared.tableHeaders.available")}</th>
+                  <th className="px-5 py-2.5 text-start">{t("shared.tableHeaders.product")}</th>
+                  <th className="px-5 py-2.5 text-start">{t("shared.tableHeaders.available")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#F1F3F5]">
@@ -396,12 +396,12 @@ export default function StoreDashboard() {
           <table className="w-full text-start">
             <thead>
               <tr className="border-b border-[#E7EBF0] bg-[#F9FAFB] text-[11px] font-semibold uppercase tracking-wide text-[#667085]">
-                <th className="px-5 py-2.5">{t("shared.tableHeaders.orderId")}</th>
-                <th className="px-5 py-2.5">{t("shared.tableHeaders.customer")}</th>
-                <th className="px-5 py-2.5">{t("shared.tableHeaders.items")}</th>
-                <th className="px-5 py-2.5">{t("shared.tableHeaders.total")}</th>
-                <th className="px-5 py-2.5">{t("shared.tableHeaders.status")}</th>
-                <th className="px-5 py-2.5">{t("shared.tableHeaders.date")}</th>
+                <th className="px-5 py-2.5 text-start">{t("shared.tableHeaders.orderId")}</th>
+                <th className="px-5 py-2.5 text-start">{t("shared.tableHeaders.customer")}</th>
+                <th className="px-5 py-2.5 text-start">{t("shared.tableHeaders.items")}</th>
+                <th className="px-5 py-2.5 text-start">{t("shared.tableHeaders.total")}</th>
+                <th className="px-5 py-2.5 text-start">{t("shared.tableHeaders.status")}</th>
+                <th className="px-5 py-2.5 text-start">{t("shared.tableHeaders.date")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#F1F3F5]">

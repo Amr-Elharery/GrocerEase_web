@@ -404,7 +404,7 @@ function TableCard<T>({
             <thead>
               <tr className="border-b border-[#E7EBF0] bg-[#F9FAFB] text-[11px] font-semibold uppercase tracking-wide text-[#667085]">
                 {head.map((h) => (
-                  <th key={h} className="px-5 py-2.5">{h}</th>
+                  <th key={h} className="px-5 py-2.5 text-start">{h}</th>
                 ))}
               </tr>
             </thead>
