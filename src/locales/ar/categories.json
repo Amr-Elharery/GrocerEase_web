@@ -1,0 +1,40 @@
+{
+  "breadcrumb": {
+    "catalogue": "الكتالوج",
+    "categories": "الفئات"
+  },
+  "title": "إدارة الفئات",
+  "subtitle": "إدارة فئات البقالة والفئات الفرعية وتجميع المنتجات.",
+  "loading": "جارٍ تحميل الفئات...",
+  "topLevel": {
+    "sectionTitle": "الفئات الرئيسية",
+    "countLabel": "{{count}} فئة",
+    "addButton": "إضافة فئة",
+    "addPlaceholder": "اسم الفئة..."
+  },
+  "subCategories": {
+    "sectionTitleWithParent": "الفئات الفرعية لـ {{parent}}",
+    "sectionTitleDefault": "الفئات الفرعية",
+    "countLabel": "{{count}} فئة فرعية",
+    "selectPrompt": "اختر فئة",
+    "addButton": "إضافة فئة فرعية",
+    "addPlaceholder": "اسم الفئة الفرعية...",
+    "productsCount": "{{count}} منتج"
+  },
+  "emptyState": {
+    "selectCategoryTitle": "اختر فئة",
+    "selectCategoryText": "انقر على فئة رئيسية لعرض فئاتها الفرعية أو تعديلها أو إضافة فئات جديدة.",
+    "noSubCategoriesTitle": "لا توجد فئات فرعية بعد",
+    "noSubCategoriesText": "أضف أول فئة فرعية ضمن {{parent}}."
+  },
+  "errors": {
+    "nameRequired": "الاسم مطلوب",
+    "nameExists": "الاسم موجود بالفعل",
+    "deleteFallback": "تعذر حذف هذه الفئة."
+  },
+  "deleteModal": {
+    "title": "حذف الفئة",
+    "cannotDelete": "لا يمكن حذف <1>\"{{name}}\"</1> لأنها تحتوي على <2>{{count}} منتج</2> مرتبط بها. يرجى إعادة تعيينها أولاً.",
+    "confirmMessage": "هل أنت متأكد من أنك تريد حذف <1>\"{{name}}\"</1>"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "loading": "Loading profile...",
+  "roles": {
+    "user": "User",
+    "admin": "Admin",
+    "storeManager": "Store Manager"
+  },
+  "banner": {
+    "portal": "ZAD {{label}} Portal",
+    "title": "My Profile",
+    "subtitle": "Manage your account information and access settings."
+  },
+  "actions": {
+    "editProfile": "Edit Profile"
+  },
+  "status": {
+    "active": "Active"
+  },
+  "leftCard": {
+    "accountType": "Account Type",
+    "status": "Status",
+    "lastUpdate": "Last Update",
+    "today": "Today"
+  },
+  "rightCard": {
+    "heading": "Account Information",
+    "subtitle": "These details are used for account identification and platform access."
+  },
+  "fields": {
+    "fullName": "Full Name",
+    "email": "Email Address",
+    "phone": "Phone Number",
+    "role": "Role",
+    "notAvailable": "N/A"
+  },
+  "footer": {
+    "secureAccount": "Secure {{label}} Account",
+    "secureDescription": "Keep your contact information updated to maintain secure account access."
+  }
+}

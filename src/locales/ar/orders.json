@@ -1,0 +1,75 @@
+{
+  "statuses": {
+    "pending": "قيد الانتظار",
+    "processing": "قيد المعالجة",
+    "assigned": "تم الإسناد",
+    "outForDelivery": "في الطريق للتوصيل",
+    "pickedUp": "تم الاستلام",
+    "delivered": "تم التوصيل",
+    "cancelled": "ملغي"
+  },
+  "paymentMethods": {
+    "cash": "نقدًا",
+    "card": "بطاقة"
+  },
+  "detailModal": {
+    "title": "تفاصيل الطلب",
+    "status": "الحالة",
+    "customer": "العميل",
+    "store": "المتجر",
+    "totalItems": "إجمالي العناصر",
+    "itemsCount": "{{n}} عنصر",
+    "totalPayment": "الإجمالي / طريقة الدفع",
+    "placedAt": "وقت الطلب",
+    "products": "المنتجات ({{n}})",
+    "item": "عنصر رقم {{id}}",
+    "subtotal": "المجموع الفرعي",
+    "deliveryFee": "رسوم التوصيل",
+    "total": "الإجمالي"
+  },
+  "list": {
+    "title": "الطلبات",
+    "subtitle": "تتبع جميع طلبات العملاء وإدارتها.",
+    "loading": "جارٍ تحميل الطلبات...",
+    "filterOrders": "تصفية الطلبات",
+    "filterOrdersDescription": "قم بتصفية الطلبات حسب الحالة أو طريقة الدفع أو البحث.",
+    "searchPlaceholder": "ابحث في الطلبات...",
+    "reset": "إعادة تعيين",
+    "columns": {
+      "orderId": "رقم الطلب",
+      "customer": "العميل",
+      "store": "المتجر",
+      "items": "العناصر",
+      "total": "الإجمالي",
+      "payment": "الدفع",
+      "status": "الحالة",
+      "date": "التاريخ"
+    },
+    "allStatuses": "كل الحالات",
+    "allPayments": "كل طرق الدفع",
+    "itemsCount": "{{n}} عنصر",
+    "showing": "عرض {{n}} طلب",
+    "page": "صفحة {{n}}"
+  },
+  "storeOrders": {
+    "title": "الطلبات",
+    "subtitle": "عرض مباشر للطلبات الواردة.",
+    "loading": "جارٍ تحميل الطلبات...",
+    "refreshingIn": "التحديث خلال {{n}} ث",
+    "refresh": "تحديث",
+    "filterByStatus": "تصفية حسب الحالة",
+    "all": "الكل",
+    "lastUpdated": "آخر تحديث:",
+    "columns": {
+      "orderId": "رقم الطلب",
+      "customer": "العميل",
+      "items": "العناصر",
+      "total": "الإجمالي",
+      "status": "الحالة",
+      "time": "الوقت",
+      "actions": "الإجراءات"
+    },
+    "itemsCount": "{{n}} عنصر",
+    "showing": "عرض {{filtered}} من {{total}} طلب"
+  }
+}

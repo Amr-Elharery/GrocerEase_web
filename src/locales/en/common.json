@@ -1,0 +1,28 @@
+{
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "confirm": "Confirm",
+    "clear": "Clear",
+    "view": "View",
+    "create": "Create",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "close": "Close",
+    "submit": "Submit"
+  },
+  "status": {
+    "loading": "Loading...",
+    "deleting": "Deleting...",
+    "saving": "Saving..."
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "ar": "Arabic"
+  }
+}

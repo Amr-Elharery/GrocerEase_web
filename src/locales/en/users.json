@@ -1,0 +1,50 @@
+{
+  "title": "User Directory",
+  "subtitle": "View and manage all registered platform users.",
+  "loading": "Loading users...",
+  "filter": {
+    "heading": "Filter Users",
+    "subtitle": "Refine users by role, status, or search.",
+    "searchPlaceholder": "Search users...",
+    "reset": "Reset"
+  },
+  "roles": {
+    "all": "All Roles",
+    "admin": "Admin",
+    "storeManager": "Store Manager",
+    "customer": "Customer",
+    "delivery": "Delivery",
+    "none": "No Role"
+  },
+  "statuses": {
+    "all": "All Statuses",
+    "active": "Active",
+    "suspended": "Suspended"
+  },
+  "table": {
+    "user": "User",
+    "role": "Role",
+    "status": "Status",
+    "action": "Action",
+    "empty": "No users match your filters."
+  },
+  "actions": {
+    "suspend": "Suspend",
+    "activate": "Activate",
+    "suspendUser": "Suspend User",
+    "activateUser": "Activate User"
+  },
+  "footer": {
+    "showing": "Showing",
+    "of": "of",
+    "users": "users",
+    "page": "Page"
+  },
+  "modal": {
+    "title": "User Details",
+    "phone": "Phone",
+    "role": "Role",
+    "status": "Status",
+    "userId": "User ID"
+  }
+}

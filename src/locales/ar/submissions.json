@@ -1,0 +1,62 @@
+{
+  "loading": "جارٍ تحميل الطلبات...",
+  "title": "طلبات المنتجات",
+  "subtitle": "{{count}} طلب معلّق بحاجة إلى مراجعتك.",
+  "rejectReasons": {
+    "duplicateProduct": "منتج مكرر",
+    "invalidCategory": "فئة غير صحيحة",
+    "insufficientInformation": "معلومات غير كافية",
+    "notGroceryProduct": "ليس منتجًا بقاليًا",
+    "other": "أخرى"
+  },
+  "statuses": {
+    "all": "كل الحالات",
+    "pending": "معلّق",
+    "flagged": "موسوم",
+    "approved": "مقبول",
+    "rejected": "مرفوض"
+  },
+  "filter": {
+    "heading": "تصفية الطلبات",
+    "subtitle": "قم بتصفية الطلبات حسب الحالة أو البحث.",
+    "searchPlaceholder": "ابحث في الطلبات...",
+    "reset": "إعادة تعيين"
+  },
+  "table": {
+    "submissionId": "رقم الطلب",
+    "productName": "اسم المنتج",
+    "category": "الفئة",
+    "submitter": "مقدم الطلب",
+    "date": "التاريخ",
+    "status": "الحالة",
+    "actions": "الإجراءات",
+    "empty": "لا توجد طلبات مطابقة لعوامل التصفية."
+  },
+  "actions": {
+    "view": "عرض",
+    "approve": "قبول",
+    "approving": "جارٍ القبول...",
+    "reject": "رفض",
+    "rejecting": "جارٍ الرفض..."
+  },
+  "footer": {
+    "showing": "عرض",
+    "of": "من",
+    "submissions": "طلب"
+  },
+  "errors": {
+    "approveFailed": "تعذّر قبول هذا الطلب.",
+    "rejectFailed": "تعذّر رفض هذا الطلب."
+  },
+  "panel": {
+    "title": "مراجعة سريعة",
+    "openFullView": "فتح العرض الكامل",
+    "noImage": "لم يتم إرفاق صورة",
+    "brand": "العلامة التجارية",
+    "subCategory": "الفئة الفرعية",
+    "description": "وصف المنتج",
+    "attachedAssets": "الملفات المرفقة ({{count}})",
+    "selectRejectionReason": "اختر سبب الرفض",
+    "internalLog": "السجل الداخلي"
+  }
+}
